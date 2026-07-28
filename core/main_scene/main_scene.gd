@@ -44,3 +44,4 @@ func _ready() -> void:
 	mech.add_child(plrCtrlrScene)
 	
 	_game_camera.first_person_target = mech
+	_game_camera.camera_mode = GameCamera.ECameraMode.FIRST_PERSON
