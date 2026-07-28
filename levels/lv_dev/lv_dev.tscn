@@ -1,3 +1,27 @@
 [gd_scene format=3 uid="uid://dyhygadsweine"]
 
+[ext_resource type="Material" uid="uid://dxwb4thl11o7t" path="res://assets/basic_materials/m_checkerboard.tres" id="1_lsv3u"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_xse17"]
+size = Vector3(100, 1, 100)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xse17"]
+size = Vector3(100, 1, 100)
+
 [node name="LevelDev" type="Node3D" unique_id=1708905452]
+
+[node name="Marker3D" type="Marker3D" parent="." unique_id=1805182680]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=446552284]
+transform = Transform3D(1, 0, 0, 0, 0.65630233, 0.754498, 0, -0.754498, 0.65630233, 0, 11, 0)
+light_bake_mode = 1
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1743422697]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=876193758]
+shape = SubResource("BoxShape3D_xse17")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=510934791]
+material_override = ExtResource("1_lsv3u")
+mesh = SubResource("BoxMesh_xse17")

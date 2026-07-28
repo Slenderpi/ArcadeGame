@@ -1,10 +1,23 @@
 [gd_scene format=3 uid="uid://dhgdgbr812rv2"]
 
-[node name="MainScene" type="Node" unique_id=1180811448]
+[ext_resource type="Script" uid="uid://dqgs0suqdr0ic" path="res://core/main_scene/main_scene.gd" id="1_awcct"]
+[ext_resource type="PackedScene" uid="uid://dyhygadsweine" path="res://levels/lv_dev/lv_dev.tscn" id="2_wqpev"]
+[ext_resource type="PackedScene" uid="uid://dn3hp2lqhrwn8" path="res://core/game_camera/game_camera.tscn" id="3_3gbtc"]
+
+[node name="MainScene" type="Node" unique_id=1180811448 node_paths=PackedStringArray("_game_camera", "_folder_level", "_folder_entities", "_folder_effects")]
 process_mode = 3
+script = ExtResource("1_awcct")
+level_to_load = ExtResource("2_wqpev")
+_game_camera = NodePath("World/GameCamera")
+_folder_level = NodePath("World/Level")
+_folder_entities = NodePath("World/Entities")
+_folder_effects = NodePath("World/Effects")
 
 [node name="World" type="Node" parent="." unique_id=1051000033]
 process_mode = 1
+
+[node name="GameCamera" parent="World" unique_id=244505734 instance=ExtResource("3_3gbtc")]
+transform = Transform3D(1, 0, 0, 0, 0.86602545, 0.50000006, 0, -0.50000006, 0.86602545, 0, 5, 5)
 
 [node name="Level" type="Node3D" parent="World" unique_id=2123426684]
 
