@@ -261,3 +261,4 @@ func _handle_camera_mode_change() -> void:
 		ECameraMode.FREE_FLIGHT:
 			_free_flight_rot = rotation
 			_free_flight_rot.z = 0 # Remove roll
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
