@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://dhgdgbr812rv2"]
+
+[node name="MainScene" type="Node" unique_id=1180811448]
+process_mode = 3
+
+[node name="World" type="Node" parent="." unique_id=1051000033]
+process_mode = 1
+
+[node name="Level" type="Node3D" parent="World" unique_id=2123426684]
+
+[node name="Entities" type="Node3D" parent="World" unique_id=1295134493]
+
+[node name="Effects" type="Node3D" parent="World" unique_id=1181375799]
+
+[node name="UI" type="Node" parent="." unique_id=690036975]
