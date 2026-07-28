@@ -1,0 +1,36 @@
+[gd_scene format=3 uid="uid://ktk85mqyxoxj"]
+
+[ext_resource type="Script" uid="uid://eb5ffr5f36ok" path="res://ui/dev_canvas/dev_canvas.gd" id="1_urbsn"]
+[ext_resource type="Script" uid="uid://d1at3y8hqbnih" path="res://ui/dev_canvas/fps_label.gd" id="2_fl0hp"]
+[ext_resource type="FontFile" uid="uid://y6a3mwetdwcc" path="res://assets/fonts/consolas/consola.ttf" id="2_n8cf4"]
+[ext_resource type="FontFile" uid="uid://c5dxwvvvdiqo7" path="res://assets/fonts/consolas/consolab.ttf" id="3_5cp3g"]
+[ext_resource type="FontFile" uid="uid://da6hgjgsxvvic" path="res://assets/fonts/consolas/consolaz.ttf" id="4_uw75p"]
+[ext_resource type="FontFile" uid="uid://thw8cc7x20vf" path="res://assets/fonts/consolas/consolai.ttf" id="5_uxnd5"]
+
+[node name="DevCanvas" type="CanvasLayer" unique_id=159376391]
+script = ExtResource("1_urbsn")
+
+[node name="Panel" type="Panel" parent="." unique_id=529319228]
+offset_right = 172.0
+offset_bottom = 45.0
+
+[node name="FpsLabel" type="RichTextLabel" parent="Panel" unique_id=500743552]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/normal_font = ExtResource("2_n8cf4")
+theme_override_fonts/bold_font = ExtResource("3_5cp3g")
+theme_override_fonts/bold_italics_font = ExtResource("4_uw75p")
+theme_override_fonts/italics_font = ExtResource("5_uxnd5")
+theme_override_font_sizes/normal_font_size = 14
+bbcode_enabled = true
+text = "FPS        : [color=cyan]60[/color]
+FPS (live) : [color=cyan]60[/color]
+Frame time : [color=cyan]0.0000000[/color]
+"
+autowrap_mode = 0
+autowrap_trim_flags = 0
+script = ExtResource("2_fl0hp")

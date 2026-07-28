@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dqgs0suqdr0ic" path="res://core/main_scene/main_scene.gd" id="1_awcct"]
 [ext_resource type="PackedScene" uid="uid://dyhygadsweine" path="res://levels/lv_dev/lv_dev.tscn" id="2_wqpev"]
 [ext_resource type="PackedScene" uid="uid://dn3hp2lqhrwn8" path="res://core/game_camera/game_camera.tscn" id="3_3gbtc"]
+[ext_resource type="PackedScene" uid="uid://ktk85mqyxoxj" path="res://ui/dev_canvas/dev_canvas.tscn" id="4_et8y5"]
 
 [node name="MainScene" type="Node" unique_id=1180811448 node_paths=PackedStringArray("_game_camera", "_folder_level", "_folder_entities", "_folder_effects")]
 process_mode = 3
@@ -26,3 +27,5 @@ transform = Transform3D(1, 0, 0, 0, 0.86602545, 0.50000006, 0, -0.50000006, 0.86
 [node name="Effects" type="Node3D" parent="World" unique_id=1181375799]
 
 [node name="UI" type="Node" parent="." unique_id=690036975]
+
+[node name="DevCanvas" parent="UI" unique_id=159376391 instance=ExtResource("4_et8y5")]
