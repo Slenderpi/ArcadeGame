@@ -12,6 +12,7 @@ process_mode = 3
 script = ExtResource("1_awcct")
 level_to_load = ExtResource("2_wqpev")
 mech_to_load_0 = ExtResource("3_0lowg")
+mech_to_load_1 = ExtResource("3_0lowg")
 player_controller = ExtResource("4_v3gik")
 _game_camera = NodePath("World/GameCamera")
 _folder_level = NodePath("World/Level")

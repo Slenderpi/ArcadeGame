@@ -13,15 +13,16 @@ size = Vector3(100, 1, 100)
 
 [sub_resource type="BoxMesh" id="BoxMesh_tkwxs"]
 
-[node name="LevelDev" type="Node3D" unique_id=1708905452 node_paths=PackedStringArray("spawn_point_0")]
+[node name="LevelDev" type="Node3D" unique_id=1708905452 node_paths=PackedStringArray("spawn_point_0", "spawn_point_1")]
 script = ExtResource("1_mmko4")
 spawn_point_0 = NodePath("SpawnPoint0")
+spawn_point_1 = NodePath("SpawnPoint1")
 
 [node name="SpawnPoint0" type="Marker3D" parent="." unique_id=1805182680]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 
 [node name="SpawnPoint1" type="Marker3D" parent="." unique_id=1968213705]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 2, 0)
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 2, -10)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=446552284]
 transform = Transform3D(1, 0, 0, 0, 0.65630233, 0.754498, 0, -0.754498, 0.65630233, 0, 11, 0)
