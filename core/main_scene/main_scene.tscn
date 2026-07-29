@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://ktk85mqyxoxj" path="res://ui/dev_canvas/dev_canvas.tscn" id="4_et8y5"]
 [ext_resource type="PackedScene" uid="uid://cmmhck63a2xag" path="res://components/controllers/player_controller/player_controller_component.tscn" id="4_v3gik"]
 
-[node name="MainScene" type="Node" unique_id=1180811448 node_paths=PackedStringArray("_game_camera", "_folder_level", "_folder_entities", "_folder_effects")]
+[node name="MainScene" type="Node" unique_id=1180811448 node_paths=PackedStringArray("_game_camera", "_folder_level", "_folder_entities", "_folder_effects", "_folder_ui", "_dev_canvas")]
 process_mode = 3
 script = ExtResource("1_awcct")
 level_to_load = ExtResource("2_wqpev")
@@ -17,6 +17,8 @@ _game_camera = NodePath("World/GameCamera")
 _folder_level = NodePath("World/Level")
 _folder_entities = NodePath("World/Entities")
 _folder_effects = NodePath("World/Effects")
+_folder_ui = NodePath("UI")
+_dev_canvas = NodePath("UI/DevCanvas")
 
 [node name="World" type="Node" parent="." unique_id=1051000033]
 process_mode = 1

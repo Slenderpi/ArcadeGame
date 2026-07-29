@@ -43,7 +43,7 @@ func _physics_process(delta: float) -> void:
 	velocity *= 0.7
 	_handle_gravity(delta)
 	move_and_slide()
-	_reset_attack_input_states()
+	_reset_attack_input_states.call_deferred()
 
 
 func _handle_gravity(delta: float) -> void:

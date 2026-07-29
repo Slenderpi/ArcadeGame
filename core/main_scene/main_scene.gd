@@ -27,6 +27,8 @@ var _folder_effects : Node3D
 @export
 @warning_ignore("unused_private_class_variable")
 var _folder_ui : Node
+@export
+var _dev_canvas : DevCanvas
 
 
 func _ready() -> void:
@@ -45,3 +47,5 @@ func _ready() -> void:
 	
 	_game_camera.first_person_target = mech
 	_game_camera.camera_mode = GameCamera.ECameraMode.FIRST_PERSON
+	
+	_dev_canvas.mech_character = mech
