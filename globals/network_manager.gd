@@ -17,9 +17,9 @@ signal connection_established(isHost: bool)
 
 
 ## Port to use for discovery
-const PORT_NETWORKING := 8000
+const PORT_NETWORKING := 31983
 ## Port to use for the game
-const PORT_GAME := 7000
+const PORT_GAME := 21983
 
 ## This string is appended to all packets sent over UDP.
 ## NetworkManager will expect packets it receives to have this header.
