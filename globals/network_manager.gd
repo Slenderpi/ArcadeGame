@@ -2,9 +2,9 @@ extends Node
 
 
 ## NetworkManager state.
-enum State {
+enum ENetworkManagerState {
 	IDLE,
-	SEARCHING,
+	CALLING,
 	HOST,
 	CLIENT
 }
@@ -15,13 +15,15 @@ const PORT_NETWORKING := 8000
 ## Port to use for the game
 const PORT_GAME := 7000
 
-const UDPSTR_DISCOVERY := &"VIRTUAL ON,DISCOVERY"
-const UDPSTR_HOST := &"VIRTUAL ON,HOST"
-const UDPSTR_CLIENT := &"VIRTUAL ON,CLIENT"
+const UDPSTR_HEADER := &"VirtualOn"
+const UDPSTR_CALL := &"CALL"
+const UDPSTR_RESPONSE := &"RESPONSE"
+#const UDPSTR_HOST := &"HOST"
+#const UDPSTR_CLIENT := &"CLIENT"
 #const UDPSTR_
 
 
-var state := State.IDLE
+var state := ENetworkManagerState.IDLE
 
 var udp := PacketPeerUDP.new()
 var peer := ENetMultiplayerPeer.new()
@@ -39,41 +41,67 @@ func _ready() -> void:
 		return
 	udp.set_broadcast_enabled(true)
 	
-	state = State.SEARCHING
+	state = ENetworkManagerState.CALLING
 
 
 func _process(_delta: float) -> void:
 	if udp.get_available_packet_count() > 0:
-		var array_bytes := udp.get_packet()
-		var sender_ip := udp.get_packet_ip()
-		if my_local_ips.has(sender_ip):
-			print("Received my own message (ip: %s | message: %s)" % [sender_ip, udp.get_packet().get_string_from_ascii()])
+		var packetArr := udp.get_packet()
+		var packetStr := packetArr.get_string_from_ascii()
+		
+		var senderIp := udp.get_packet_ip()
+		if my_local_ips.has(senderIp):
+			print("Received my own message (ip: %s | message: %s)" % [senderIp, packetStr])
+			return
+		elif not packetStr.begins_with(UDPSTR_HEADER):
+			Debug.print_warning("Received unrelated message (ip: %s | message: %s)" % [senderIp, packetStr])
 			return
 		
-		other_ip = sender_ip
+		var msgArgs := packetStr.trim_prefix(UDPSTR_HEADER + ',').split(',')
 		
-		var packet_string := array_bytes.get_string_from_ascii()
-		print_rich("[color=green]Received message from %s:[/color] %s" % [sender_ip, packet_string])
-		state = State.IDLE
+		match state:
+			ENetworkManagerState.CALLING:
+				if msgArgs[0] == UDPSTR_CALL:
+					other_ip = senderIp
+					state = ENetworkManagerState.IDLE
+					print_rich("[color=green]Received CALL from %s! I will be a client." % other_ip)
+					_broadcast_response()
+				elif msgArgs[0] == UDPSTR_RESPONSE:
+					other_ip = senderIp
+					state = ENetworkManagerState.IDLE
+					print_rich("[color=green]Received RESPONSE from %s! I will be a server." % other_ip)
+				else:
+					print_rich("[color=green]Received unrecognized message from %s:[/color] %s" % [other_ip, str(msgArgs)])
+			ENetworkManagerState.IDLE, ENetworkManagerState.HOST, ENetworkManagerState.CLIENT:
+				print_rich("Not in calling state, but received message from %s: %s" % [other_ip, str(msgArgs)])
 
 
-func _broadcast_discovery() -> void:
+func _broadcast_call() -> void:
 	udp.set_dest_address("255.255.255.255", PORT_NETWORKING)
-	udp.put_packet(UDPSTR_DISCOVERY.to_utf8_buffer())
+	udp.put_packet(make_packet(UDPSTR_CALL).to_utf8_buffer())
+
+
+func _broadcast_response() -> void:
+	udp.set_dest_address(other_ip, PORT_NETWORKING)
+	udp.put_packet(make_packet(UDPSTR_RESPONSE).to_utf8_buffer())
 
 
 func _broadcast_hello() -> void:
 	udp.set_dest_address(other_ip, PORT_NETWORKING)
-	udp.put_packet(("Hello!").to_utf8_buffer())
+	udp.put_packet(make_packet("Hello!").to_utf8_buffer())
+
+
+func make_packet(message: String) -> String:
+	return UDPSTR_HEADER + ',' + message
 
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		if event.pressed and event.keycode == KEY_Y:
 			match state:
-				State.SEARCHING:
-					_broadcast_discovery()
-				State.IDLE, State.HOST, State.CLIENT:
+				ENetworkManagerState.CALLING:
+					_broadcast_call()
+				ENetworkManagerState.IDLE, ENetworkManagerState.HOST, ENetworkManagerState.CLIENT:
 					_broadcast_hello()
 
 
@@ -87,18 +115,19 @@ func _set_local_ips() -> void:
 		#if friendly.begins_with("eth"):
 			#for addr in iface["addresses"]:
 				#my_local_ips.append(addr)
-	print_rich("[color=cyan]Local ips set for this device:\n", my_local_ips)
+	Debug.print_info("Local ips on this device: \n%s" % str(my_local_ips))
 
 
 func _print_local_interfaces() -> void:
 	var interfaces := IP.get_local_interfaces()
-	print_rich(
-		"[color=cyan]PRINTING LOCAL INTERFACES. Unorganized listing:[/color]\n%s\n[color=cyan]-----------------------------------------------------------------------------" \
-			% interfaces)
+	Debug.print_info("PRINTING LOCAL INTERFACES. Unorganized listing:")
+	print(interfaces)
+	Debug.print_info("-----------------------------------------------------------------------------")
 	for interface in interfaces:
-		print("index: ", interface["index"])
-		print("name: ", interface["name"])
-		print("friendly: ", interface["friendly"])
-		print("addresses: ", interface["addresses"])
-		print()
-	print_rich("[color=cyan]Done printing interfaces.\n-----------------------------------------------------------------------------\n")
+		print(
+			"index: ", interface["index"], '\n',
+			"name: ", interface["name"], '\n',
+			"friendly: ", interface["friendly"], '\n',
+			"addresses: ", interface["addresses"], '\n'
+		)
+	Debug.print_info("Done printing interfaces.\n-----------------------------------------------------------------------------\n")
