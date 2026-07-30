@@ -44,6 +44,15 @@ func _ready() -> void:
 	var level := level_to_load.instantiate() as Node3D
 	_level_data = level as LevelData
 	_folder_level.add_child(level)
+	NetworkManager.found_peer.connect(func():
+		Debug.print_info("Found peer")
+	)
+	NetworkManager.player_connected.connect(func(peerId: int):
+		Debug.print_info("Player joined: %d" % peerId)
+	)
+	NetworkManager.player_disconnected.connect(func(peerId: int):
+		Debug.print_info("Player left: %d" % peerId)
+	)
 	
 	
 	

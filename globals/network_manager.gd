@@ -11,9 +11,19 @@ enum ENetworkManagerState {
 }
 
 
-## Fired when a UDP RESPONSE is answered by a RESPONSE or when a CALL is received.[br]
-## isHost: true if this instance should be the host.
-signal connection_established(isHost: bool)
+## Emitted when another Peer is found, which occurs when either a CALL or
+## a RESPONSE is received.
+signal found_peer
+## Emitted when another Peer joined through ENet. For the host, this is when
+## the server is created. For the client, this is when they have successfully
+## connected to the server.[br]
+## [br]
+## [code]peerId[/code]: the Id of the Peer that joined.
+signal player_connected(peerId: int)
+## Emitted when another Peer left through ENet.[br]
+## [br]
+## [code]peerId[/code]: the Id of the Peer that left.
+signal player_disconnected(peerId: int)
 
 
 ## Port to use for discovery
@@ -31,6 +41,9 @@ const UDPSTR_CALL := &"CALL"
 const UDPSTR_RESPONSE := &"RESPONSE"
 ## Sent by the NetworkManager after it's started its server.
 const UDPSTR_SERVER_START := &"SERVER_START"
+
+## Global IP when calling out to everyone on the network.
+const GLOBAL_IP := &"255.255.255.255"
 
 
 var state := ENetworkManagerState.IDLE
@@ -77,26 +90,26 @@ func _process(_delta: float) -> void:
 		match state:
 			ENetworkManagerState.CALLING:
 				if msgArgs[0] == UDPSTR_CALL:
-					other_ip = senderIp
-					print_rich("[color=green]Received CALL from %s! I will be a client." % other_ip)
 					state = ENetworkManagerState.WAITING_SERVER
+					print_rich("[color=green]Received CALL from %s! I will be a client." % senderIp)
+					_on_found_peer(senderIp)
 					_broadcast_response()
 				elif msgArgs[0] == UDPSTR_RESPONSE:
-					other_ip = senderIp
-					print_rich("[color=green]Received RESPONSE from %s! I will be the host." % other_ip)
+					print_rich("[color=green]Received RESPONSE from %s! I will be the host." % senderIp)
+					_on_found_peer(senderIp)
 					_start_server()
 				else:
-					print_rich("[color=green]Received unrecognized message from %s:[/color] %s" % [other_ip, str(msgArgs)])
+					print_rich("[color=green]Received unrecognized message from %s:[/color] %s" % [senderIp, str(msgArgs)])
 			ENetworkManagerState.WAITING_SERVER:
 				if msgArgs[0] == UDPSTR_SERVER_START:
-					print_rich("[color=green]Received SERVER_START from %s!" % other_ip)
+					print_rich("[color=green]Received SERVER_START from %s!" % senderIp)
 					_create_client_peer()
 			ENetworkManagerState.IDLE, ENetworkManagerState.HOST, ENetworkManagerState.CLIENT:
-				print_rich("Received message from %s: %s" % [other_ip, str(msgArgs)])
+				print_rich("Received message from %s: %s" % [senderIp, str(msgArgs)])
 
 
 func _broadcast_call() -> void:
-	udp.set_dest_address("255.255.255.255", PORT_NETWORKING)
+	udp.set_dest_address(GLOBAL_IP, PORT_NETWORKING)
 	udp.put_packet(make_packet(UDPSTR_CALL).to_utf8_buffer())
 
 
@@ -119,6 +132,16 @@ func make_packet(message: String) -> String:
 	return UDPSTR_HEADER + ',' + message
 
 
+## Stops the server. Only the host should call this.
+func close_server() -> void:
+	assert(state == ENetworkManagerState.HOST, "close_server() caller was not in HOST state. Only the HOST should call this.")
+	peer.close()
+	multiplayer.multiplayer_peer = null
+	# TODO: MainScene should probably trigger returning to CALL state, and this code should instead go to IDLE
+	state = ENetworkManagerState.CALLING
+
+
+## Starts the server. The NetworkManager that will be the host should call this.
 func _start_server() -> void:
 	var error := peer.create_server(PORT_GAME, 2)
 	if error != OK:
@@ -128,6 +151,7 @@ func _start_server() -> void:
 	state = ENetworkManagerState.HOST
 	print_rich("[color=green]Server started successfully.")
 	_broadcast_server_start()
+	player_connected.emit(1)
 
 
 func _create_client_peer() -> void:
@@ -138,32 +162,36 @@ func _create_client_peer() -> void:
 	multiplayer.multiplayer_peer = peer
 	state = ENetworkManagerState.CLIENT
 	print_rich("[color=green]Client created and joined successfully.")
-
-
-func _input(event: InputEvent) -> void:
-	if event is InputEventKey:
-		if event.pressed and event.keycode == KEY_Y:
-			match state:
-				ENetworkManagerState.CALLING:
-					_broadcast_call()
-				ENetworkManagerState.IDLE, ENetworkManagerState.HOST, ENetworkManagerState.CLIENT:
-					_broadcast_hello()
+	player_connected.emit(peer.get_unique_id())
 
 
 func _on_peer_connected(id: int) -> void:
 	print("Peer connected. Id: %d" % id)
+	player_connected.emit(id)
 
 
 func _on_peer_disconnected(id: int) -> void:
 	print("Peer disconnected. Id: %d" % id)
+	if state == ENetworkManagerState.HOST and multiplayer.get_peers().size() == 0:
+		Debug.print_info("Returning to CALL state.")
+		close_server()
+	player_disconnected.emit(id)
 
 
 func _on_connected_to_server() -> void:
 	print("Connected to server.")
+	player_connected.emit(peer.get_unique_id())
 
 
 func _on_server_disconnected() -> void:
-	print("Server disconnected.")
+	# TODO: MainScene should probably trigger returning to CALL state, and this code should instead go to IDLE
+	print("Server disconnected. Returning to CALL state.")
+	state = ENetworkManagerState.CALLING
+
+
+func _on_found_peer(senderIp: String) -> void:
+	other_ip = senderIp
+	found_peer.emit()
 
 
 func _set_local_ips() -> void:
@@ -177,6 +205,21 @@ func _set_local_ips() -> void:
 			#for addr in iface["addresses"]:
 				#my_local_ips.append(addr)
 	Debug.print_info("Local ips on this device: \n%s" % str(my_local_ips))
+
+
+func _exit_tree() -> void:
+	udp.close()
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey:
+		if event.pressed and event.keycode == KEY_Y:
+			match state:
+				ENetworkManagerState.CALLING:
+					_broadcast_call()
+				ENetworkManagerState.WAITING_SERVER, ENetworkManagerState.IDLE, ENetworkManagerState.HOST, ENetworkManagerState.CLIENT:
+					#_broadcast_call()
+					_broadcast_hello()
 
 
 func _print_local_interfaces() -> void:
