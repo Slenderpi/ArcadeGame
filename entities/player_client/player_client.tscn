@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://dalixf4th8pa0"]
+
+[ext_resource type="Script" uid="uid://bpo24vj7tihgs" path="res://entities/player_client/player_client.gd" id="1_cevh5"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_xse17"]
+
+[node name="PlayerClient" type="Node3D" unique_id=1350795132]
+script = ExtResource("1_cevh5")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=715335812]
+mesh = SubResource("BoxMesh_xse17")

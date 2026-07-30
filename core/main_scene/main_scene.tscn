@@ -2,18 +2,13 @@
 
 [ext_resource type="Script" uid="uid://dqgs0suqdr0ic" path="res://core/main_scene/main_scene.gd" id="1_awcct"]
 [ext_resource type="PackedScene" uid="uid://dyhygadsweine" path="res://levels/lv_dev/lv_dev.tscn" id="2_wqpev"]
-[ext_resource type="PackedScene" uid="uid://b0pw1c17p3b5n" path="res://entities/mech_characters/mech_guy/mech_guy.tscn" id="3_0lowg"]
 [ext_resource type="PackedScene" uid="uid://dn3hp2lqhrwn8" path="res://core/game_camera/game_camera.tscn" id="3_3gbtc"]
 [ext_resource type="PackedScene" uid="uid://ktk85mqyxoxj" path="res://ui/dev_canvas/dev_canvas.tscn" id="4_et8y5"]
-[ext_resource type="PackedScene" uid="uid://cmmhck63a2xag" path="res://components/controllers/player_controller/player_controller_component.tscn" id="4_v3gik"]
 
 [node name="MainScene" type="Node" unique_id=1180811448 node_paths=PackedStringArray("_game_camera", "_folder_level", "_folder_entities", "_folder_effects", "_folder_ui", "_dev_canvas")]
 process_mode = 3
 script = ExtResource("1_awcct")
 level_to_load = ExtResource("2_wqpev")
-mech_to_load_0 = ExtResource("3_0lowg")
-mech_to_load_1 = ExtResource("3_0lowg")
-player_controller = ExtResource("4_v3gik")
 _game_camera = NodePath("World/GameCamera")
 _folder_level = NodePath("World/Level")
 _folder_entities = NodePath("World/Entities")
