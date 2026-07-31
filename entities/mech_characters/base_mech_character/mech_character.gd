@@ -54,7 +54,7 @@ func _physics_process(delta: float) -> void:
 	# TODO: _handle_movement()
 	var moveL := Vector3(_stick_input_left.x, 0, _stick_input_left.y)
 	var moveR := Vector3(_stick_input_right.x, 0, _stick_input_right.y)
-	velocity += moveL * 3 + moveR * 3
+	velocity += (moveL * 3 + moveR * 3) * transform.basis
 	# TODO: _handle_attack()
 	if _is_attack_both:
 		print("ATK_B")
