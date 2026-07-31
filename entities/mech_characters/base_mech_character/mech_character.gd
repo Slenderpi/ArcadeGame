@@ -26,6 +26,11 @@ var _is_attack_right : bool
 var _is_attack_both : bool
 
 
+func _ready() -> void:
+	var peerId := name.to_int()
+	set_multiplayer_authority(peerId)
+
+
 func _physics_process(delta: float) -> void:
 	# TODO: _handle_movement()
 	var moveL := Vector3(_stick_input_left.x, 0, _stick_input_left.y)

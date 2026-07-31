@@ -2,17 +2,14 @@ extends Node
 ## This class is essentially a GameManager type of class
 
 
-const PORT := 7000
-
-
 @export
 var level_to_load : PackedScene
 var _level_data : LevelData
 
-#@export
-#var mech_to_load_0 : PackedScene
-#@export
-#var mech_to_load_1 : PackedScene
+@export
+var mech_to_load_0 : PackedScene
+@export
+var mech_to_load_1 : PackedScene
 #@export
 #var player_controller : PackedScene
 var player_client_scene := preload("res://entities/player_client/player_client.tscn")
@@ -33,6 +30,11 @@ var _folder_effects : Node3D
 @export
 @warning_ignore("unused_private_class_variable")
 var _folder_ui : Node
+@export_subgroup("Multiplayer")
+@export
+var level_mspawner : MultiplayerSpawner
+@export
+var entities_mspawner : MultiplayerSpawner
 @export
 var _dev_canvas : DevCanvas
 
@@ -41,17 +43,32 @@ var spawned_mechs : Array[MechCharacter] = []
 
 
 func _ready() -> void:
-	var level := level_to_load.instantiate() as Node3D
-	_level_data = level as LevelData
-	_folder_level.add_child(level)
+	entities_mspawner.spawn_function = func(data: Variant) -> Node:
+		var mech := mech_to_load_0.instantiate() as MechCharacter
+		mech.name = str(data["peer_id"])
+		mech.global_transform = data["trans"]
+		return mech
+	
 	NetworkManager.found_peer.connect(func():
 		Debug.print_info("Found peer")
 	)
 	NetworkManager.player_connected.connect(func(peerId: int):
 		Debug.print_info("Player joined: %d" % peerId)
+		if not multiplayer.is_server():
+			return
+		if peerId != 1:
+			print("SPAWNING LEVEL AND CHARACTERS.")
+			_spawn_level_and_characters()
 	)
 	NetworkManager.player_disconnected.connect(func(peerId: int):
 		Debug.print_info("Player left: %d" % peerId)
+		if not multiplayer.is_server():
+			return
+		
+		for c in _folder_level.get_children():
+			c.queue_free()
+		for c in _folder_entities.get_children():
+			c.queue_free()
 	)
 	
 	
@@ -77,6 +94,31 @@ func _ready() -> void:
 	#plrCtrlr.player_id = playerId
 	#mech.add_child(plrCtrlr)
 	#
+	#spawned_mechs.append(mech)
+
+
+func _spawn_level_and_characters() -> void:
+	if not multiplayer.is_server():
+		return
+	
+	var level := level_to_load.instantiate() as Node3D
+	_level_data = level as LevelData
+	_folder_level.add_child(level)
+	
+	_spawn_mech_character(1, _level_data.spawn_point_0.global_transform)
+	_spawn_mech_character(multiplayer.get_peers()[0], _level_data.spawn_point_1.global_transform)
+
+
+func _spawn_mech_character(peerId: int, trans: Transform3D) -> void:
+	entities_mspawner.spawn({
+		"peer_id" = peerId,
+		"trans" = trans
+	})
+	#var mech := mech_to_load_0.instantiate() as MechCharacter
+	#mech.global_transform = trans
+	#
+	#mech.name = str(peerId)
+	#_folder_entities.add_child(mech, true)
 	#spawned_mechs.append(mech)
 
 
