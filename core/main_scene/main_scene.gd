@@ -78,3 +78,13 @@ func _ready() -> void:
 	#mech.add_child(plrCtrlr)
 	#
 	#spawned_mechs.append(mech)
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey:
+		if event.is_pressed():
+			if event.keycode == KEY_ESCAPE:
+				if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+					Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+				elif Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
+					Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
