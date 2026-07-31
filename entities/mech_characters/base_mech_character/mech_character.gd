@@ -19,6 +19,14 @@ var movement_force : float = 1.0
 @export
 var gravity_coefficient : float = 1.0
 
+## Should be set by MainScene when this character is instantiated.
+## The following values map to the following controller types:[br]
+## - 0: [DummyControllerComponent] TODO[br]
+## - 1: [PlayerControllerComponent][br]
+## - 2: [AIControllerComponent] TODO
+var controller_type : int
+
+
 var _stick_input_left : Vector2
 var _stick_input_right : Vector2
 var _is_attack_left : bool
@@ -29,6 +37,17 @@ var _is_attack_both : bool
 func _ready() -> void:
 	var peerId := name.to_int()
 	set_multiplayer_authority(peerId)
+	if not is_multiplayer_authority():
+		return
+	var cntrlr : CharacterControllerComponent = null
+	match controller_type:
+		1:
+			cntrlr = PlayerControllerComponent.new()
+		0, 2:
+			# TODO: DummyControllerComponent, AIControllerComponent
+			pass
+	cntrlr.mech_character = self
+	add_child(cntrlr)
 
 
 func _physics_process(delta: float) -> void:

@@ -43,10 +43,12 @@ var spawned_mechs : Array[MechCharacter] = []
 
 
 func _ready() -> void:
+	entities_mspawner.spawned.connect(_on_mech_character_spawned)
 	entities_mspawner.spawn_function = func(data: Variant) -> Node:
 		var mech := mech_to_load_0.instantiate() as MechCharacter
 		mech.name = str(data["peer_id"])
-		mech.global_transform = data["trans"]
+		mech.global_transform = data["transform"]
+		mech.controller_type = data["controller"]
 		return mech
 	
 	NetworkManager.found_peer.connect(func():
@@ -71,8 +73,6 @@ func _ready() -> void:
 			c.queue_free()
 	)
 	
-	
-	
 	#_spawn_mech_character_for_player(mech_to_load_0, 0)
 	#_spawn_mech_character_for_player(mech_to_load_1, 1)
 	
@@ -80,21 +80,6 @@ func _ready() -> void:
 	#_game_camera.camera_mode = GameCamera.ECameraMode.FIRST_PERSON
 	
 	#_dev_canvas.mech_character = spawned_mechs[0]
-
-
-#func _spawn_mech_character_for_player(mechScene: PackedScene, playerId: int) -> void:
-	## Spawn mech
-	#var mech := mechScene.instantiate() as MechCharacter
-	#mech.transform = (_level_data.spawn_point_0 if playerId == 0 else _level_data.spawn_point_1).transform
-	#_folder_entities.add_child(mech)
-	#
-	## Create controller
-	#var plrCtrlrScene := player_controller.instantiate()
-	#var plrCtrlr := plrCtrlrScene as PlayerControllerComponent
-	#plrCtrlr.player_id = playerId
-	#mech.add_child(plrCtrlr)
-	#
-	#spawned_mechs.append(mech)
 
 
 func _spawn_level_and_characters() -> void:
@@ -105,21 +90,25 @@ func _spawn_level_and_characters() -> void:
 	_level_data = level as LevelData
 	_folder_level.add_child(level)
 	
-	_spawn_mech_character(1, _level_data.spawn_point_0.global_transform)
-	_spawn_mech_character(multiplayer.get_peers()[0], _level_data.spawn_point_1.global_transform)
+	_on_mech_character_spawned(_spawn_mech_character(1, _level_data.spawn_point_0.global_transform, 1))
+	_spawn_mech_character(multiplayer.get_peers()[0], _level_data.spawn_point_1.global_transform, 1)
 
 
-func _spawn_mech_character(peerId: int, trans: Transform3D) -> void:
-	entities_mspawner.spawn({
+func _spawn_mech_character(peerId: int, transform: Transform3D, controller: int) -> Node:
+	return entities_mspawner.spawn({
 		"peer_id" = peerId,
-		"trans" = trans
+		"transform" = transform,
+		"controller" = controller
 	})
-	#var mech := mech_to_load_0.instantiate() as MechCharacter
-	#mech.global_transform = trans
-	#
-	#mech.name = str(peerId)
-	#_folder_entities.add_child(mech, true)
-	#spawned_mechs.append(mech)
+
+
+func _on_mech_character_spawned(node: Node) -> void:
+	if not node.is_multiplayer_authority():
+		return
+	if node is MechCharacter:
+		_dev_canvas.mech_character = node
+		_game_camera.first_person_target = node
+		_game_camera.camera_mode = GameCamera.ECameraMode.FIRST_PERSON
 
 
 func _input(event: InputEvent) -> void:

@@ -59,6 +59,11 @@ var player_id : int:
 var _player_id : int
 
 
+func _ready() -> void:
+	# NOTE: player_id will probably be removed.
+	player_id = 0
+
+
 func _physics_process(_delta: float) -> void:
 	_handle_stick_movement_inputs()
 	_handle_action_inputs()
