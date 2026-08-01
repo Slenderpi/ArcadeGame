@@ -39,9 +39,17 @@ var _is_trigger_both : bool
 var _is_button_left : bool
 var _is_button_right : bool
 
+var _has_set_authority := false
+
+
+func _enter_tree() -> void:
+	if not _has_set_authority:
+		_has_set_authority = true
+		set_multiplayer_authority(peer_id)
+
 
 func _ready() -> void:
-	set_multiplayer_authority(peer_id)
+	#set_multiplayer_authority(peer_id)
 	if not is_multiplayer_authority():
 		return
 	var cntrlr : CharacterControllerComponent = null
