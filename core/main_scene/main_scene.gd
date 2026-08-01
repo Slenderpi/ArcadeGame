@@ -85,7 +85,7 @@ var active_mech_1 : MechCharacter
 
 
 func _ready() -> void:
-	#entities_mspawner.spawned.connect(_on_mech_character_spawned)
+	entities_mspawner.spawned.connect(_on_multiplayer_entity_spawned)
 	#entities_mspawner.spawn_function = func(data: Variant) -> Node:
 		#var mech := mech_to_load_0.instantiate() as MechCharacter
 		#mech.name = str(data["peer_id"])
@@ -187,21 +187,39 @@ func spawn_level(levelResource: Resource) -> void:
 func spawn_mech(mechScene0: PackedScene, controllerType0: int, mechScene1: PackedScene, peerId1: int, controllerType1: int) -> void:
 	if not multiplayer.is_server():
 		return
+	print("Spawning mechs")
 	
-	active_mech_0 = mechScene0.instantiate() as MechCharacter
-	active_mech_0.peer_id = 1
-	active_mech_0.transform = active_stage.spawn_point_0.global_transform
-	active_mech_0.controller_type = controllerType0
-	_folder_entities.add_child(active_mech_0, true)
+	var mech0 = mechScene0.instantiate() as MechCharacter
+	mech0.peer_id = 1
+	mech0.transform = active_stage.spawn_point_0.global_transform
+	mech0.controller_type = controllerType0
 	
-	active_mech_1 = mechScene1.instantiate() as MechCharacter
-	active_mech_1.peer_id = peerId1
-	active_mech_1.transform = active_stage.spawn_point_1.global_transform
-	active_mech_1.controller_type = controllerType1
-	_folder_entities.add_child(active_mech_1, true)
+	var mech1 = mechScene1.instantiate() as MechCharacter
+	mech1.peer_id = peerId1
+	mech1.transform = active_stage.spawn_point_1.global_transform
+	mech1.controller_type = controllerType1
 	
-	_on_mech_character_0_spawned()
-	_on_mech_character_1_spawned.rpc()
+	_folder_entities.add_child(mech0, true)
+	_folder_entities.add_child(mech1, true)
+	
+	# Call this function explicitly for the server.
+	# The spawned signal on the MultiplayerSpawner only calls it on the client.
+	_on_multiplayer_entity_spawned(mech0)
+	_on_multiplayer_entity_spawned(mech1)
+
+
+func _on_multiplayer_entity_spawned(node: Node):
+	if node is MechCharacter:
+		print("Mech spawned! peerId of mech: ", node.peer_id)
+		if node.peer_id == 1:
+			print("active_mech_0 set")
+			active_mech_0 = node
+		else:
+			print("active_mech_1 set")
+			active_mech_1 = node
+		if node.peer_id == multiplayer.get_unique_id():
+			print("This is my entity. Calling general func.")
+			_on_mech_character_spawned_general(node)
 
 
 #func _spawn_mech_character(peerId: int, transform: Transform3D, controller: int) -> Node:
@@ -212,18 +230,18 @@ func spawn_mech(mechScene0: PackedScene, controllerType0: int, mechScene1: Packe
 	#})
 
 
-# Since this function is for Player0, it should only be called by the server.
-# This check is not explicitly validated.
-func _on_mech_character_0_spawned() -> void:
-	print("Mech 0 spawned. Has authority: ", active_mech_0.is_multiplayer_authority())
-	_on_mech_character_spawned_general(active_mech_0)
-
-
-# Since this function is for Player1, only the client should actually run this.
-@rpc("any_peer")
-func _on_mech_character_1_spawned() -> void:
-	print("Mech 1 spawned. Has authority: ", active_mech_1.is_multiplayer_authority())
-	_on_mech_character_spawned_general(active_mech_1)
+## Since this function is for Player0, it should only be called by the server.
+## This check is not explicitly validated.
+#func _on_mech_character_0_spawned() -> void:
+	#print("Mech 0 spawned. Has authority: ", active_mech_0.is_multiplayer_authority())
+	#_on_mech_character_spawned_general(active_mech_0)
+#
+#
+## Since this function is for Player1, only the client should actually run this.
+#@rpc("any_peer")
+#func _on_mech_character_1_spawned() -> void:
+	#print("Mech 1 spawned. Has authority: ", active_mech_1.is_multiplayer_authority())
+	#_on_mech_character_spawned_general(active_mech_1)
 
 
 func _on_mech_character_spawned_general(mechChar: MechCharacter) -> void:
