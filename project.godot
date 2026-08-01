@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Debug="*uid://cu7bimfn6fy4k"
 NetworkManager="*uid://cc0bu236eu6gu"
+StageRefs="*uid://3xmhx6ujbonj"
 
 [display]
 

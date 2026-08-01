@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://dyhygadsweine"]
 
 [ext_resource type="Material" uid="uid://dxwb4thl11o7t" path="res://assets/basic_materials/m_checkerboard.tres" id="1_lsv3u"]
-[ext_resource type="Script" uid="uid://c85iolop1hj2r" path="res://levels/level_data.gd" id="1_mmko4"]
-[ext_resource type="Script" uid="uid://c4yx8tc85j1rc" path="res://levels/lv_dev/fast_cube_test.gd" id="2_45owk"]
+[ext_resource type="Script" uid="uid://c85iolop1hj2r" path="res://stages/level_data.gd" id="1_mmko4"]
+[ext_resource type="Script" uid="uid://c4yx8tc85j1rc" path="res://stages/lv_dev/fast_cube_test.gd" id="2_45owk"]
 [ext_resource type="Material" uid="uid://btkumge4biux0" path="res://assets/basic_materials/m_green.tres" id="2_nl26l"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_xse17"]

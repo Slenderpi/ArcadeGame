@@ -1,5 +1,19 @@
 extends Node
-## This class is essentially a GameManager type of class
+class_name MainScene
+## This class is essentially a GameManager type of class that manages
+## the game as a whole.
+# NOTE: consider a coin_added signal, either here or in a coin-reading
+#		script.
+
+
+## Determines what state the game as a whole is in.
+enum EMainSceneState {
+	BOOTING,
+	ATTRACTION_MODE,
+	LOGIN, # NOTE: may rename to just "MENU"
+	GAMEPLAY,
+	RESULTS
+}
 
 
 @export
@@ -13,6 +27,11 @@ var mech_to_load_1 : PackedScene
 #@export
 #var player_controller : PackedScene
 var player_client_scene := preload("res://entities/player_client/player_client.tscn")
+
+#@export_category("Developer Config")
+### If true, skips visuals related to booting (the booting process itself still completes).
+#@export
+#var _skip_booting : bool = false
 
 @export_group("References")
 @export_subgroup("World")
@@ -38,6 +57,25 @@ var entities_mspawner : MultiplayerSpawner
 @export
 var _dev_canvas : DevCanvas
 
+
+## The current state of the program.
+var state : EMainSceneState:
+	get:
+		return _state
+	set(value):
+		_state = value
+		match state:
+			EMainSceneState.BOOTING:
+				_on_state_booting()
+			EMainSceneState.ATTRACTION_MODE:
+				_on_state_attraction_mode()
+			EMainSceneState.LOGIN:
+				_on_state_login()
+			EMainSceneState.GAMEPLAY:
+				_on_state_gameplay()
+var _state : EMainSceneState = EMainSceneState.BOOTING
+## The current [GameMode] in use.
+var game_mode : GameMode = null
 
 var spawned_mechs : Array[MechCharacter] = []
 
@@ -73,6 +111,8 @@ func _ready() -> void:
 			c.queue_free()
 	)
 	
+	state = EMainSceneState.BOOTING
+	
 	#_spawn_mech_character_for_player(mech_to_load_0, 0)
 	#_spawn_mech_character_for_player(mech_to_load_1, 1)
 	
@@ -80,6 +120,47 @@ func _ready() -> void:
 	#_game_camera.camera_mode = GameCamera.ECameraMode.FIRST_PERSON
 	
 	#_dev_canvas.mech_character = spawned_mechs[0]
+
+
+func _on_state_booting() -> void:
+	Debug.print_info("MainScene state: BOOTING.")
+	print("Booting not yet implemented. Going straight to ATTRACTION_MODE.")
+	state = EMainSceneState.ATTRACTION_MODE
+
+
+func _on_state_attraction_mode() -> void:
+	Debug.print_info("MainScene state: ATTRACTION_MODE.")
+	# TODO: On any controller input, enter 
+	print("Attraction not yet implemented. Going straight to LOGIN.")
+	state = EMainSceneState.LOGIN
+
+
+func _on_state_login() -> void:
+	Debug.print_info("MainScene state: LOGIN.")
+	# TODO: use NetworkManager to determine if the other machine is ready to play.
+	# 		If fails, SingleplayerGameMode
+	#		If succeeds, MultiplayerGameMode
+	print("Defaulting to MultiplayerGameMode.")
+	game_mode = MultiplayerGameMode.new(self)
+	print("Login not yet implemented. Going straight to GAMEPLAY.")
+	state = EMainSceneState.GAMEPLAY
+
+
+func _on_state_gameplay() -> void:
+	Debug.print_info("MainScene state: GAMEPLAY.")
+	assert(game_mode != null, "MainScene entered GAMEPLAY but game_mode is null. Should be set in LOGIN state.")
+	if not multiplayer.is_server():
+		return
+	game_mode.start()
+
+
+## Spawns the level.
+## Should only be called by the host.
+func spawn_level(levelResource: Resource) -> void:
+	print("Spawning level")
+	var level := levelResource.instantiate() as Node3D
+	_level_data = level as LevelData
+	_folder_level.add_child(level)
 
 
 func _spawn_level_and_characters() -> void:

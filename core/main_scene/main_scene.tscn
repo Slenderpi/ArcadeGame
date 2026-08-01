@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dhgdgbr812rv2"]
 
 [ext_resource type="Script" uid="uid://dqgs0suqdr0ic" path="res://core/main_scene/main_scene.gd" id="1_awcct"]
-[ext_resource type="PackedScene" uid="uid://dyhygadsweine" path="res://levels/lv_dev/lv_dev.tscn" id="2_wqpev"]
+[ext_resource type="PackedScene" uid="uid://dyhygadsweine" path="res://stages/lv_dev/lv_dev.tscn" id="2_wqpev"]
 [ext_resource type="PackedScene" uid="uid://b0pw1c17p3b5n" path="res://entities/mech_characters/mech_guy/mech_guy.tscn" id="3_0lowg"]
 [ext_resource type="PackedScene" uid="uid://dn3hp2lqhrwn8" path="res://core/game_camera/game_camera.tscn" id="3_3gbtc"]
 [ext_resource type="PackedScene" uid="uid://ktk85mqyxoxj" path="res://ui/dev_canvas/dev_canvas.tscn" id="4_et8y5"]
@@ -17,8 +17,8 @@ _folder_level = NodePath("World/Level")
 _folder_entities = NodePath("World/Entities")
 _folder_effects = NodePath("World/Effects")
 _folder_ui = NodePath("UI")
-level_mspawner = NodePath("Multiplayer/LevelMSpawner")
-entities_mspawner = NodePath("Multiplayer/EntitiesMSpawner")
+level_mspawner = NodePath("Multiplayer/Spawners/LevelMSpawner")
+entities_mspawner = NodePath("Multiplayer/Spawners/EntitiesMSpawner")
 _dev_canvas = NodePath("UI/DevCanvas")
 
 [node name="World" type="Node" parent="." unique_id=1051000033]
@@ -40,10 +40,12 @@ visible = false
 
 [node name="Multiplayer" type="Node" parent="." unique_id=2046824306]
 
-[node name="LevelMSpawner" type="MultiplayerSpawner" parent="Multiplayer" unique_id=531030473]
-_spawnable_scenes = PackedStringArray("uid://dyhygadsweine")
-spawn_path = NodePath("../../World/Level")
+[node name="Spawners" type="Node" parent="Multiplayer" unique_id=438647007]
 
-[node name="EntitiesMSpawner" type="MultiplayerSpawner" parent="Multiplayer" unique_id=808705322]
+[node name="LevelMSpawner" type="MultiplayerSpawner" parent="Multiplayer/Spawners" unique_id=531030473]
+_spawnable_scenes = PackedStringArray("uid://dyhygadsweine")
+spawn_path = NodePath("../../../World/Level")
+
+[node name="EntitiesMSpawner" type="MultiplayerSpawner" parent="Multiplayer/Spawners" unique_id=808705322]
 _spawnable_scenes = PackedStringArray("uid://b0pw1c17p3b5n")
-spawn_path = NodePath("../../World/Entities")
+spawn_path = NodePath("../../../World/Entities")

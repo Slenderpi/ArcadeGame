@@ -37,8 +37,11 @@ const UDPSTR_HEADER := &"VirtualOn"
 ## Sent when in the [enum ENetworkManagerState.CALLING] state.
 const UDPSTR_CALL := &"CALL"
 ## Sent when in the [enum ENetworkManagerState.CALLING] state AND this
-## NetworkManager receives a CALL.
+## NetworkManager receives a CALL AND there is someone playing.
 const UDPSTR_RESPONSE := &"RESPONSE"
+## Sent when inthe [enum ENetworkManagerState.CALLING] state AND this
+## NetworkManager receives a CALL AND the game does not have a Player on it.
+const UDPSTR_NO_PLAY := &"NO_PLAY"
 ## Sent by the NetworkManager after it's started its server.
 const UDPSTR_SERVER_START := &"SERVER_START"
 
