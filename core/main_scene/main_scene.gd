@@ -18,7 +18,6 @@ enum EMainSceneState {
 
 @export
 var level_to_load : PackedScene
-var _level_data : LevelData
 
 @export
 var mech_to_load_0 : PackedScene
@@ -77,18 +76,23 @@ var _state : EMainSceneState = EMainSceneState.BOOTING
 ## The current [GameMode] in use.
 var game_mode : GameMode = null
 
-var spawned_mechs : Array[MechCharacter] = []
+## The currently spawned [StageData]
+var active_stage : LevelData
+## The currently spawned [MechCharacter] for Player 0
+var active_mech_0 : MechCharacter
+## The currently spawned [MechCharacter] for Player 1
+var active_mech_1 : MechCharacter
 
 
 func _ready() -> void:
-	entities_mspawner.spawned.connect(_on_mech_character_spawned)
-	entities_mspawner.spawn_function = func(data: Variant) -> Node:
-		var mech := mech_to_load_0.instantiate() as MechCharacter
-		mech.name = str(data["peer_id"])
-		mech.global_transform = data["transform"]
-		mech.controller_type = data["controller"]
-		return mech
-	
+	#entities_mspawner.spawned.connect(_on_mech_character_spawned)
+	#entities_mspawner.spawn_function = func(data: Variant) -> Node:
+		#var mech := mech_to_load_0.instantiate() as MechCharacter
+		#mech.name = str(data["peer_id"])
+		#mech.global_transform = data["transform"]
+		#mech.controller_type = data["controller"]
+		#return mech
+	#
 	NetworkManager.found_peer.connect(func():
 		Debug.print_info("Found peer")
 	)
@@ -97,14 +101,14 @@ func _ready() -> void:
 		if not multiplayer.is_server():
 			return
 		if peerId != 1:
-			print("SPAWNING LEVEL AND CHARACTERS.")
-			_spawn_level_and_characters()
+			print("Setting main scene state to GAMEPLAY.")
+			state = EMainSceneState.GAMEPLAY
 	)
 	NetworkManager.player_disconnected.connect(func(peerId: int):
 		Debug.print_info("Player left: %d" % peerId)
 		if not multiplayer.is_server():
 			return
-		
+		Debug.print_info("Clearing folders.")
 		for c in _folder_level.get_children():
 			c.queue_free()
 		for c in _folder_entities.get_children():
@@ -142,8 +146,9 @@ func _on_state_login() -> void:
 	#		If succeeds, MultiplayerGameMode
 	print("Defaulting to MultiplayerGameMode.")
 	game_mode = MultiplayerGameMode.new(self)
-	print("Login not yet implemented. Going straight to GAMEPLAY.")
-	state = EMainSceneState.GAMEPLAY
+	print("Begin the server to enter GAMEPLAY.")
+	#print("Login not yet implemented. Going straight to GAMEPLAY.")
+	#state = EMainSceneState.GAMEPLAY
 
 
 func _on_state_gameplay() -> void:
@@ -158,38 +163,73 @@ func _on_state_gameplay() -> void:
 ## Should only be called by the host.
 func spawn_level(levelResource: Resource) -> void:
 	print("Spawning level")
-	var level := levelResource.instantiate() as Node3D
-	_level_data = level as LevelData
-	_folder_level.add_child(level)
+	var stage := levelResource.instantiate() as Node3D
+	active_stage = stage as LevelData
+	_folder_level.add_child(stage)
 
 
-func _spawn_level_and_characters() -> void:
+#func _spawn_level_and_characters() -> void:
+	#if not multiplayer.is_server():
+		#return
+	#
+	#var stage := level_to_load.instantiate() as Node3D
+	#active_stage = stage as LevelData
+	#_folder_level.add_child(stage)
+	#
+	#_on_mech_character_spawned(_spawn_mech_character(1, active_stage.spawn_point_0.global_transform, 1))
+	#_spawn_mech_character(multiplayer.get_peers()[0], active_stage.spawn_point_1.global_transform, 1)
+
+
+## Spawns MechCharacters for both Players. Player0 is ALWAYS the host's Player,
+## so their peerId will always be 0.
+## [br]
+## [b]This function is server locked.[/b]
+func spawn_mech(mechScene0: PackedScene, controllerType0: int, mechScene1: PackedScene, peerId1: int, controllerType1: int) -> void:
 	if not multiplayer.is_server():
 		return
 	
-	var level := level_to_load.instantiate() as Node3D
-	_level_data = level as LevelData
-	_folder_level.add_child(level)
+	active_mech_0 = mechScene0.instantiate() as MechCharacter
+	active_mech_0.peer_id = 1
+	active_mech_0.transform = active_stage.spawn_point_0.global_transform
+	active_mech_0.controller_type = controllerType0
+	_folder_entities.add_child(active_mech_0, true)
 	
-	_on_mech_character_spawned(_spawn_mech_character(1, _level_data.spawn_point_0.global_transform, 1))
-	_spawn_mech_character(multiplayer.get_peers()[0], _level_data.spawn_point_1.global_transform, 1)
+	active_mech_1 = mechScene1.instantiate() as MechCharacter
+	active_mech_1.peer_id = peerId1
+	active_mech_1.transform = active_stage.spawn_point_1.global_transform
+	active_mech_1.controller_type = controllerType1
+	_folder_entities.add_child(active_mech_1, true)
+	
+	_on_mech_character_0_spawned()
+	_on_mech_character_1_spawned.rpc()
 
 
-func _spawn_mech_character(peerId: int, transform: Transform3D, controller: int) -> Node:
-	return entities_mspawner.spawn({
-		"peer_id" = peerId,
-		"transform" = transform,
-		"controller" = controller
-	})
+#func _spawn_mech_character(peerId: int, transform: Transform3D, controller: int) -> Node:
+	#return entities_mspawner.spawn({
+		#"peer_id" = peerId,
+		#"transform" = transform,
+		#"controller" = controller
+	#})
 
 
-func _on_mech_character_spawned(node: Node) -> void:
-	if not node.is_multiplayer_authority():
-		return
-	if node is MechCharacter:
-		_dev_canvas.mech_character = node
-		_game_camera.first_person_target = node
-		_game_camera.camera_mode = GameCamera.ECameraMode.FIRST_PERSON
+# Since this function is for Player0, it should only be called by the server.
+# This check is not explicitly validated.
+func _on_mech_character_0_spawned() -> void:
+	print("Mech 0 spawned. Has authority: ", active_mech_0.is_multiplayer_authority())
+	_on_mech_character_spawned_general(active_mech_0)
+
+
+# Since this function is for Player1, only the client should actually run this.
+@rpc("any_peer")
+func _on_mech_character_1_spawned() -> void:
+	print("Mech 1 spawned. Has authority: ", active_mech_1.is_multiplayer_authority())
+	_on_mech_character_spawned_general(active_mech_1)
+
+
+func _on_mech_character_spawned_general(mechChar: MechCharacter) -> void:
+	_dev_canvas.mech_character = mechChar
+	_game_camera.first_person_target = mechChar
+	_game_camera.camera_mode = GameCamera.ECameraMode.FIRST_PERSON
 
 
 func _input(event: InputEvent) -> void:

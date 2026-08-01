@@ -4,8 +4,25 @@
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_xse17"]
 
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_sskpf"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath("CharacterBody3D:controller_type")
+properties/2/spawn = true
+properties/2/replication_mode = 2
+properties/3/path = NodePath("CharacterBody3D:peer_id")
+properties/3/spawn = true
+properties/3/replication_mode = 2
+
 [node name="CharacterBody3D" type="CharacterBody3D" unique_id=1402290052]
 script = ExtResource("1_x3now")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1704555056]
 shape = SubResource("CapsuleShape3D_xse17")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1275744687]
+replication_config = SubResource("SceneReplicationConfig_sskpf")
