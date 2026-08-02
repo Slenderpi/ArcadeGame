@@ -10,6 +10,7 @@ class_name MainScene
 enum EMainSceneState {
 	BOOTING,
 	ATTRACTION_MODE,
+	MATCHMAKING,
 	LOGIN, # NOTE: may rename to just "MENU"
 	GAMEPLAY,
 	## For the MainScene that runs as the CLIENT.
@@ -71,6 +72,8 @@ var state : EMainSceneState:
 				_on_state_booting()
 			EMainSceneState.ATTRACTION_MODE:
 				_on_state_attraction_mode()
+			EMainSceneState.MATCHMAKING:
+				_on_state_matchmaking()
 			EMainSceneState.LOGIN:
 				_on_state_login()
 			EMainSceneState.GAMEPLAY:
@@ -139,8 +142,23 @@ func _on_state_booting() -> void:
 func _on_state_attraction_mode() -> void:
 	Debug.print_info("MainScene state: ATTRACTION_MODE.")
 	# TODO: On any controller input, enter 
-	print("Attraction not yet implemented. Going straight to LOGIN.")
-	state = EMainSceneState.LOGIN
+	#print("Attraction not yet implemented. Going straight to LOGIN.")
+	#state = EMainSceneState.LOGIN
+
+
+func _on_state_matchmaking() -> void:
+	Debug.print_info("MainScene state: MATCHMAKING.")
+	print("Asking NetworkManager to find a peer...")
+	NetworkManager.can_versus = true
+	var peerIp : String = await NetworkManager.find_peer()
+	if peerIp.is_empty():
+		Debug.print_info("NetworkManager did not find an available peer. Entering Singleplayer mode!")
+	else:
+		Debug.print_info("NetworkManager found a peer! Peer ip: %s" % peerIp)
+		return
+		var serverIp : String = NetworkManager.my_ip # TODO: compare the IPs and choose
+		print("The IP that will be the server is: %s" % serverIp)
+		NetworkManager.start_server(serverIp)
 
 
 func _on_state_login() -> void:
@@ -233,3 +251,8 @@ func _input(event: InputEvent) -> void:
 					Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 				elif Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 					Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+			if event.pressed and event.keycode == KEY_J: # TODO: TEMP
+				print("J KEY PRESSED. COIN INSERT SIMULATED.")
+				if state == EMainSceneState.ATTRACTION_MODE:
+					print("Matchmaking triggered.")
+					state = EMainSceneState.MATCHMAKING

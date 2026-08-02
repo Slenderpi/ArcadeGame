@@ -26,6 +26,11 @@ signal player_connected(peerId: int)
 signal player_disconnected(peerId: int)
 
 
+signal server_started # TODO
+signal versus_peer_found(otherIp: String) # TODO
+signal _call_result(result: String)
+
+
 ## Port to use for discovery
 const PORT_NETWORKING := 31983
 ## Port to use for the game
@@ -41,9 +46,11 @@ const UDPSTR_CALL := &"CALL"
 const UDPSTR_RESPONSE := &"RESPONSE"
 ## Sent when inthe [enum ENetworkManagerState.CALLING] state AND this
 ## NetworkManager receives a CALL AND the game does not have a Player on it.
-const UDPSTR_NO_PLAY := &"NO_PLAY"
+const UDPSTR_NOPLAY := &"NOPLAY"
 ## Sent by the NetworkManager after it's started its server.
-const UDPSTR_SERVER_START := &"SERVER_START"
+const UDPSTR_SERVER_START := &"SERVER_START" # TODO: delete?
+const UDPSTR_SERVER_CREATED := &"SERVER_CREATED"
+const UDPSTR_SERVER_REQUEST := &"SERVER_REQUEST"
 
 ## Global IP when calling out to everyone on the network.
 const GLOBAL_IP := &"255.255.255.255"
@@ -51,12 +58,27 @@ const GLOBAL_IP := &"255.255.255.255"
 
 var state := ENetworkManagerState.IDLE
 
+## Set this value to tell NetworkManager whether or not this device can be
+## challenged by another device for versus mode.[br]
+## [br]
+## [b]Example:[/b] no coin has been inserted on this device yet, so this value
+## should be false.
+## Then, a coin is inserted. This value should then get set to true.
+var can_versus : bool = false
+
 var udp := PacketPeerUDP.new()
 var peer := ENetMultiplayerPeer.new()
 
 var my_local_ips : Array[String] = []
-var my_eth_ipv4 : String
+var my_ip : String
 var other_ip : String
+
+## How long to wait between unanswered CALLs.
+var call_retry_time : float = 1
+## Maximum number of CALL tries.
+var max_call_attempts : int = 3
+var _last_call_time : int = -10000 # TODO: reset value
+var _curr_call_attempts := 0 # TODO: reset value
 
 
 func _ready() -> void:
@@ -78,6 +100,19 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	if state == ENetworkManagerState.CALLING:
+		var currTime := Time.get_ticks_msec()
+		if currTime - _last_call_time >= call_retry_time * 1000:
+			_curr_call_attempts += 1
+			if _curr_call_attempts > max_call_attempts:
+				state = ENetworkManagerState.IDLE
+				print_rich("[color=orange]Call attempts have timed out. Firing _call_result with empty string.")
+				_call_result.emit("")
+			else:
+				_last_call_time = currTime
+				print("Broadcasting CALL...")
+				_broadcast_call()
+		
 	if udp.get_available_packet_count() > 0:
 		var packetArr := udp.get_packet()
 		var packetStr := packetArr.get_string_from_ascii()
@@ -92,7 +127,28 @@ func _process(_delta: float) -> void:
 		
 		var msgArgs := packetStr.trim_prefix(UDPSTR_HEADER + ',').split(',')
 		
-		print_rich("[color=green]Received message from %s: %s" % [senderIp, str(msgArgs)])
+		if msgArgs[0] == UDPSTR_CALL:
+			print_rich("[color=green]Received CALL from %s with preferred IP %s" % [senderIp, msgArgs[1]])
+			senderIp = msgArgs[1]
+			if can_versus:
+				print_rich("[color=green]can_versus is true. Replying with RESPONSE.")
+				other_ip = msgArgs[1]
+				versus_peer_found.emit(other_ip)
+				_broadcast_response()
+			else:
+				print_rich("[color=orange]can_versus is false. Replying with NOPLAY.")
+				_broadcast_noplay()
+		elif msgArgs[0] == UDPSTR_RESPONSE:
+			print_rich("[color=green]Received RESPONSE from %s with preferred IP %s" % [senderIp, msgArgs[1]])
+			other_ip = msgArgs[1]
+			state = ENetworkManagerState.IDLE
+			_call_result.emit(other_ip)
+		elif msgArgs[0] == UDPSTR_NOPLAY:
+			print_rich("[color=green]Received NOPLAY from %s" % senderIp)
+			state = ENetworkManagerState.IDLE
+			_call_result.emit("")
+		else:
+			print_rich("Received unkown message from %s: %s" % [senderIp, str(msgArgs)])
 		#match state:
 			#ENetworkManagerState.CALLING:
 				#print_rich("[color=green]Received message from %s: %s" % [senderIp, str(msgArgs)])
@@ -126,19 +182,35 @@ func set_to_solo() -> void:
 	#peer.disconnect_peer()
 
 
-func find_peer() -> void:
+func find_peer() -> String:
 	state = ENetworkManagerState.CALLING
-	_broadcast_call()
+	return await _call_result
+	#state = ENetworkManagerState.CALLING
+	#_broadcast_call()
+
+
+func start_server(serverIp: String) -> void:
+	Debug.print_info("NetworkManager.start_server() called.")
+	if serverIp == my_ip:
+		print_rich("I will be the [color=pink]host!")
+	else:
+		print_rich("I will be the [color=pink]client!")
 
 
 func _broadcast_call() -> void:
+	_last_call_time = Time.get_ticks_msec()
 	udp.set_dest_address(GLOBAL_IP, PORT_NETWORKING)
-	udp.put_packet(make_packet(UDPSTR_CALL + ',' + my_eth_ipv4).to_utf8_buffer())
+	udp.put_packet(make_packet(UDPSTR_CALL + ',' + my_ip).to_utf8_buffer())
 
 
 func _broadcast_response() -> void:
 	udp.set_dest_address(other_ip, PORT_NETWORKING)
-	udp.put_packet(make_packet(UDPSTR_RESPONSE).to_utf8_buffer())
+	udp.put_packet(make_packet(UDPSTR_RESPONSE + ',' + my_ip).to_utf8_buffer())
+
+
+func _broadcast_noplay() -> void:
+	udp.set_dest_address(other_ip, PORT_NETWORKING)
+	udp.put_packet(make_packet(UDPSTR_NOPLAY).to_utf8_buffer())
 
 
 func _broadcast_hello() -> void:
@@ -146,9 +218,19 @@ func _broadcast_hello() -> void:
 	udp.put_packet(make_packet("Hello!").to_utf8_buffer())
 
 
-func _broadcast_server_start() -> void:
+func _broadcast_server_created() -> void:
 	udp.set_dest_address(other_ip, PORT_NETWORKING)
-	udp.put_packet(make_packet(UDPSTR_SERVER_START).to_utf8_buffer())
+	udp.put_packet(make_packet(UDPSTR_SERVER_CREATED).to_utf8_buffer())
+
+
+func _broadcast_server_request() -> void:
+	udp.set_dest_address(other_ip, PORT_NETWORKING)
+	udp.put_packet(make_packet(UDPSTR_SERVER_REQUEST).to_utf8_buffer())
+
+
+#func _broadcast_server_start() -> void:
+	#udp.set_dest_address(other_ip, PORT_NETWORKING)
+	#udp.put_packet(make_packet(UDPSTR_SERVER_START).to_utf8_buffer())
 
 
 func make_packet(message: String) -> String:
@@ -164,28 +246,42 @@ func close_server() -> void:
 	state = ENetworkManagerState.CALLING
 
 
-## Starts the server. The NetworkManager that will be the host should call this.
-func _start_server() -> void:
+### Starts the server. The NetworkManager that will be the host should call this.
+#func _start_server() -> void: # TODO: delete?
+	#var error := peer.create_server(PORT_GAME, 2)
+	#if error != OK:
+		#Debug.print_error("Failed to start server. Error: %s" % error)
+		#return
+	#multiplayer.multiplayer_peer = peer
+	#state = ENetworkManagerState.HOST
+	#print_rich("[color=green]Server started successfully.")
+	##_broadcast_server_start()
+	#player_connected.emit(1)
+
+
+func _create_server() -> void:
+	print("Creating ENet server...")
 	var error := peer.create_server(PORT_GAME, 2)
 	if error != OK:
 		Debug.print_error("Failed to start server. Error: %s" % error)
 		return
 	multiplayer.multiplayer_peer = peer
-	state = ENetworkManagerState.HOST
 	print_rich("[color=green]Server started successfully.")
-	_broadcast_server_start()
-	player_connected.emit(1)
+	state = ENetworkManagerState.IDLE # TODO: what state should be next?
+	_broadcast_server_created()
 
 
-func _create_client_peer() -> void:
+#func _create_client_peer() -> void:
+func _create_client() -> void:
 	var error := peer.create_client(other_ip, PORT_GAME)
 	if error != OK:
 		Debug.print_error("Failed to create client. Error: %s" % error)
 		return
 	multiplayer.multiplayer_peer = peer
-	state = ENetworkManagerState.CLIENT
 	print_rich("[color=green]Client created and joined successfully.")
-	player_connected.emit(peer.get_unique_id())
+	#state = ENetworkManagerState.CLIENT
+	state = ENetworkManagerState.IDLE # TODO: what state should be next?
+	#player_connected.emit(peer.get_unique_id())
 
 
 func _on_peer_connected(id: int) -> void:
@@ -212,25 +308,40 @@ func _on_server_disconnected() -> void:
 	state = ENetworkManagerState.CALLING
 
 
-func _on_found_peer(senderIp: String) -> void:
-	other_ip = senderIp
-	found_peer.emit()
+#func _on_found_peer(senderIp: String) -> void:
+	#other_ip = senderIp
+	#found_peer.emit()
 
 
 func _set_local_ips() -> void:
 	my_local_ips.clear()
 	var interfaces := IP.get_local_interfaces()
 	for iface in interfaces:
-		for addr in iface["addresses"]: # TODO: Might remove
+		var addresses : Array = iface["addresses"]
+		for addr in addresses: # TODO: Might remove
 			my_local_ips.append(addr)
-		if "eth" not in iface["friendly"].to_lower():
+		if not my_ip.is_empty() or "eth" not in iface["friendly"].to_lower():
 			continue
-		for addr : String in iface["addresses"]:
-			if addr.split('.').size() == 4:
-				if not my_eth_ipv4.is_empty():
-					Debug.print_warning("Found another ethernet IPv4 address: %s" % addr)
-				my_eth_ipv4 = addr
-				print_rich("[color=green]Found my ethernet ipv4: ", addr)
+		if addresses.size() == 0:
+			Debug.print_warning(
+				"Possible ethernet address found with 0 addresses. Index: %s | Name: %s | Friendly: %s" \
+				% [iface["index"], iface["name"], iface["friendly"]]
+			)
+			continue
+		var ipOption : String = addresses[0]
+		if addresses.size() > 1:
+			var addri := 0
+			while addri < addresses.size() and ipOption.split('.').size() != 4:
+				addri += 1
+				ipOption = addresses[addri]
+		my_ip = ipOption
+		print_rich("[color=green]Found my ethernet address: ", my_ip)
+		#for addr : String in addresses:
+			#if addr.split('.').size() == 4:
+				#if not my_ip.is_empty():
+					#Debug.print_warning("Found another ethernet IPv4 address: %s" % addr)
+				#my_ip = addr
+				#print_rich("[color=green]Found my ethernet ipv4: ", addr)
 				#return
 		#for addr in iface["addresses"]:
 			#my_local_ips.append(addr)
@@ -238,6 +349,8 @@ func _set_local_ips() -> void:
 		#if friendly.begins_with("eth"):
 			#for addr in iface["addresses"]:
 				#my_local_ips.append(addr)
+	if my_ip.is_empty():
+		Debug.print_error("No ethernet IP was found!")
 	Debug.print_info("Local ips on this device: \n%s" % str(my_local_ips))
 
 
@@ -245,11 +358,11 @@ func _exit_tree() -> void:
 	udp.close()
 
 
-func _input(event: InputEvent) -> void:
-	if event is InputEventKey:
-		if event.pressed and event.keycode == KEY_J:
-			print("J KEY PRESSED")
-			_broadcast_call()
+#func _input(event: InputEvent) -> void:
+	#if event is InputEventKey:
+		#if event.pressed and event.keycode == KEY_J:
+			#print("J KEY PRESSED")
+			#_broadcast_call()
 
 
 #func _input(event: InputEvent) -> void:
