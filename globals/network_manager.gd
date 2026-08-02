@@ -67,7 +67,7 @@ func _ready() -> void:
 	
 	_print_local_interfaces()
 	_set_local_ips()
-	var error = udp.bind(PORT_NETWORKING, my_eth_ipv4)
+	var error = udp.bind(PORT_NETWORKING)
 	if error != OK:
 		Debug.print_error("Encountered an error when binding to UDP socket for discovery: %s" % error)
 		return
@@ -83,7 +83,7 @@ func _process(_delta: float) -> void:
 		var packetStr := packetArr.get_string_from_ascii()
 		
 		var senderIp := udp.get_packet_ip()
-		if senderIp == my_eth_ipv4:
+		if my_local_ips.has(senderIp):
 			print("Received my own message (ip: %s | message: %s)" % [senderIp, packetStr])
 			return
 		elif not packetStr.begins_with(UDPSTR_HEADER):
@@ -133,7 +133,7 @@ func find_peer() -> void:
 
 func _broadcast_call() -> void:
 	udp.set_dest_address(GLOBAL_IP, PORT_NETWORKING)
-	udp.put_packet(make_packet(UDPSTR_CALL).to_utf8_buffer())
+	udp.put_packet(make_packet(UDPSTR_CALL + ',' + my_eth_ipv4).to_utf8_buffer())
 
 
 func _broadcast_response() -> void:
