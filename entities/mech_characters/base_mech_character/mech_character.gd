@@ -22,12 +22,14 @@ var gravity_coefficient : float = 1.0
 
 ## Set this value at instantiate() time.
 ## This value is read and applied at _ready() time.
+@export
 var peer_id : int = 1
 ## Should be set by MainScene when this character is instantiated.
 ## The following values map to the following controller types:[br]
 ## - 0: [DummyControllerComponent] TODO[br]
 ## - 1: [PlayerControllerComponent][br]
 ## - 2: [AIControllerComponent] TODO
+@export
 var controller_type : int
 
 

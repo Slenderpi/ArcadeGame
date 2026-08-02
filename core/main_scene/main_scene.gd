@@ -66,7 +66,7 @@ var state : EMainSceneState:
 		return _state
 	set(value):
 		_state = value
-		match state:
+		match _state:
 			EMainSceneState.BOOTING:
 				_on_state_booting()
 			EMainSceneState.ATTRACTION_MODE:
@@ -113,8 +113,8 @@ func _ready() -> void:
 				state = EMainSceneState.GAMEPLAY
 		else:
 			if peerId == 1:
-				print("Setting main scene state to GAMEPLAY.")
-				state = EMainSceneState.GAMEPLAY
+				print("Setting main scene state to CLIENT.")
+				state = EMainSceneState.CLIENT
 	)
 	NetworkManager.player_disconnected.connect(func(peerId: int):
 		Debug.print_info("Player left: %d" % peerId)
@@ -215,8 +215,8 @@ func spawn_mech(mechScene0: PackedScene, controllerType0: int, mechScene1: Packe
 	mech1.transform = active_stage.spawn_point_1.global_transform
 	mech1.controller_type = controllerType1
 	
-	_folder_entities.add_child(mech0, true)
-	_folder_entities.add_child(mech1, true)
+	_folder_entities.add_child(mech0)
+	_folder_entities.add_child(mech1)
 	
 	# Call this function explicitly for the server.
 	# The spawned signal on the MultiplayerSpawner only calls it on the client.
