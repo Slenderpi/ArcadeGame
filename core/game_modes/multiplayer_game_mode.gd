@@ -17,5 +17,5 @@ func start() -> void:
 	
 	_main_scene.spawn_mech(
 		_temp_mech_to_load, 1,
-		_temp_mech_to_load, 0 if true else _main_scene.multiplayer.get_peers()[0], 0
+		_temp_mech_to_load, _main_scene.multiplayer.get_peers()[0], 0
 	)

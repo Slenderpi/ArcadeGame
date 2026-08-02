@@ -39,13 +39,18 @@ var _is_trigger_both : bool
 var _is_button_left : bool
 var _is_button_right : bool
 
-var _has_set_authority := false
+#var _has_set_authority := false
 
 
-func _enter_tree() -> void:
-	if not _has_set_authority:
-		_has_set_authority = true
-		set_multiplayer_authority(peer_id)
+# E 0:00:11:445   on_replication_start: The MultiplayerSynchronizer at path
+#	"/root/MainScene/World/Entities/CharacterBody3D2/MultiplayerSynchronizer"
+#	is unable to process the pending spawn since it has no network ID.
+#	This might happen when changing the multiplayer authority during the "_ready" callback.
+#	Make sure to only change the authority of multiplayer synchronizers during the "_enter_tree" callback of their multiplayer spawner.
+# <C++ Error>   Condition "pending_sync_net_ids.is_empty()" is true. Returning: ERR_INVALID_DATA
+# <C++ Source>  modules/multiplayer/scene_replication_interface.cpp:242 @ on_replication_start()
+#func _enter_tree() -> void:
+	#set_multiplayer_authority(peer_id)
 
 
 func _ready() -> void:

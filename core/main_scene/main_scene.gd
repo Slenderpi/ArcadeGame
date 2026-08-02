@@ -12,6 +12,8 @@ enum EMainSceneState {
 	ATTRACTION_MODE,
 	LOGIN, # NOTE: may rename to just "MENU"
 	GAMEPLAY,
+	## For the MainScene that runs as the CLIENT.
+	CLIENT,
 	RESULTS
 }
 
@@ -58,6 +60,7 @@ var _dev_canvas : DevCanvas
 
 
 ## The current state of the program.
+@export
 var state : EMainSceneState:
 	get:
 		return _state
@@ -72,6 +75,10 @@ var state : EMainSceneState:
 				_on_state_login()
 			EMainSceneState.GAMEPLAY:
 				_on_state_gameplay()
+			EMainSceneState.CLIENT:
+				_on_state_client()
+			EMainSceneState.RESULTS:
+				pass
 var _state : EMainSceneState = EMainSceneState.BOOTING
 ## The current [GameMode] in use.
 var game_mode : GameMode = null
@@ -95,14 +102,19 @@ func _ready() -> void:
 	#
 	NetworkManager.found_peer.connect(func():
 		Debug.print_info("Found peer")
+		if not multiplayer.is_server():
+			state = EMainSceneState.CLIENT
 	)
 	NetworkManager.player_connected.connect(func(peerId: int):
 		Debug.print_info("Player joined: %d" % peerId)
-		if not multiplayer.is_server():
-			return
-		if peerId != 1:
-			print("Setting main scene state to GAMEPLAY.")
-			state = EMainSceneState.GAMEPLAY
+		if multiplayer.is_server():
+			if peerId != 1:
+				print("Setting main scene state to GAMEPLAY.")
+				state = EMainSceneState.GAMEPLAY
+		else:
+			if peerId == 1:
+				print("Setting main scene state to GAMEPLAY.")
+				state = EMainSceneState.GAMEPLAY
 	)
 	NetworkManager.player_disconnected.connect(func(peerId: int):
 		Debug.print_info("Player left: %d" % peerId)
@@ -157,6 +169,10 @@ func _on_state_gameplay() -> void:
 	if not multiplayer.is_server():
 		return
 	game_mode.start()
+
+
+func _on_state_client() -> void:
+	Debug.print_info("MainScene state: CLIENT.")
 
 
 ## Spawns the level.
@@ -219,6 +235,7 @@ func _on_multiplayer_entity_spawned(node: Node):
 			active_mech_1 = node
 		if node.peer_id == multiplayer.get_unique_id():
 			print("This is my entity. Calling general func.")
+			set_multiplayer_authority(node.peer_id)
 			_on_mech_character_spawned_general(node)
 
 
