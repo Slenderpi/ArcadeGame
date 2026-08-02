@@ -26,8 +26,12 @@ signal player_connected(peerId: int)
 signal player_disconnected(peerId: int)
 
 
-signal server_started # TODO
 signal versus_peer_found(otherIp: String) # TODO
+## Emitted when both devices have connected to each other via ENet.
+signal server_started # TODO
+## Emitted if connection to the peer has been lost.
+signal disconnected
+
 signal _call_result(result: String)
 
 
@@ -82,10 +86,24 @@ var _curr_call_attempts := 0 # TODO: reset value
 
 
 func _ready() -> void:
-	multiplayer.peer_connected.connect(_on_peer_connected)
-	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
-	multiplayer.connected_to_server.connect(_on_connected_to_server)
-	multiplayer.server_disconnected.connect(_on_server_disconnected)
+	multiplayer.peer_connected.connect(func(peerId: int):
+		print_rich("[color=orange]peer_connected fired with peerId %d." % peerId)
+		if peerId != peer.get_unique_id():
+			server_started.emit()
+	)
+	multiplayer.peer_disconnected.connect(func(peerId: int):
+		print_rich("[color=orange]peer_disconnected fired with peerId %d." % peerId)
+		disconnected.emit()
+	)
+	#multiplayer.connected_to_server.connect(_on_connected_to_server)
+	multiplayer.server_disconnected.connect(func():
+		print_rich("[color=orange]server_disconnected fired.")
+		disconnected.emit()
+	)
+	#multiplayer.peer_connected.connect(_on_peer_connected)
+	#multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+	#multiplayer.connected_to_server.connect(_on_connected_to_server)
+	#multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
 	_print_local_interfaces()
 	_set_local_ips()
@@ -297,28 +315,28 @@ func _create_client() -> void:
 	# TODO: server_started needs to be emitted on probably the peer_connected signal
 
 
-func _on_peer_connected(id: int) -> void:
-	print("Peer connected. Id: %d" % id)
-	player_connected.emit(id)
-
-
-func _on_peer_disconnected(id: int) -> void:
-	print("Peer disconnected. Id: %d" % id)
-	if state == ENetworkManagerState.HOST and multiplayer.get_peers().size() == 0:
-		Debug.print_info("Returning to CALL state.")
-		close_server()
-	player_disconnected.emit(id)
-
-
-func _on_connected_to_server() -> void:
-	print("Connected to server.")
-	player_connected.emit(peer.get_unique_id())
-
-
-func _on_server_disconnected() -> void:
-	# TODO: MainScene should probably trigger returning to CALL state, and this code should instead go to IDLE
-	print("Server disconnected. Returning to CALL state.")
-	state = ENetworkManagerState.CALLING
+#func _on_peer_connected(id: int) -> void:
+	#print("Peer connected. Id: %d" % id)
+	#player_connected.emit(id)
+#
+#
+#func _on_peer_disconnected(id: int) -> void:
+	#print("Peer disconnected. Id: %d" % id)
+	#if state == ENetworkManagerState.HOST and multiplayer.get_peers().size() == 0:
+		#Debug.print_info("Returning to CALL state.")
+		#close_server()
+	#player_disconnected.emit(id)`
+#
+#
+#func _on_connected_to_server() -> void:
+	#print("Connected to server.")
+	#player_connected.emit(peer.get_unique_id())
+#
+#
+#func _on_server_disconnected() -> void:
+	## TODO: MainScene should probably trigger returning to CALL state, and this code should instead go to IDLE
+	#print("Server disconnected. Returning to CALL state.")
+	#state = ENetworkManagerState.CALLING
 
 
 #func _on_found_peer(senderIp: String) -> void:

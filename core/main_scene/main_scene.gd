@@ -114,6 +114,14 @@ func _ready() -> void:
 		print("Versus peer found (%s). Current game should get paused and UI'd." % peerIp)
 		state = EMainSceneState.IDLE
 	)
+	NetworkManager.server_started.connect(func():
+		print_rich("[color=green]Server started! Gameplay can begin.")
+		# TODO
+	)
+	NetworkManager.disconnected.connect(func():
+		print_rich("[color=orange]Peers have disconnected. Multiplayer should end.")
+		# TODO
+	)
 	#NetworkManager.found_peer.connect(func():
 		#Debug.print_info("Found peer")
 		#if not multiplayer.is_server():
