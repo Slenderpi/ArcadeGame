@@ -55,6 +55,7 @@ var udp := PacketPeerUDP.new()
 var peer := ENetMultiplayerPeer.new()
 
 var my_local_ips : Array[String] = []
+var my_eth_ipv4 : String
 var other_ip : String
 
 
@@ -64,15 +65,16 @@ func _ready() -> void:
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
-	#_print_local_interfaces()
+	_print_local_interfaces()
 	_set_local_ips()
-	var error = udp.bind(PORT_NETWORKING)
+	var error = udp.bind(PORT_NETWORKING, my_eth_ipv4)
 	if error != OK:
 		Debug.print_error("Encountered an error when binding to UDP socket for discovery: %s" % error)
 		return
 	udp.set_broadcast_enabled(true)
 	
-	state = ENetworkManagerState.CALLING
+	#state = ENetworkManagerState.CALLING
+	state = ENetworkManagerState.IDLE
 
 
 func _process(_delta: float) -> void:
@@ -81,7 +83,7 @@ func _process(_delta: float) -> void:
 		var packetStr := packetArr.get_string_from_ascii()
 		
 		var senderIp := udp.get_packet_ip()
-		if my_local_ips.has(senderIp):
+		if senderIp == my_eth_ipv4:
 			print("Received my own message (ip: %s | message: %s)" % [senderIp, packetStr])
 			return
 		elif not packetStr.begins_with(UDPSTR_HEADER):
@@ -90,25 +92,43 @@ func _process(_delta: float) -> void:
 		
 		var msgArgs := packetStr.trim_prefix(UDPSTR_HEADER + ',').split(',')
 		
-		match state:
-			ENetworkManagerState.CALLING:
-				if msgArgs[0] == UDPSTR_CALL:
-					state = ENetworkManagerState.WAITING_SERVER
-					print_rich("[color=green]Received CALL from %s! I will be a client." % senderIp)
-					_on_found_peer(senderIp)
-					_broadcast_response()
-				elif msgArgs[0] == UDPSTR_RESPONSE:
-					print_rich("[color=green]Received RESPONSE from %s! I will be the host." % senderIp)
-					_on_found_peer(senderIp)
-					_start_server()
-				else:
-					print_rich("[color=green]Received unrecognized message from %s:[/color] %s" % [senderIp, str(msgArgs)])
-			ENetworkManagerState.WAITING_SERVER:
-				if msgArgs[0] == UDPSTR_SERVER_START:
-					print_rich("[color=green]Received SERVER_START from %s!" % senderIp)
-					_create_client_peer()
-			ENetworkManagerState.IDLE, ENetworkManagerState.HOST, ENetworkManagerState.CLIENT:
-				print_rich("Received message from %s: %s" % [senderIp, str(msgArgs)])
+		print_rich("[color=green]Received message from %s: %s" % [senderIp, str(msgArgs)])
+		#match state:
+			#ENetworkManagerState.CALLING:
+				#print_rich("[color=green]Received message from %s: %s" % [senderIp, str(msgArgs)])
+				#if msgArgs[0] == UDPSTR_CALL
+				#WebRTCMultiplayerPeer
+		
+		
+		#match state:
+			#ENetworkManagerState.CALLING:
+				#if msgArgs[0] == UDPSTR_CALL:
+					#state = ENetworkManagerState.WAITING_SERVER
+					#print_rich("[color=green]Received CALL from %s! I will be a client." % senderIp)
+					#_on_found_peer(senderIp)
+					#_broadcast_response()
+				#elif msgArgs[0] == UDPSTR_RESPONSE:
+					#print_rich("[color=green]Received RESPONSE from %s! I will be the host." % senderIp)
+					#_on_found_peer(senderIp)
+					#_start_server()
+				#else:
+					#print_rich("[color=green]Received unrecognized message from %s:[/color] %s" % [senderIp, str(msgArgs)])
+			#ENetworkManagerState.WAITING_SERVER:
+				#if msgArgs[0] == UDPSTR_SERVER_START:
+					#print_rich("[color=green]Received SERVER_START from %s!" % senderIp)
+					#_create_client_peer()
+			#ENetworkManagerState.IDLE, ENetworkManagerState.HOST, ENetworkManagerState.CLIENT:
+				#print_rich("Received message from %s: %s" % [senderIp, str(msgArgs)])
+
+
+func set_to_solo() -> void:
+	state = ENetworkManagerState.IDLE
+	#peer.disconnect_peer()
+
+
+func find_peer() -> void:
+	state = ENetworkManagerState.CALLING
+	_broadcast_call()
 
 
 func _broadcast_call() -> void:
@@ -201,8 +221,19 @@ func _set_local_ips() -> void:
 	my_local_ips.clear()
 	var interfaces := IP.get_local_interfaces()
 	for iface in interfaces:
-		for addr in iface["addresses"]:
+		for addr in iface["addresses"]: # TODO: Might remove
 			my_local_ips.append(addr)
+		if "eth" not in iface["friendly"].to_lower():
+			continue
+		for addr : String in iface["addresses"]:
+			if addr.split('.').size() == 4:
+				if not my_eth_ipv4.is_empty():
+					Debug.print_warning("Found another ethernet IPv4 address: %s" % addr)
+				my_eth_ipv4 = addr
+				print_rich("[color=green]Found my ethernet ipv4: ", addr)
+				#return
+		#for addr in iface["addresses"]:
+			#my_local_ips.append(addr)
 		#var friendly : String = iface["friendly"].to_lower()
 		#if friendly.begins_with("eth"):
 			#for addr in iface["addresses"]:
@@ -216,13 +247,20 @@ func _exit_tree() -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
-		if event.pressed and event.keycode == KEY_Y:
-			match state:
-				ENetworkManagerState.CALLING:
-					_broadcast_call()
-				ENetworkManagerState.WAITING_SERVER, ENetworkManagerState.IDLE, ENetworkManagerState.HOST, ENetworkManagerState.CLIENT:
+		if event.pressed and event.keycode == KEY_J:
+			print("J KEY PRESSED")
+			_broadcast_call()
+
+
+#func _input(event: InputEvent) -> void:
+	#if event is InputEventKey:
+		#if event.pressed and event.keycode == KEY_Y:
+			#match state:
+				#ENetworkManagerState.CALLING:
 					#_broadcast_call()
-					_broadcast_hello()
+				#ENetworkManagerState.WAITING_SERVER, ENetworkManagerState.IDLE, ENetworkManagerState.HOST, ENetworkManagerState.CLIENT:
+					##_broadcast_call()
+					#_broadcast_hello()
 
 
 func _print_local_interfaces() -> void:

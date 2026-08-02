@@ -128,14 +128,6 @@ func _ready() -> void:
 	)
 	
 	state = EMainSceneState.BOOTING
-	
-	#_spawn_mech_character_for_player(mech_to_load_0, 0)
-	#_spawn_mech_character_for_player(mech_to_load_1, 1)
-	
-	#_game_camera.first_person_target = spawned_mechs[0]
-	#_game_camera.camera_mode = GameCamera.ECameraMode.FIRST_PERSON
-	
-	#_dev_canvas.mech_character = spawned_mechs[0]
 
 
 func _on_state_booting() -> void:
@@ -184,18 +176,6 @@ func spawn_level(levelResource: Resource) -> void:
 	_folder_level.add_child(stage)
 
 
-#func _spawn_level_and_characters() -> void:
-	#if not multiplayer.is_server():
-		#return
-	#
-	#var stage := level_to_load.instantiate() as Node3D
-	#active_stage = stage as LevelData
-	#_folder_level.add_child(stage)
-	#
-	#_on_mech_character_spawned(_spawn_mech_character(1, active_stage.spawn_point_0.global_transform, 1))
-	#_spawn_mech_character(multiplayer.get_peers()[0], active_stage.spawn_point_1.global_transform, 1)
-
-
 ## Spawns MechCharacters for both Players. Player0 is ALWAYS the host's Player,
 ## so their peerId will always be 0.
 ## [br]
@@ -237,28 +217,6 @@ func _on_multiplayer_entity_spawned(node: Node):
 			print("This is my entity. Calling general func.")
 			set_multiplayer_authority(node.peer_id)
 			_on_mech_character_spawned_general(node)
-
-
-#func _spawn_mech_character(peerId: int, transform: Transform3D, controller: int) -> Node:
-	#return entities_mspawner.spawn({
-		#"peer_id" = peerId,
-		#"transform" = transform,
-		#"controller" = controller
-	#})
-
-
-## Since this function is for Player0, it should only be called by the server.
-## This check is not explicitly validated.
-#func _on_mech_character_0_spawned() -> void:
-	#print("Mech 0 spawned. Has authority: ", active_mech_0.is_multiplayer_authority())
-	#_on_mech_character_spawned_general(active_mech_0)
-#
-#
-## Since this function is for Player1, only the client should actually run this.
-#@rpc("any_peer")
-#func _on_mech_character_1_spawned() -> void:
-	#print("Mech 1 spawned. Has authority: ", active_mech_1.is_multiplayer_authority())
-	#_on_mech_character_spawned_general(active_mech_1)
 
 
 func _on_mech_character_spawned_general(mechChar: MechCharacter) -> void:
