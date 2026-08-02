@@ -149,10 +149,10 @@ func _process(_delta: float) -> void:
 			_call_result.emit("")
 		elif msgArgs[0] == UDPSTR_SERVER_CREATED:
 			print_rich("[color=green]Received SERVER_CREATED from %s" % senderIp)
-			# TODO
+			_create_server()
 		elif msgArgs[0] == UDPSTR_SERVER_REQUEST:
 			print_rich("[color=green]Received SERVER_REQUEST from %s" % senderIp)
-			# TODO
+			_create_client()
 		else:
 			print_rich("Received unkown message from %s: %s" % [senderIp, str(msgArgs)])
 		#match state:
@@ -282,6 +282,7 @@ func _create_server() -> void:
 
 #func _create_client_peer() -> void:
 func _create_client() -> void:
+	print("Creating ENet client...")
 	var error := peer.create_client(other_ip, PORT_GAME)
 	if error != OK:
 		Debug.print_error("Failed to create client. Error: %s" % error)
@@ -292,6 +293,7 @@ func _create_client() -> void:
 	can_versus = false
 	state = ENetworkManagerState.IDLE # TODO: what state should be next?
 	#player_connected.emit(peer.get_unique_id())
+	# TODO: server_started needs to be emitted on probably the peer_connected signal
 
 
 func _on_peer_connected(id: int) -> void:
