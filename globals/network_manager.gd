@@ -137,7 +137,7 @@ func _process(_delta: float) -> void:
 				_broadcast_response()
 			else:
 				print_rich("[color=orange]can_versus is false. Replying with NOPLAY.")
-				_broadcast_noplay()
+				_broadcast_noplay(senderIp)
 		elif msgArgs[0] == UDPSTR_RESPONSE:
 			print_rich("[color=green]Received RESPONSE from %s with preferred IP %s" % [senderIp, msgArgs[1]])
 			other_ip = msgArgs[1]
@@ -208,8 +208,8 @@ func _broadcast_response() -> void:
 	udp.put_packet(make_packet(UDPSTR_RESPONSE + ',' + my_ip).to_utf8_buffer())
 
 
-func _broadcast_noplay() -> void:
-	udp.set_dest_address(other_ip, PORT_NETWORKING)
+func _broadcast_noplay(senderIp: String) -> void:
+	udp.set_dest_address(senderIp, PORT_NETWORKING)
 	udp.put_packet(make_packet(UDPSTR_NOPLAY).to_utf8_buffer())
 
 
