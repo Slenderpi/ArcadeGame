@@ -147,6 +147,12 @@ func _process(_delta: float) -> void:
 			print_rich("[color=green]Received NOPLAY from %s" % senderIp)
 			state = ENetworkManagerState.IDLE
 			_call_result.emit("")
+		elif msgArgs[0] == UDPSTR_SERVER_CREATED:
+			print_rich("[color=green]Received SERVER_CREATED from %s" % senderIp)
+			# TODO
+		elif msgArgs[0] == UDPSTR_SERVER_REQUEST:
+			print_rich("[color=green]Received SERVER_REQUEST from %s" % senderIp)
+			# TODO
 		else:
 			print_rich("Received unkown message from %s: %s" % [senderIp, str(msgArgs)])
 		#match state:
@@ -193,8 +199,10 @@ func start_server(serverIp: String) -> void:
 	Debug.print_info("NetworkManager.start_server() called.")
 	if serverIp == my_ip:
 		print_rich("I will be the [color=pink]host!")
+		_create_server()
 	else:
 		print_rich("I will be the [color=pink]client!")
+		_broadcast_server_request()
 
 
 func _broadcast_call() -> void:
@@ -267,6 +275,7 @@ func _create_server() -> void:
 		return
 	multiplayer.multiplayer_peer = peer
 	print_rich("[color=green]Server started successfully.")
+	can_versus = false
 	state = ENetworkManagerState.IDLE # TODO: what state should be next?
 	_broadcast_server_created()
 
@@ -280,6 +289,7 @@ func _create_client() -> void:
 	multiplayer.multiplayer_peer = peer
 	print_rich("[color=green]Client created and joined successfully.")
 	#state = ENetworkManagerState.CLIENT
+	can_versus = false
 	state = ENetworkManagerState.IDLE # TODO: what state should be next?
 	#player_connected.emit(peer.get_unique_id())
 

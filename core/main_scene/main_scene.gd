@@ -155,7 +155,6 @@ func _on_state_matchmaking() -> void:
 		Debug.print_info("NetworkManager did not find an available peer. Entering Singleplayer mode!")
 	else:
 		Debug.print_info("NetworkManager found a peer! Peer ip: %s" % peerIp)
-		return
 		var serverIp : String = NetworkManager.my_ip # TODO: compare the IPs and choose
 		print("The IP that will be the server is: %s" % serverIp)
 		NetworkManager.start_server(serverIp)
