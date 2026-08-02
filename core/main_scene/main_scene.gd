@@ -13,6 +13,7 @@ enum EMainSceneState {
 	ATTRACTION_MODE,
 	MATCHMAKING,
 	LOGIN, # NOTE: may rename to just "MENU"
+	SINGLEPLAYER,
 	GAMEPLAY,
 	## For the MainScene that runs as the CLIENT.
 	CLIENT,
@@ -77,6 +78,8 @@ var state : EMainSceneState:
 				_on_state_attraction_mode()
 			EMainSceneState.MATCHMAKING:
 				_on_state_matchmaking()
+			EMainSceneState.SINGLEPLAYER:
+				_on_state_singleplayer()
 			EMainSceneState.LOGIN:
 				_on_state_login()
 			EMainSceneState.GAMEPLAY:
@@ -108,7 +111,7 @@ func _ready() -> void:
 	#
 	
 	NetworkManager.versus_peer_found.connect(func(peerIp: String):
-		print("Versus peer found. Current game should get paused and UI'd")
+		print("Versus peer found (%s). Current game should get paused and UI'd." % peerIp)
 		state = EMainSceneState.IDLE
 	)
 	#NetworkManager.found_peer.connect(func():
@@ -166,12 +169,16 @@ func _on_state_matchmaking() -> void:
 	NetworkManager.can_versus = true
 	var peerIp : String = await NetworkManager.find_peer()
 	if peerIp.is_empty():
-		Debug.print_info("NetworkManager did not find an available peer. Entering Singleplayer mode!")
+		Debug.print_info("Matchmaking result: NetworkManager did not find an available peer. Entering Singleplayer mode!")
 	else:
-		Debug.print_info("NetworkManager found a peer! Peer ip: %s" % peerIp)
-		var serverIp : String = peerIp # TODO: compare the IPs and choose
+		Debug.print_info("Matchmaking result: NetworkManager found a peer! Peer ip: %s" % peerIp)
+		var serverIp : String = _choose_host_ip(peerIp)
 		print("The IP that will be the server is: %s" % serverIp)
 		NetworkManager.start_server(serverIp)
+
+
+func _on_state_singleplayer() -> void:
+	Debug.print_info("MainScene state: SINGLEPLAYER.")
 
 
 func _on_state_login() -> void:
@@ -196,6 +203,35 @@ func _on_state_gameplay() -> void:
 
 func _on_state_client() -> void:
 	Debug.print_info("MainScene state: CLIENT.")
+
+
+# Chooses the IP to become the host. Priority:
+# Not IPv6
+# Smaller IPv4 numeric value (i.e. 1.1.1.1 becomes 1111)
+# String-based comparison of IPv6: my_ip if my_ip < peerIp else peerIp
+func _choose_host_ip(peerIp: String) -> String:
+	var myIp4Parts := NetworkManager.my_ip.split('.')
+	var peerIp4Parts := peerIp.split('.')
+	if myIp4Parts.size() != 4:
+		if peerIp4Parts.size() != 4:
+			# IPv6 vs IPv6
+			return NetworkManager.my_ip if NetworkManager.my_ip < peerIp else peerIp
+		else:
+			# Only peer is IPv4
+			return peerIp
+	elif peerIp4Parts.size() != 4:
+		# Only my IP is IPv4
+		return NetworkManager.my_ip
+	else:
+		# IPv4 vs IPv4
+		var myNumeric := 0
+		var peerNumeric := 0
+		for i in range(0, 4):
+			for c in myIp4Parts[i]:
+				myNumeric = myNumeric * 10 + c.to_int()
+			for c in peerIp4Parts[i]:
+				peerNumeric = peerNumeric * 10 + c.to_int()
+		return NetworkManager.my_ip if myNumeric < peerNumeric else peerIp
 
 
 ## Spawns the level.

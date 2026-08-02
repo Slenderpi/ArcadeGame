@@ -38,7 +38,7 @@ const PORT_GAME := 21983
 
 ## This string is appended to all packets sent over UDP.
 ## NetworkManager will expect packets it receives to have this header.
-const UDPSTR_HEADER := &"VirtualOn"
+const UDPSTR_HEADER := &"VirtualOff"
 ## Sent when in the [enum ENetworkManagerState.CALLING] state.
 const UDPSTR_CALL := &"CALL"
 ## Sent when in the [enum ENetworkManagerState.CALLING] state AND this
@@ -82,10 +82,10 @@ var _curr_call_attempts := 0 # TODO: reset value
 
 
 func _ready() -> void:
-	#multiplayer.peer_connected.connect(_on_peer_connected)
-	#multiplayer.peer_disconnected.connect(_on_peer_disconnected)
-	#multiplayer.connected_to_server.connect(_on_connected_to_server)
-	#multiplayer.server_disconnected.connect(_on_server_disconnected)
+	multiplayer.peer_connected.connect(_on_peer_connected)
+	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+	multiplayer.connected_to_server.connect(_on_connected_to_server)
+	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
 	_print_local_interfaces()
 	_set_local_ips()
