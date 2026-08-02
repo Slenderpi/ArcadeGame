@@ -149,10 +149,10 @@ func _process(_delta: float) -> void:
 			_call_result.emit("")
 		elif msgArgs[0] == UDPSTR_SERVER_CREATED:
 			print_rich("[color=green]Received SERVER_CREATED from %s" % senderIp)
-			_create_server()
+			_create_client()
 		elif msgArgs[0] == UDPSTR_SERVER_REQUEST:
 			print_rich("[color=green]Received SERVER_REQUEST from %s" % senderIp)
-			_create_client()
+			_create_server()
 		else:
 			print_rich("Received unkown message from %s: %s" % [senderIp, str(msgArgs)])
 		#match state:
