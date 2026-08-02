@@ -82,10 +82,10 @@ var _curr_call_attempts := 0 # TODO: reset value
 
 
 func _ready() -> void:
-	multiplayer.peer_connected.connect(_on_peer_connected)
-	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
-	multiplayer.connected_to_server.connect(_on_connected_to_server)
-	multiplayer.server_disconnected.connect(_on_server_disconnected)
+	#multiplayer.peer_connected.connect(_on_peer_connected)
+	#multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+	#multiplayer.connected_to_server.connect(_on_connected_to_server)
+	#multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
 	_print_local_interfaces()
 	_set_local_ips()
@@ -202,6 +202,7 @@ func start_server(serverIp: String) -> void:
 		_create_server()
 	else:
 		print_rich("I will be the [color=pink]client!")
+		print("Broadcasting SERVER_REQUEST.")
 		_broadcast_server_request()
 
 
