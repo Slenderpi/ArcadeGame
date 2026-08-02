@@ -8,6 +8,7 @@ class_name MainScene
 
 ## Determines what state the game as a whole is in.
 enum EMainSceneState {
+	IDLE,
 	BOOTING,
 	ATTRACTION_MODE,
 	MATCHMAKING,
@@ -68,6 +69,8 @@ var state : EMainSceneState:
 	set(value):
 		_state = value
 		match _state:
+			EMainSceneState.IDLE:
+				Debug.print_info("MainScene state: IDLE.")
 			EMainSceneState.BOOTING:
 				_on_state_booting()
 			EMainSceneState.ATTRACTION_MODE:
@@ -103,27 +106,29 @@ func _ready() -> void:
 		#mech.controller_type = data["controller"]
 		#return mech
 	#
-	NetworkManager.found_peer.connect(func():
-		Debug.print_info("Found peer")
-		if not multiplayer.is_server():
-			state = EMainSceneState.CLIENT
+	
+	NetworkManager.versus_peer_found.connect(func(peerIp: String):
+		print("Versus peer found. Current game should get paused and UI'd")
+		state = EMainSceneState.IDLE
 	)
+	#NetworkManager.found_peer.connect(func():
+		#Debug.print_info("Found peer")
+		#if not multiplayer.is_server():
+			#state = EMainSceneState.CLIENT
+	#)
 	NetworkManager.player_connected.connect(func(peerId: int):
 		Debug.print_info("Player joined: %d" % peerId)
-		if multiplayer.is_server():
-			if peerId != 1:
-				print("Setting main scene state to GAMEPLAY.")
-				state = EMainSceneState.GAMEPLAY
-		else:
-			if peerId == 1:
-				print("Setting main scene state to CLIENT.")
-				state = EMainSceneState.CLIENT
+		#if multiplayer.is_server():
+			#if peerId != 1:
+				#print("Setting main scene state to GAMEPLAY.")
+				#state = EMainSceneState.GAMEPLAY
+		#else:
+			#if peerId == 1:
+				#print("Setting main scene state to CLIENT.")
+				#state = EMainSceneState.CLIENT
 	)
 	NetworkManager.player_disconnected.connect(func(peerId: int):
-		Debug.print_info("Player left: %d" % peerId)
-		if not multiplayer.is_server():
-			return
-		Debug.print_info("Clearing folders.")
+		Debug.print_info("Player left: %d. Clearing folders." % peerId)
 		for c in _folder_level.get_children():
 			c.queue_free()
 		for c in _folder_entities.get_children():
@@ -131,6 +136,15 @@ func _ready() -> void:
 	)
 	
 	state = EMainSceneState.BOOTING
+
+
+func _process(_delta: float) -> void:
+	if Input.is_action_just_pressed(&"insert_coin"):
+		# TODO: TEMP, should be done in a coin manager
+		print("COIN KEY PRESSED. COIN INSERT SIMULATED.")
+		if state == EMainSceneState.ATTRACTION_MODE:
+			print("Matchmaking triggered.")
+			state = EMainSceneState.MATCHMAKING
 
 
 func _on_state_booting() -> void:
@@ -250,8 +264,3 @@ func _input(event: InputEvent) -> void:
 					Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 				elif Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 					Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-			if event.pressed and event.keycode == KEY_J: # TODO: TEMP
-				print("J KEY PRESSED. COIN INSERT SIMULATED.")
-				if state == EMainSceneState.ATTRACTION_MODE:
-					print("Matchmaking triggered.")
-					state = EMainSceneState.MATCHMAKING
