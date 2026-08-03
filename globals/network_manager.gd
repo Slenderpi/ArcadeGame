@@ -76,6 +76,7 @@ var peer := ENetMultiplayerPeer.new()
 var my_local_ips : Array[String] = []
 var my_ip : String
 var other_ip : String
+var other_peer_id : int
 
 ## How long to wait between unanswered CALLs.
 var call_retry_time : float = 1
@@ -112,8 +113,11 @@ func _ready() -> void:
 		Debug.print_error("Encountered an error when binding to UDP socket for discovery: %s" % error)
 		return
 	udp.set_broadcast_enabled(true)
-	
+	print("UDP setup on port %d." % udp.get_local_port())
 	#state = ENetworkManagerState.CALLING
+	print_rich("[color=green]NetworkManager setup finished. Changing to IDLE state.\n\
+-----------------------------------------------------------------------------\
+\n")
 	state = ENetworkManagerState.IDLE
 
 
@@ -213,6 +217,16 @@ func find_peer() -> String:
 	#_broadcast_call()
 
 
+func start_singleplayer_server() -> void:
+	Debug.print_info("NetworkManager.start_singleplayer_server() called.")
+	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	other_peer_id = 0
+	print_rich("[color=green]Server started successfully.")
+	can_versus = false
+	state = ENetworkManagerState.IDLE # TODO: what state should be next?
+	server_started.emit()
+
+
 func start_server(serverIp: String) -> void:
 	Debug.print_info("NetworkManager.start_server() called.")
 	if serverIp == my_ip:
@@ -307,6 +321,7 @@ func _create_client() -> void:
 		Debug.print_error("Failed to create client. Error: %s" % error)
 		return
 	multiplayer.multiplayer_peer = peer
+	other_peer_id = peer.get_unique_id()
 	print_rich("[color=green]Client created and joined successfully.")
 	#state = ENetworkManagerState.CLIENT
 	can_versus = false

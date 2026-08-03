@@ -116,7 +116,7 @@ func _ready() -> void:
 	)
 	NetworkManager.server_started.connect(func():
 		print_rich("[color=green]Server started! Gameplay can begin.")
-		# TODO
+		state = EMainSceneState.GAMEPLAY
 	)
 	NetworkManager.disconnected.connect(func():
 		print_rich("[color=orange]Peers have disconnected. Multiplayer should end.")
@@ -178,6 +178,7 @@ func _on_state_matchmaking() -> void:
 	var peerIp : String = await NetworkManager.find_peer()
 	if peerIp.is_empty():
 		Debug.print_info("Matchmaking result: NetworkManager did not find an available peer. Entering Singleplayer mode!")
+		NetworkManager.start_singleplayer_server()
 	else:
 		Debug.print_info("Matchmaking result: NetworkManager found a peer! Peer ip: %s" % peerIp)
 		var serverIp : String = _choose_host_ip(peerIp)
@@ -203,6 +204,7 @@ func _on_state_login() -> void:
 
 func _on_state_gameplay() -> void:
 	Debug.print_info("MainScene state: GAMEPLAY.")
+	game_mode = MultiplayerGameMode.new(self)
 	assert(game_mode != null, "MainScene entered GAMEPLAY but game_mode is null. Should be set in LOGIN state.")
 	if not multiplayer.is_server():
 		return
@@ -255,23 +257,25 @@ func spawn_level(levelResource: Resource) -> void:
 ## so their peerId will always be 0.
 ## [br]
 ## [b]This function is server locked.[/b]
-func spawn_mech(mechScene0: PackedScene, controllerType0: int, mechScene1: PackedScene, peerId1: int, controllerType1: int) -> void:
+func spawn_mech(mechScene0: PackedScene, controllerType0: int, mechScene1: PackedScene, controllerType1: int) -> void:
 	if not multiplayer.is_server():
 		return
 	print("Spawning mechs")
 	
 	var mech0 = mechScene0.instantiate() as MechCharacter
+	mech0.name = "1"
 	mech0.peer_id = 1
 	mech0.transform = active_stage.spawn_point_0.global_transform
 	mech0.controller_type = controllerType0
 	
 	var mech1 = mechScene1.instantiate() as MechCharacter
-	mech1.peer_id = peerId1
+	mech1.name = str(NetworkManager.other_peer_id)
+	mech1.peer_id = NetworkManager.other_peer_id
 	mech1.transform = active_stage.spawn_point_1.global_transform
 	mech1.controller_type = controllerType1
 	
-	_folder_entities.add_child(mech0)
-	_folder_entities.add_child(mech1)
+	_folder_entities.add_child(mech0, true)
+	_folder_entities.add_child(mech1, true)
 	
 	# Call this function explicitly for the server.
 	# The spawned signal on the MultiplayerSpawner only calls it on the client.

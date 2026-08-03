@@ -61,11 +61,12 @@ func _ready() -> void:
 		return
 	var cntrlr : CharacterControllerComponent = null
 	match controller_type:
+		0:
+			cntrlr = DummyControllerComponent.new()
 		1:
 			cntrlr = PlayerControllerComponent.new()
-		0, 2:
-			# TODO: DummyControllerComponent, AIControllerComponent
-			pass
+		2:
+			cntrlr = AIControllerComponent.new()
 	if cntrlr: # This if check is temp until the other controllers are created
 		cntrlr.mech_character = self
 		add_child(cntrlr)
