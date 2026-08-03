@@ -14,6 +14,7 @@ enum EMainSceneState {
 	MATCHMAKING,
 	LOGIN, # NOTE: may rename to just "MENU"
 	SINGLEPLAYER,
+	MULTIPLAYER,
 	GAMEPLAY,
 	## For the MainScene that runs as the CLIENT.
 	CLIENT,
@@ -21,16 +22,9 @@ enum EMainSceneState {
 }
 
 
-@export
-var level_to_load : PackedScene
-
-@export
-var mech_to_load_0 : PackedScene
-@export
-var mech_to_load_1 : PackedScene
 #@export
 #var player_controller : PackedScene
-var player_client_scene := preload("res://entities/player_client/player_client.tscn")
+#var player_client_scene := preload("res://entities/player_client/player_client.tscn")
 
 #@export_category("Developer Config")
 ### If true, skips visuals related to booting (the booting process itself still completes).
@@ -80,6 +74,8 @@ var state : EMainSceneState:
 				_on_state_matchmaking()
 			EMainSceneState.SINGLEPLAYER:
 				_on_state_singleplayer()
+			EMainSceneState.MULTIPLAYER:
+				_on_state_multiplayer()
 			EMainSceneState.LOGIN:
 				_on_state_login()
 			EMainSceneState.GAMEPLAY:
@@ -114,9 +110,15 @@ func _ready() -> void:
 		print("Versus peer found (%s). Current game should get paused and UI'd." % peerIp)
 		state = EMainSceneState.IDLE
 	)
-	NetworkManager.server_started.connect(func():
+	NetworkManager.server_started.connect(func(isMultiplayer: bool):
 		print_rich("[color=green]Server started! Gameplay can begin.")
-		state = EMainSceneState.GAMEPLAY
+		reset()
+		if isMultiplayer:
+			NetworkManager.can_versus = false
+			state = EMainSceneState.MULTIPLAYER
+		else:
+			NetworkManager.can_versus = true
+			state = EMainSceneState.SINGLEPLAYER
 	)
 	NetworkManager.disconnected.connect(func():
 		print_rich("[color=orange]Peers have disconnected. Multiplayer should end.")
@@ -139,11 +141,8 @@ func _ready() -> void:
 				#state = EMainSceneState.CLIENT
 	)
 	NetworkManager.player_disconnected.connect(func(peerId: int):
-		Debug.print_info("Player left: %d. Clearing folders." % peerId)
-		for c in _folder_level.get_children():
-			c.queue_free()
-		for c in _folder_entities.get_children():
-			c.queue_free()
+		Debug.print_info("Player left: %d. Calling reset()." % peerId)
+		reset()
 	)
 	
 	state = EMainSceneState.BOOTING
@@ -188,6 +187,16 @@ func _on_state_matchmaking() -> void:
 
 func _on_state_singleplayer() -> void:
 	Debug.print_info("MainScene state: SINGLEPLAYER.")
+	game_mode = SingleplayerGameMode.new(self)
+	game_mode.start()
+
+
+func _on_state_multiplayer() -> void:
+	Debug.print_info("MainScene state: MULTIPLAYER.")
+	if not multiplayer.is_server():
+		return
+	game_mode = MultiplayerGameMode.new(self)
+	game_mode.start()
 
 
 func _on_state_login() -> void:
@@ -302,6 +311,18 @@ func _on_mech_character_spawned_general(mechChar: MechCharacter) -> void:
 	_dev_canvas.mech_character = mechChar
 	_game_camera.first_person_target = mechChar
 	_game_camera.camera_mode = GameCamera.ECameraMode.FIRST_PERSON
+
+
+func reset() -> void:
+	Debug.print_info("reset() called. Resetting World folders and MainScene's internal values.")
+	for c in _folder_entities.get_children():
+		c.queue_free()
+	for c in _folder_level.get_children():
+		c.queue_free()
+	active_stage = null
+	active_mech_0 = null
+	active_mech_1 = null
+	game_mode = null
 
 
 func _input(event: InputEvent) -> void:

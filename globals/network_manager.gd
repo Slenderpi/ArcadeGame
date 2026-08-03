@@ -26,9 +26,11 @@ signal player_connected(peerId: int)
 signal player_disconnected(peerId: int)
 
 
+## Emitted when this devices receives a CALL and
+## [member NetworkManager.can_versus] is true.
 signal versus_peer_found(otherIp: String) # TODO
 ## Emitted when both devices have connected to each other via ENet.
-signal server_started # TODO
+signal server_started(multiplayer: bool) # TODO
 ## Emitted if connection to the peer has been lost.
 signal disconnected
 
@@ -90,7 +92,7 @@ func _ready() -> void:
 	multiplayer.peer_connected.connect(func(peerId: int):
 		print_rich("[color=orange]peer_connected fired with peerId %d." % peerId)
 		if peerId != peer.get_unique_id():
-			server_started.emit()
+			server_started.emit(true)
 	)
 	multiplayer.peer_disconnected.connect(func(peerId: int):
 		print_rich("[color=orange]peer_disconnected fired with peerId %d." % peerId)
@@ -205,8 +207,8 @@ func _process(_delta: float) -> void:
 				#print_rich("Received message from %s: %s" % [senderIp, str(msgArgs)])
 
 
-func set_to_solo() -> void:
-	state = ENetworkManagerState.IDLE
+#func set_to_solo() -> void:
+	#state = ENetworkManagerState.IDLE
 	#peer.disconnect_peer()
 
 
@@ -222,9 +224,9 @@ func start_singleplayer_server() -> void:
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	other_peer_id = 0
 	print_rich("[color=green]Server started successfully.")
-	can_versus = false
+	#can_versus = false
 	state = ENetworkManagerState.IDLE # TODO: what state should be next?
-	server_started.emit()
+	server_started.emit(false)
 
 
 func start_server(serverIp: String) -> void:
@@ -308,7 +310,7 @@ func _create_server() -> void:
 		return
 	multiplayer.multiplayer_peer = peer
 	print_rich("[color=green]Server started successfully.")
-	can_versus = false
+	#can_versus = false
 	state = ENetworkManagerState.IDLE # TODO: what state should be next?
 	_broadcast_server_created()
 
@@ -324,7 +326,7 @@ func _create_client() -> void:
 	other_peer_id = peer.get_unique_id()
 	print_rich("[color=green]Client created and joined successfully.")
 	#state = ENetworkManagerState.CLIENT
-	can_versus = false
+	#can_versus = false
 	state = ENetworkManagerState.IDLE # TODO: what state should be next?
 	#player_connected.emit(peer.get_unique_id())
 	# TODO: server_started needs to be emitted on probably the peer_connected signal
