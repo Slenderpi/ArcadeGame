@@ -1,5 +1,8 @@
 extends Node
 
+## If true, NetworkManager will look for an ethernet IP to use.
+## Otherwise, it will look for a wifi IP.
+const USE_ETH_IP : bool = false
 
 ## The states of NetworkManager.
 enum ENetworkManagerState {
@@ -372,7 +375,7 @@ func _set_local_ips() -> void:
 		var addresses : Array = iface["addresses"]
 		for addr in addresses: # TODO: Might remove
 			my_local_ips.append(addr)
-		if not my_ip.is_empty() or "eth" not in iface["friendly"].to_lower():
+		if not my_ip.is_empty() or not _friendly_interface_req(iface["friendly"].to_lower()):
 			continue
 		if addresses.size() == 0:
 			Debug.print_warning(
@@ -404,6 +407,16 @@ func _set_local_ips() -> void:
 	if my_ip.is_empty():
 		Debug.print_error("No ethernet IP was found!")
 	Debug.print_info("Local ips on this device: \n%s" % str(my_local_ips))
+
+
+func _friendly_interface_req(friendlyLowered: String) -> bool:
+	if USE_ETH_IP:
+		return "eth" in friendlyLowered
+	else:
+		for c in friendlyLowered:
+			if c.is_valid_int():
+				return false
+		return "wi-fi" in friendlyLowered or "wifi" in friendlyLowered
 
 
 func _exit_tree() -> void:
