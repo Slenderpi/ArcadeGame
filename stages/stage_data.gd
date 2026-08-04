@@ -1,5 +1,5 @@
 extends Node3D
-class_name LevelData
+class_name StageData
 
 
 @export var spawn_point_0 : Marker3D
