@@ -126,6 +126,7 @@ func _ready() -> void:
 		print_rich("[color=orange]Peers have disconnected. Multiplayer should end.")
 		# TODO
 		reset()
+		NetworkManager.close_server()
 		state = EMainSceneState.ATTRACTION_MODE
 	)
 	#NetworkManager.found_peer.connect(func():

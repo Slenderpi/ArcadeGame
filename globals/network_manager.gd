@@ -73,7 +73,7 @@ var state := ENetworkManagerState.IDLE
 var can_versus : bool = false
 
 var udp := PacketPeerUDP.new()
-var peer := ENetMultiplayerPeer.new()
+#var peer := ENetMultiplayerPeer.new()
 
 var my_local_ips : Array[String] = []
 var my_ip : String
@@ -91,7 +91,7 @@ var _curr_call_attempts := 0 # TODO: reset value
 func _ready() -> void:
 	multiplayer.peer_connected.connect(func(peerId: int):
 		print_rich("[color=orange]peer_connected fired with peerId %d." % peerId)
-		if peerId != peer.get_unique_id():
+		if peerId != multiplayer.get_unique_id():
 			other_peer_id = peerId
 			server_started.emit(true)
 	)
@@ -283,11 +283,16 @@ func make_packet(message: String) -> String:
 
 ## Stops the server. Only the host should call this.
 func close_server() -> void:
-	assert(state == ENetworkManagerState.HOST, "close_server() caller was not in HOST state. Only the HOST should call this.")
-	peer.close()
-	multiplayer.multiplayer_peer = null
+	Debug.print_info("Closing server.")
+	#assert(state == ENetworkManagerState.HOST, "close_server() caller was not in HOST state. Only the HOST should call this.")
+	if multiplayer.multiplayer_peer:
+		multiplayer.multiplayer_peer.close()
+		multiplayer.multiplayer_peer = null
+	else:
+		Debug.print_warning("Attempted to close server but there is currently no multiplayer peer set yet.")
 	# TODO: MainScene should probably trigger returning to CALL state, and this code should instead go to IDLE
-	state = ENetworkManagerState.CALLING
+	state = ENetworkManagerState.IDLE
+	#state = ENetworkManagerState.CALLING
 
 
 ### Starts the server. The NetworkManager that will be the host should call this.
@@ -305,6 +310,7 @@ func close_server() -> void:
 
 func _create_server() -> void:
 	print("Creating ENet server...")
+	var peer := ENetMultiplayerPeer.new()
 	var error := peer.create_server(PORT_GAME, 2)
 	if error != OK:
 		Debug.print_error("Failed to start server. Error: %s" % error)
@@ -319,6 +325,7 @@ func _create_server() -> void:
 #func _create_client_peer() -> void:
 func _create_client() -> void:
 	print("Creating ENet client...")
+	var peer := ENetMultiplayerPeer.new()
 	var error := peer.create_client(other_ip, PORT_GAME)
 	if error != OK:
 		Debug.print_error("Failed to create client. Error: %s" % error)
