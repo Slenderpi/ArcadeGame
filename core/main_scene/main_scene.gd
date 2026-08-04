@@ -354,6 +354,9 @@ func reset() -> void:
 	active_mech_0 = null
 	active_mech_1 = null
 	game_mode = null
+	_dev_canvas.mech_character = null
+	_game_camera.camera_mode = GameCamera.ECameraMode.FREE_FLIGHT
+	_game_camera.first_person_target = null
 
 
 func _input(event: InputEvent) -> void:
