@@ -294,6 +294,7 @@ func spawn_mech(mechType0: MechRefs.EMech, controllerType0: int, mechType1: Mech
 		return
 	print("---- Spawning mechs ----")
 	
+	print("My peerId: ", multiplayer.get_unique_id(), " | Other: ", NetworkManager.other_peer_id)
 	_spawn_mech.rpc(mechType0, 1, controllerType0, active_stage.spawn_point_0.transform)
 	_spawn_mech.rpc(mechType1, NetworkManager.other_peer_id, controllerType1, active_stage.spawn_point_1.transform)
 	

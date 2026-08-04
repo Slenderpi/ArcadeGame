@@ -92,7 +92,7 @@ func _ready() -> void:
 	multiplayer.peer_connected.connect(func(peerId: int):
 		print_rich("[color=orange]peer_connected fired with peerId %d." % peerId)
 		if peerId != peer.get_unique_id():
-			other_peer_id = peer.get_unique_id()
+			other_peer_id = peerId
 			server_started.emit(true)
 	)
 	multiplayer.peer_disconnected.connect(func(peerId: int):
@@ -324,7 +324,7 @@ func _create_client() -> void:
 		Debug.print_error("Failed to create client. Error: %s" % error)
 		return
 	multiplayer.multiplayer_peer = peer
-	other_peer_id = peer.get_unique_id()
+	other_peer_id = 1
 	print_rich("[color=green]Client created and joined successfully.")
 	#state = ENetworkManagerState.CLIENT
 	#can_versus = false
