@@ -39,7 +39,7 @@ var _game_camera : GameCamera
 @export
 var _folder_level : Node3D
 @export
-var _folder_entities : Node3D
+var _folder_characters : Node3D
 @export
 @warning_ignore("unused_private_class_variable")
 var _folder_effects : Node3D
@@ -283,7 +283,7 @@ func _spawn_mech(mechType: MechRefs.EMech, peerId: int, controllerType: int, tra
 	mech.name = str(peerId)
 	mech.controller_type = controllerType
 	mech.transform = transform
-	_folder_entities.add_child(mech, true)
+	_folder_characters.add_child(mech, true)
 	_on_mech_character_spawned_general(mech)
 
 
@@ -348,7 +348,7 @@ func _on_mech_character_spawned_general(mechChar: MechCharacter) -> void:
 
 func reset() -> void:
 	Debug.print_info("reset() called. Resetting World folders and MainScene's internal values.")
-	for c in _folder_entities.get_children():
+	for c in _folder_characters.get_children():
 		c.queue_free()
 	for c in _folder_level.get_children():
 		c.queue_free()
@@ -359,10 +359,6 @@ func reset() -> void:
 	_dev_canvas.mech_character = null
 	_game_camera.camera_mode = GameCamera.ECameraMode.FREE_FLIGHT
 	_game_camera.first_person_target = null
-
-
-func _exit_tree() -> void:
-	print("_exit_tree() called on MainScene.")
 
 
 func _input(event: InputEvent) -> void:
