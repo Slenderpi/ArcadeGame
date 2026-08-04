@@ -92,6 +92,7 @@ func _ready() -> void:
 	multiplayer.peer_connected.connect(func(peerId: int):
 		print_rich("[color=orange]peer_connected fired with peerId %d." % peerId)
 		if peerId != peer.get_unique_id():
+			other_peer_id = peer.get_unique_id()
 			server_started.emit(true)
 	)
 	multiplayer.peer_disconnected.connect(func(peerId: int):
