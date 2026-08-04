@@ -114,6 +114,7 @@ func _ready() -> void:
 	NetworkManager.server_started.connect(func(isMultiplayer: bool):
 		print_rich("[color=green]Server started! Gameplay can begin.")
 		reset()
+		multiplayer.multiplayer_peer = NetworkManager.multiplayer.multiplayer_peer
 		if isMultiplayer:
 			NetworkManager.can_versus = false
 			state = EMainSceneState.MULTIPLAYER
@@ -265,6 +266,25 @@ func spawn_level(levelResource: Resource) -> void:
 	_folder_level.add_child(stage)
 
 
+#@rpc("any_peer", "call_local")
+#func _spawn_mech_0(mechScene: PackedScene) -> void:
+	#print("Spawning mech0!")
+	#active_mech_0 = mechScene.instantiate() as MechCharacter
+	#active_mech_0.name = "1"
+	#active_mech_0.transform = active_stage.spawn_point_0.transform
+	#_folder_entities.add_child(active_mech_0, true)
+
+
+@rpc("any_peer", "call_local")
+func _spawn_mech(mechScene: PackedScene, peerId: int, controllerType: int, transform: Transform3D) -> void:
+	var mech := mechScene.instantiate() as MechCharacter
+	mech.name = str(peerId)
+	mech.controller_type = controllerType
+	mech.transform = transform
+	_folder_entities.add_child(mech, true)
+	_on_mech_character_spawned_general(mech)
+
+
 ## Spawns MechCharacters for both Players. Player0 is ALWAYS the host's Player,
 ## so their peerId will always be 0.
 ## [br]
@@ -272,27 +292,30 @@ func spawn_level(levelResource: Resource) -> void:
 func spawn_mech(mechScene0: PackedScene, controllerType0: int, mechScene1: PackedScene, controllerType1: int) -> void:
 	if not multiplayer.is_server():
 		return
-	print("Spawning mechs")
+	print("---- Spawning mechs ----")
 	
-	var mech0 = mechScene0.instantiate() as MechCharacter
-	mech0.name = "1"
-	mech0.peer_id = 1
-	mech0.transform = active_stage.spawn_point_0.global_transform
-	mech0.controller_type = controllerType0
+	_spawn_mech.rpc(mechScene0, 1, controllerType0, active_stage.spawn_point_0.transform)
+	_spawn_mech.rpc(mechScene1, NetworkManager.other_peer_id, controllerType1, active_stage.spawn_point_1.transform)
 	
-	var mech1 = mechScene1.instantiate() as MechCharacter
-	mech1.name = str(NetworkManager.other_peer_id)
-	mech1.peer_id = NetworkManager.other_peer_id
-	mech1.transform = active_stage.spawn_point_1.global_transform
-	mech1.controller_type = controllerType1
-	
-	_folder_entities.add_child(mech0, true)
-	_folder_entities.add_child(mech1, true)
-	
-	# Call this function explicitly for the server.
-	# The spawned signal on the MultiplayerSpawner only calls it on the client.
-	_on_multiplayer_entity_spawned(mech0)
-	_on_multiplayer_entity_spawned(mech1)
+	#var mech0 = mechScene0.instantiate() as MechCharacter
+	#mech0.name = "1"
+	#mech0.peer_id = 1
+	#mech0.transform = active_stage.spawn_point_0.global_transform
+	#mech0.controller_type = controllerType0
+	#
+	#var mech1 = mechScene1.instantiate() as MechCharacter
+	#mech1.name = str(NetworkManager.other_peer_id)
+	#mech1.peer_id = NetworkManager.other_peer_id
+	#mech1.transform = active_stage.spawn_point_1.global_transform
+	#mech1.controller_type = controllerType1
+	#
+	#_folder_entities.add_child(mech0, true)
+	#_folder_entities.add_child(mech1, true)
+	#
+	## Call this function explicitly for the server.
+	## The spawned signal on the MultiplayerSpawner only calls it on the client.
+	#_on_multiplayer_entity_spawned(mech0)
+	#_on_multiplayer_entity_spawned(mech1)
 
 
 func _on_multiplayer_entity_spawned(node: Node):
@@ -311,6 +334,10 @@ func _on_multiplayer_entity_spawned(node: Node):
 
 
 func _on_mech_character_spawned_general(mechChar: MechCharacter) -> void:
+	if not mechChar.is_multiplayer_authority() or mechChar.name == "0":
+		print("MechCharacter %s is not my character" % mechChar.name)
+		return
+	print("MechCharacter %s IS my character, setting camera and related stuff to it." % mechChar.name)
 	_dev_canvas.mech_character = mechChar
 	_game_camera.first_person_target = mechChar
 	_game_camera.camera_mode = GameCamera.ECameraMode.FIRST_PERSON

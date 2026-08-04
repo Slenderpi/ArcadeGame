@@ -17,5 +17,5 @@ func start() -> void:
 	
 	_main_scene.spawn_mech(
 		_temp_mech_to_load, 1,
-		_temp_mech_to_load, 2
+		_temp_mech_to_load, 1
 	)

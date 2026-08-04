@@ -20,10 +20,10 @@ var movement_force : float = 1.0
 var gravity_coefficient : float = 1.0
 
 
-## Set this value at instantiate() time.
-## This value is read and applied at _ready() time.
-@export
-var peer_id : int = 1
+### Set this value at instantiate() time.
+### This value is read and applied at _ready() time.
+#@export
+#var peer_id : int = 1
 ## Should be set by MainScene when this character is instantiated.
 ## The following values map to the following controller types:[br]
 ## - 0: [DummyControllerComponent] TODO[br]
@@ -56,7 +56,9 @@ var _is_button_right : bool
 
 
 func _ready() -> void:
-	#set_multiplayer_authority(peer_id)
+	var peerId := name.to_int()
+	if peerId != 0:
+		set_multiplayer_authority(peerId)
 	if not is_multiplayer_authority():
 		return
 	var cntrlr : CharacterControllerComponent = null
