@@ -69,9 +69,8 @@ func _ready() -> void:
 			cntrlr = PlayerControllerComponent.new()
 		2:
 			cntrlr = AIControllerComponent.new()
-	if cntrlr: # This if check is temp until the other controllers are created
-		cntrlr.mech_character = self
-		add_child(cntrlr)
+	cntrlr.mech_character = self
+	add_child(cntrlr)
 
 
 func _physics_process(delta: float) -> void:

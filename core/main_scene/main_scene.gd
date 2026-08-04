@@ -276,8 +276,8 @@ func spawn_level(levelResource: Resource) -> void:
 
 
 @rpc("any_peer", "call_local")
-func _spawn_mech(mechScene: PackedScene, peerId: int, controllerType: int, transform: Transform3D) -> void:
-	var mech := mechScene.instantiate() as MechCharacter
+func _spawn_mech(mechType: MechRefs.EMech, peerId: int, controllerType: int, transform: Transform3D) -> void:
+	var mech := MechRefs.instantiate_mech(mechType)
 	mech.name = str(peerId)
 	mech.controller_type = controllerType
 	mech.transform = transform
@@ -289,13 +289,13 @@ func _spawn_mech(mechScene: PackedScene, peerId: int, controllerType: int, trans
 ## so their peerId will always be 0.
 ## [br]
 ## [b]This function is server locked.[/b]
-func spawn_mech(mechScene0: PackedScene, controllerType0: int, mechScene1: PackedScene, controllerType1: int) -> void:
+func spawn_mech(mechType0: MechRefs.EMech, controllerType0: int, mechType1: MechRefs.EMech, controllerType1: int) -> void:
 	if not multiplayer.is_server():
 		return
 	print("---- Spawning mechs ----")
 	
-	_spawn_mech.rpc(mechScene0, 1, controllerType0, active_stage.spawn_point_0.transform)
-	_spawn_mech.rpc(mechScene1, NetworkManager.other_peer_id, controllerType1, active_stage.spawn_point_1.transform)
+	_spawn_mech.rpc(mechType0, 1, controllerType0, active_stage.spawn_point_0.transform)
+	_spawn_mech.rpc(mechType1, NetworkManager.other_peer_id, controllerType1, active_stage.spawn_point_1.transform)
 	
 	#var mech0 = mechScene0.instantiate() as MechCharacter
 	#mech0.name = "1"

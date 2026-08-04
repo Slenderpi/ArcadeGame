@@ -6,8 +6,6 @@ class_name MultiplayerGameMode
 ## already be set up.
 
 
-var _temp_mech_to_load := preload("res://entities/mech_characters/mech_guy/mech_guy.tscn")
-
 
 func start() -> void:
 	Debug.print_info("MultiplayerGameMode starting!")
@@ -16,6 +14,6 @@ func start() -> void:
 	# TODO: allow players to choose character, then spawn characters
 	
 	_main_scene.spawn_mech(
-		_temp_mech_to_load, 1,
-		_temp_mech_to_load, 1
+		MechRefs.EMech.MECH_GUY, 1,
+		MechRefs.EMech.MECH_GUY, 1
 	)
