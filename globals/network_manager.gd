@@ -2,7 +2,7 @@ extends Node
 
 ## If true, NetworkManager will look for an ethernet IP to use.
 ## Otherwise, it will look for a wifi IP.
-const USE_ETH_IP : bool = false
+const USE_ETH_IP : bool = true
 
 ## The states of NetworkManager.
 enum ENetworkManagerState {
@@ -390,7 +390,7 @@ func _set_local_ips() -> void:
 				addri += 1
 				ipOption = addresses[addri]
 		my_ip = ipOption
-		print_rich("[color=green]Found my ethernet address: ", my_ip)
+		print_rich("[color=green]Found my %s address: %s" % ["ETHERNET" if USE_ETH_IP else "WIFI", my_ip])
 		#for addr : String in addresses:
 			#if addr.split('.').size() == 4:
 				#if not my_ip.is_empty():
