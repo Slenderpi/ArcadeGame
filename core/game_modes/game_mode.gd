@@ -24,4 +24,4 @@ func _init(mainSceneOwner: MainScene) -> void:
 
 ## Triggers the [GameMode] to begin.
 func start() -> void:
-	Debug.print_info("GameMode.start() has been called.")
+	Debug.print_success("[GameMode]: start() has been called.")

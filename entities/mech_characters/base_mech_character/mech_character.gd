@@ -19,16 +19,11 @@ var movement_force : float = 1.0
 @export
 var gravity_coefficient : float = 1.0
 
-
-### Set this value at instantiate() time.
-### This value is read and applied at _ready() time.
-#@export
-#var peer_id : int = 1
 ## Should be set by MainScene when this character is instantiated.
 ## The following values map to the following controller types:[br]
-## - 0: [DummyControllerComponent] TODO[br]
+## - 0: [DummyControllerComponent][br]
 ## - 1: [PlayerControllerComponent][br]
-## - 2: [AIControllerComponent] TODO
+## - 2: [AIControllerComponent]
 @export
 var controller_type : int
 
@@ -41,36 +36,12 @@ var _is_trigger_both : bool
 var _is_button_left : bool
 var _is_button_right : bool
 
-#var _has_set_authority := false
-
-
-# E 0:00:11:445   on_replication_start: The MultiplayerSynchronizer at path
-#	"/root/MainScene/World/Entities/CharacterBody3D2/MultiplayerSynchronizer"
-#	is unable to process the pending spawn since it has no network ID.
-#	This might happen when changing the multiplayer authority during the "_ready" callback.
-#	Make sure to only change the authority of multiplayer synchronizers during the "_enter_tree" callback of their multiplayer spawner.
-# <C++ Error>   Condition "pending_sync_net_ids.is_empty()" is true. Returning: ERR_INVALID_DATA
-# <C++ Source>  modules/multiplayer/scene_replication_interface.cpp:242 @ on_replication_start()
-#func _enter_tree() -> void:
-	#set_multiplayer_authority(peer_id)
-
 
 func _ready() -> void:
-	var peerId := name.to_int()
-	if peerId != 0:
-		set_multiplayer_authority(peerId)
+	_init_authority()
 	if not is_multiplayer_authority():
 		return
-	var cntrlr : CharacterControllerComponent = null
-	match controller_type:
-		0:
-			cntrlr = DummyControllerComponent.new()
-		1:
-			cntrlr = PlayerControllerComponent.new()
-		2:
-			cntrlr = AIControllerComponent.new()
-	cntrlr.mech_character = self
-	add_child(cntrlr)
+	_init_controller()
 
 
 func _physics_process(delta: float) -> void:
@@ -144,3 +115,22 @@ func _reset_attack_input_states() -> void:
 	_is_trigger_both = false
 	_is_button_left = false
 	_is_button_right = false
+
+
+func _init_authority() -> void:
+	var peerId := name.to_int()
+	if peerId != 0:
+		set_multiplayer_authority(peerId)
+
+
+func _init_controller() -> void:
+	var cntrlr : CharacterControllerComponent = null
+	match controller_type:
+		0:
+			cntrlr = DummyControllerComponent.new()
+		1:
+			cntrlr = PlayerControllerComponent.new()
+		2:
+			cntrlr = AIControllerComponent.new()
+	cntrlr.mech_character = self
+	add_child(cntrlr)
