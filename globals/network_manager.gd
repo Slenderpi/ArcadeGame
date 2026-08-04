@@ -3,6 +3,8 @@ extends Node
 ## If true, NetworkManager will look for an ethernet IP to use.
 ## Otherwise, it will look for a wifi IP.
 const USE_ETH_IP : bool = true
+## If true, NetworkManager will print many more messages in the console.
+const VERBOSE : bool = false
 
 ## The states of NetworkManager.
 enum ENetworkManagerState {
@@ -104,7 +106,8 @@ func _ready() -> void:
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	
-	_print_local_interfaces()
+	if VERBOSE:
+		_print_local_interfaces()
 	_set_local_ips()
 	_init_udp()
 	#state = ENetworkManagerState.CALLING
@@ -360,7 +363,8 @@ func _init_udp() -> void:
 		Debug.print_error("[NetMan]: Encountered an error when binding to UDP socket for discovery: %s" % error)
 		return
 	_udp.set_broadcast_enabled(true)
-	print("[NetMan]: UDP setup on port %d." % _udp.get_local_port())
+	if VERBOSE:
+		print("[NetMan]: UDP setup on port %d." % _udp.get_local_port())
 
 #endregion
 

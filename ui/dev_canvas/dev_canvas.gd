@@ -1,4 +1,4 @@
-extends CanvasLayer
+extends CanvasBase
 class_name DevCanvas
 
 
@@ -17,3 +17,7 @@ var _mech_character : MechCharacter
 
 func _set_children_mech_character_refs() -> void:
 	_controls_display._mech_character = mech_character
+
+
+func _on_hide() -> void:
+	mech_character = null

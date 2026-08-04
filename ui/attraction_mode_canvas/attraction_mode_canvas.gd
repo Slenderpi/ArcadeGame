@@ -1,0 +1,2 @@
+extends CanvasBase
+class_name AttractionModeCanvas

@@ -2,18 +2,21 @@
 
 [ext_resource type="Script" uid="uid://dqgs0suqdr0ic" path="res://core/main_scene/main_scene.gd" id="1_awcct"]
 [ext_resource type="PackedScene" uid="uid://dn3hp2lqhrwn8" path="res://core/game_camera/game_camera.tscn" id="3_3gbtc"]
+[ext_resource type="PackedScene" uid="uid://c18chs8n78i2r" path="res://ui/attraction_mode_canvas/attraction_mode_canvas.tscn" id="3_et8y5"]
+[ext_resource type="Script" uid="uid://bfmvmxjsy7hbo" path="res://core/main_scene/ui_manager.gd" id="3_frsyw"]
 [ext_resource type="PackedScene" uid="uid://ktk85mqyxoxj" path="res://ui/dev_canvas/dev_canvas.tscn" id="4_et8y5"]
+[ext_resource type="PackedScene" uid="uid://466rsrq2ccb7" path="res://ui/matchmaking_canvas/matchmaking_canvas.tscn" id="5_0lowg"]
 
-[node name="MainScene" type="Node" unique_id=1180811448 node_paths=PackedStringArray("_game_camera", "_folder_level", "_folder_characters", "_folder_effects", "_folder_ui", "level_mspawner", "_dev_canvas")]
+[node name="MainScene" type="Node" unique_id=1180811448 node_paths=PackedStringArray("_game_camera", "_folder_level", "_folder_characters", "_folder_effects", "_folder_local_only", "_ui_manager", "level_mspawner")]
 process_mode = 3
 script = ExtResource("1_awcct")
 _game_camera = NodePath("World/GameCamera")
 _folder_level = NodePath("World/Level")
 _folder_characters = NodePath("World/Characters")
 _folder_effects = NodePath("World/Effects")
-_folder_ui = NodePath("UI")
+_folder_local_only = NodePath("World/LocalOnly")
+_ui_manager = NodePath("UI")
 level_mspawner = NodePath("Multiplayer/Spawners/LevelMSpawner")
-_dev_canvas = NodePath("UI/DevCanvas")
 
 [node name="World" type="Node" parent="." unique_id=1051000033]
 process_mode = 1
@@ -28,7 +31,17 @@ transform = Transform3D(1, 0, 0, 0, 0.86602545, 0.50000006, 0, -0.50000006, 0.86
 [node name="Effects" type="Node3D" parent="World" unique_id=1181375799]
 visible = false
 
-[node name="UI" type="Node" parent="." unique_id=690036975]
+[node name="LocalOnly" type="Node3D" parent="World" unique_id=685286075]
+
+[node name="UI" type="Node" parent="." unique_id=690036975 node_paths=PackedStringArray("_attraction_mode_canvas", "_matchmaking_canvas", "_dev_canvas")]
+script = ExtResource("3_frsyw")
+_attraction_mode_canvas = NodePath("AttractionModeCanvas")
+_matchmaking_canvas = NodePath("MatchmakingCanvas")
+_dev_canvas = NodePath("DevCanvas")
+
+[node name="AttractionModeCanvas" parent="UI" unique_id=806381166 instance=ExtResource("3_et8y5")]
+
+[node name="MatchmakingCanvas" parent="UI" unique_id=1058228126 instance=ExtResource("5_0lowg")]
 
 [node name="DevCanvas" parent="UI" unique_id=159376391 instance=ExtResource("4_et8y5")]
 

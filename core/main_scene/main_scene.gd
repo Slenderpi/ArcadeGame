@@ -34,15 +34,16 @@ var _folder_characters : Node3D
 @export
 @warning_ignore("unused_private_class_variable")
 var _folder_effects : Node3D
-@export_subgroup("UI")
 @export
 @warning_ignore("unused_private_class_variable")
-var _folder_ui : Node
+var _folder_local_only : Node3D
+@export_subgroup("UI")
+@export
+var _ui_manager : UiManager
 @export_subgroup("Multiplayer")
 @export
 var level_mspawner : MultiplayerSpawner
-@export
-var _dev_canvas : DevCanvas
+
 
 #endregion
 
@@ -75,6 +76,7 @@ func _ready() -> void:
 	NetworkManager.versus_peer_found.connect(_on_versus_peer_found)
 	NetworkManager.server_started.connect(_on_server_started)
 	NetworkManager.disconnected.connect(_on_disconnected)
+	_ui_manager._main_scene = self
 	state = EMainSceneState.BOOTING
 
 
@@ -122,6 +124,7 @@ func _on_state_changed() -> void:
 			#_on_state_client()
 		#EMainSceneState.RESULTS:
 			#pass
+	#_ui_manager.on_main_scene_state_changed()
 
 
 func _on_state_booting() -> void:
@@ -133,6 +136,8 @@ func _on_state_booting() -> void:
 func _on_state_attraction_mode() -> void:
 	Debug.print_info("[MainScene]: state -> ATTRACTION_MODE.")
 	NetworkManager.can_versus = false
+	_ui_manager.show_attraction_mode()
+	#_ui_manager.on_main_scene_state_changed()
 	# TODO: On any controller input, enter training game mode
 	#print("Attraction not yet implemented. Going straight to LOGIN.")
 	#state = EMainSceneState.LOGIN
@@ -141,16 +146,22 @@ func _on_state_attraction_mode() -> void:
 func _on_state_matchmaking() -> void:
 	Debug.print_info("[MainScene]: state -> MATCHMAKING.")
 	print("[MainScene]: Awaiting NetworkManager to find a peer...")
+	_ui_manager.show_matchmaking()
 	NetworkManager.can_versus = true
 	var peerIp : String = await NetworkManager.find_peer()
-	if peerIp.is_empty():
-		Debug.print_info("[MainScene]: Matchmaking result: NetworkManager did not find an available peer. Entering Singleplayer mode!")
-		NetworkManager.start_singleplayer_server()
-	else:
+	
+	var foundPeer := !peerIp.is_empty()
+	_ui_manager.on_matchmaking_result(foundPeer)
+	await get_tree().create_timer(1.0).timeout
+	
+	if foundPeer:
 		Debug.print_info("[MainScene]: Matchmaking result: NetworkManager found a peer! Peer ip: %s" % peerIp)
 		var serverIp : String = _choose_host_ip(peerIp)
 		print("[MainScene]: The IP that will be the server is: %s" % serverIp)
 		NetworkManager.start_server(serverIp)
+	else:
+		Debug.print_info("[MainScene]: Matchmaking result: NetworkManager did not find an available peer. Entering Singleplayer mode!")
+		NetworkManager.start_singleplayer_server()
 
 
 func _on_state_singleplayer() -> void:
@@ -158,6 +169,7 @@ func _on_state_singleplayer() -> void:
 	NetworkManager.can_versus = true
 	game_mode = SingleplayerGameMode.new(self)
 	game_mode.start()
+	_ui_manager.show_gameplay()
 
 
 func _on_state_multiplayer() -> void:
@@ -167,6 +179,7 @@ func _on_state_multiplayer() -> void:
 		return
 	game_mode = MultiplayerGameMode.new(self)
 	game_mode.start()
+	_ui_manager.show_gameplay()
 
 
 #func _on_state_login() -> void:
@@ -230,8 +243,7 @@ func reset() -> void:
 	#active_mech_0 = null
 	#active_mech_1 = null
 	game_mode = null
-	_dev_canvas.mech_character = null
-	_game_camera.camera_mode = GameCamera.ECameraMode.FREE_FLIGHT
+	_game_camera.camera_mode = GameCamera.ECameraMode.NONE
 	_game_camera.first_person_target = null
 
 #endregion
@@ -245,17 +257,18 @@ func _spawn_mech(mechType: MechRefs.EMech, peerId: int, controllerType: int, tra
 	mech.controller_type = controllerType
 	mech.transform = transform
 	_folder_characters.add_child(mech, true)
-	_on_mech_character_spawned(mech)
+	_on_mech_character_instantiated(mech)
 
 
-func _on_mech_character_spawned(mechChar: MechCharacter) -> void:
+func _on_mech_character_instantiated(mechChar: MechCharacter) -> void:
 	if not mechChar.is_multiplayer_authority() or mechChar.name == "0":
 		print("[MainScene]: MechCharacter %s is not my character" % mechChar.name)
 		return
 	print("[MainScene]: MechCharacter %s IS my character, setting camera and related stuff to it." % mechChar.name)
-	_dev_canvas.mech_character = mechChar
 	_game_camera.first_person_target = mechChar
 	_game_camera.camera_mode = GameCamera.ECameraMode.FIRST_PERSON
+	# TODO TEMP: The below code may be better done via an event
+	_ui_manager.on_mech_spawned(mechChar)
 
 
 # Chooses the IP to become the host. Priority:

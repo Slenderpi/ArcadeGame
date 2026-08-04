@@ -1,0 +1,160 @@
+[gd_scene format=3 uid="uid://466rsrq2ccb7"]
+
+[ext_resource type="Script" uid="uid://d1lds032qj30q" path="res://ui/matchmaking_canvas/matchmaking_canvas.gd" id="1_iklrc"]
+[ext_resource type="Texture2D" uid="uid://bc8sf42evpj1v" path="res://assets/images/loading_circle.png" id="2_cax37"]
+[ext_resource type="Texture2D" uid="uid://ct3sd0mcxvukg" path="res://assets/images/virtual_on_logo.png" id="3_4alat"]
+
+[node name="MatchmakingCanvas" type="CanvasLayer" unique_id=1058228126 node_paths=PackedStringArray("_searching_dialogue_box", "_findingopp_loading_circle", "_multiplayer_dialogue_box", "_singleplayer_dialogue_box")]
+script = ExtResource("1_iklrc")
+_searching_dialogue_box = NodePath("SearchingDialogueBox")
+_findingopp_loading_circle = NodePath("SearchingDialogueBox/LoadingCircle")
+_multiplayer_dialogue_box = NodePath("MultiplayerDialogueBox")
+_singleplayer_dialogue_box = NodePath("SingleplayerDialogueBox")
+
+[node name="Background" type="Panel" parent="." unique_id=447870354]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SearchingDialogueBox" type="ColorRect" parent="." unique_id=1012701709]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -350.0
+offset_top = -150.0
+offset_right = 350.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.85490197)
+
+[node name="LoadingCircle" type="TextureRect" parent="SearchingDialogueBox" unique_id=1626195178]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -150.0
+offset_right = 300.0
+offset_bottom = 150.0
+grow_vertical = 2
+pivot_offset_ratio = Vector2(0.5, 0.5)
+offset_transform_scale = Vector2(0.49, 0.49)
+texture = ExtResource("2_cax37")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FindingOppLabel" type="Label" parent="SearchingDialogueBox" unique_id=260963400]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -419.0
+offset_top = -27.0
+offset_bottom = 27.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_font_sizes/font_size = 35
+text = "FINDING OPPONENT..."
+horizontal_alignment = 1
+vertical_alignment = 1
+justification_flags = 0
+
+[node name="MultiplayerDialogueBox" type="ColorRect" parent="." unique_id=246391910]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -350.0
+offset_top = -150.0
+offset_right = 350.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.85490197)
+
+[node name="MultiplayerImage" type="TextureRect" parent="MultiplayerDialogueBox" unique_id=582578951]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -150.0
+offset_right = 300.0
+offset_bottom = 150.0
+grow_vertical = 2
+pivot_offset_ratio = Vector2(0.5, 0.5)
+offset_transform_scale = Vector2(0.49, 0.49)
+texture = ExtResource("3_4alat")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FindingOppLabel" type="Label" parent="MultiplayerDialogueBox" unique_id=1130391034]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -419.0
+offset_top = -27.0
+offset_bottom = 27.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_font_sizes/font_size = 35
+text = "RIVAL LOCATED"
+horizontal_alignment = 1
+vertical_alignment = 1
+justification_flags = 0
+
+[node name="SingleplayerDialogueBox" type="ColorRect" parent="." unique_id=317942208]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -350.0
+offset_top = -150.0
+offset_right = 350.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.85490197)
+
+[node name="SingleplayerImage" type="TextureRect" parent="SingleplayerDialogueBox" unique_id=1680045302]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -150.0
+offset_right = 300.0
+offset_bottom = 150.0
+grow_vertical = 2
+pivot_offset_ratio = Vector2(0.5, 0.5)
+offset_transform_scale = Vector2(0.49, 0.49)
+texture = ExtResource("3_4alat")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FindingOppLabel" type="Label" parent="SingleplayerDialogueBox" unique_id=1373202965]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -419.0
+offset_top = -27.0
+offset_bottom = 27.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_font_sizes/font_size = 35
+text = "SINGLEPLAYER"
+horizontal_alignment = 1
+vertical_alignment = 1
+justification_flags = 0
