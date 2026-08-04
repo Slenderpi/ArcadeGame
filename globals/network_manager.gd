@@ -11,19 +11,19 @@ enum ENetworkManagerState {
 }
 
 
-## Emitted when another Peer is found, which occurs when either a CALL or
-## a RESPONSE is received.
-signal found_peer
-## Emitted when another Peer joined through ENet. For the host, this is when
-## the server is created. For the client, this is when they have successfully
-## connected to the server.[br]
-## [br]
-## [code]peerId[/code]: the Id of the Peer that joined.
-signal player_connected(peerId: int)
-## Emitted when another Peer left through ENet.[br]
-## [br]
-## [code]peerId[/code]: the Id of the Peer that left.
-signal player_disconnected(peerId: int)
+### Emitted when another Peer is found, which occurs when either a CALL or
+### a RESPONSE is received.
+#signal found_peer
+### Emitted when another Peer joined through ENet. For the host, this is when
+### the server is created. For the client, this is when they have successfully
+### connected to the server.[br]
+### [br]
+### [code]peerId[/code]: the Id of the Peer that joined.
+#signal player_connected(peerId: int)
+### Emitted when another Peer left through ENet.[br]
+### [br]
+### [code]peerId[/code]: the Id of the Peer that left.
+#signal player_disconnected(peerId: int)
 
 
 ## Emitted when this devices receives a CALL and
@@ -97,13 +97,15 @@ func _ready() -> void:
 	)
 	multiplayer.peer_disconnected.connect(func(peerId: int):
 		print_rich("[color=orange]peer_disconnected signaled with peerId %d." % peerId)
+		print("is_server: %s" % multiplayer.is_server())
 		disconnected.emit()
 	)
-	multiplayer.connected_to_server.connect(func(): print("[color=orange]connected_to_server signaled."))
-	multiplayer.server_disconnected.connect(func():
-		print_rich("[color=orange]server_disconnected signaled.")
-		disconnected.emit()
-	)
+	#multiplayer.connected_to_server.connect(func(): print("[color=orange]connected_to_server signaled."))
+	#multiplayer.server_disconnected.connect(func():
+		#print_rich("[color=orange]server_disconnected signaled.")
+		##if multiplayer.is_server():
+		#disconnected.emit()
+	#)
 	
 	_print_local_interfaces()
 	_set_local_ips()
@@ -166,8 +168,11 @@ func _process(_delta: float) -> void:
 			_call_result.emit(other_ip)
 		elif msgArgs[0] == UDPSTR_NOPLAY:
 			print_rich("[color=green]Received NOPLAY from %s" % senderIp)
-			state = ENetworkManagerState.IDLE
-			_call_result.emit("")
+			if state == ENetworkManagerState.CALLING:
+				state = ENetworkManagerState.IDLE
+				_call_result.emit("")
+			else:
+				print("NetworkManager is in IDLE state. The NOPLAY will be ignored.")
 		elif msgArgs[0] == UDPSTR_SERVER_CREATED:
 			print_rich("[color=green]Received SERVER_CREATED from %s" % senderIp)
 			_create_client()
@@ -228,10 +233,10 @@ func start_singleplayer_server() -> void:
 func start_server(serverIp: String) -> void:
 	Debug.print_info("NetworkManager.start_server() called.")
 	if serverIp == my_ip:
-		print_rich("I will be the [color=pink]host!")
+		print_rich("I will be the [b][color=pink]host!")
 		_create_server()
 	else:
-		print_rich("I will be the [color=pink]client!")
+		print_rich("I will be the [b][color=pink]client!")
 		print("Broadcasting SERVER_REQUEST.")
 		_broadcast_server_request()
 
@@ -276,13 +281,12 @@ func make_packet(message: String) -> String:
 	return UDPSTR_HEADER + ',' + message
 
 
-## Stops the server. Only the host should call this.
+## Stops the server (or, if you're the client, closes the client).
 func close_server() -> void:
 	Debug.print_info("Closing multiplayer peer.")
-	#assert(state == ENetworkManagerState.HOST, "close_server() caller was not in HOST state. Only the HOST should call this.")
 	if multiplayer.multiplayer_peer:
-		multiplayer.multiplayer_peer.close()
-		multiplayer.multiplayer_peer = null
+		multiplayer.multiplayer_peer.close.call_deferred()
+		multiplayer.set_deferred("multiplayer_peer", null)
 	else:
 		Debug.print_warning("Attempted to close multiplayer peer but there is currently none set yet.")
 	# TODO: MainScene should probably trigger returning to CALL state, and this code should instead go to IDLE
@@ -403,6 +407,7 @@ func _set_local_ips() -> void:
 
 
 func _exit_tree() -> void:
+	print("_exit_tree() called on NetworkManager.")
 	udp.close()
 
 

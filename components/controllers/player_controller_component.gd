@@ -82,9 +82,9 @@ func _read_right_stick_input() -> Vector2:
 
 func _handle_action_inputs() -> void:
 	var triggerL := Input.is_action_just_pressed(CONTROL_STRINGS[EInput.TRIGGER_LEFT])
-	var buttonL := Input.is_action_just_pressed(CONTROL_STRINGS[EInput.BUTTON_LEFT])
+	#var buttonL := Input.is_action_just_pressed(CONTROL_STRINGS[EInput.BUTTON_LEFT])
 	var triggerR := Input.is_action_just_pressed(CONTROL_STRINGS[EInput.TRIGGER_RIGHT])
-	var buttonR := Input.is_action_just_pressed(CONTROL_STRINGS[EInput.BUTTON_RIGHT])
+	#var buttonR := Input.is_action_just_pressed(CONTROL_STRINGS[EInput.BUTTON_RIGHT])
 	# TODO: Give a lenient window to detect if both buttons are hit at almost the same time
 	if triggerL and triggerR:
 		mech_character.set_trigger_both()

@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://dn3hp2lqhrwn8" path="res://core/game_camera/game_camera.tscn" id="3_3gbtc"]
 [ext_resource type="PackedScene" uid="uid://ktk85mqyxoxj" path="res://ui/dev_canvas/dev_canvas.tscn" id="4_et8y5"]
 
-[node name="MainScene" type="Node" unique_id=1180811448 node_paths=PackedStringArray("_game_camera", "_folder_level", "_folder_entities", "_folder_effects", "_folder_ui", "level_mspawner", "entities_mspawner", "_dev_canvas")]
+[node name="MainScene" type="Node" unique_id=1180811448 node_paths=PackedStringArray("_game_camera", "_folder_level", "_folder_entities", "_folder_effects", "_folder_ui", "level_mspawner", "_dev_canvas")]
 process_mode = 3
 script = ExtResource("1_awcct")
 _game_camera = NodePath("World/GameCamera")
@@ -13,7 +13,6 @@ _folder_entities = NodePath("World/Entities")
 _folder_effects = NodePath("World/Effects")
 _folder_ui = NodePath("UI")
 level_mspawner = NodePath("Multiplayer/Spawners/LevelMSpawner")
-entities_mspawner = NodePath("Multiplayer/Spawners/EntitiesMSpawner")
 _dev_canvas = NodePath("UI/DevCanvas")
 
 [node name="World" type="Node" parent="." unique_id=1051000033]
@@ -40,6 +39,3 @@ visible = false
 [node name="LevelMSpawner" type="MultiplayerSpawner" parent="Multiplayer/Spawners" unique_id=531030473]
 _spawnable_scenes = PackedStringArray("uid://dyhygadsweine")
 spawn_path = NodePath("../../../World/Level")
-
-[node name="EntitiesMSpawner" type="MultiplayerSpawner" parent="Multiplayer/Spawners" unique_id=808705322]
-_spawnable_scenes = PackedStringArray("uid://b0pw1c17p3b5n")

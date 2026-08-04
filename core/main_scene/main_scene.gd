@@ -50,8 +50,8 @@ var _folder_ui : Node
 @export_subgroup("Multiplayer")
 @export
 var level_mspawner : MultiplayerSpawner
-@export
-var entities_mspawner : MultiplayerSpawner
+#@export
+#var entities_mspawner : MultiplayerSpawner
 @export
 var _dev_canvas : DevCanvas
 
@@ -97,7 +97,7 @@ var active_mech_1 : MechCharacter
 
 
 func _ready() -> void:
-	entities_mspawner.spawned.connect(_on_multiplayer_entity_spawned)
+	#entities_mspawner.spawned.connect(_on_multiplayer_entity_spawned)
 	#entities_mspawner.spawn_function = func(data: Variant) -> Node:
 		#var mech := mech_to_load_0.instantiate() as MechCharacter
 		#mech.name = str(data["peer_id"])
@@ -132,8 +132,8 @@ func _ready() -> void:
 		#if not multiplayer.is_server():
 			#state = EMainSceneState.CLIENT
 	#)
-	NetworkManager.player_connected.connect(func(peerId: int):
-		Debug.print_info("Player joined: %d" % peerId)
+	#NetworkManager.player_connected.connect(func(peerId: int):
+		#Debug.print_info("Player joined: %d" % peerId)
 		#if multiplayer.is_server():
 			#if peerId != 1:
 				#print("Setting main scene state to GAMEPLAY.")
@@ -142,11 +142,11 @@ func _ready() -> void:
 			#if peerId == 1:
 				#print("Setting main scene state to CLIENT.")
 				#state = EMainSceneState.CLIENT
-	)
-	NetworkManager.player_disconnected.connect(func(peerId: int):
-		Debug.print_info("Player left: %d. Calling reset()." % peerId)
-		reset()
-	)
+	#)
+	#NetworkManager.player_disconnected.connect(func(peerId: int):
+		#Debug.print_info("Player left: %d. Calling reset()." % peerId)
+		#reset()
+	#)
 	
 	state = EMainSceneState.BOOTING
 
@@ -321,19 +321,19 @@ func spawn_mech(mechType0: MechRefs.EMech, controllerType0: int, mechType1: Mech
 	#_on_multiplayer_entity_spawned(mech1)
 
 
-func _on_multiplayer_entity_spawned(node: Node):
-	if node is MechCharacter:
-		print("Mech spawned! peerId of mech: ", node.peer_id)
-		if node.peer_id == 1:
-			print("active_mech_0 set")
-			active_mech_0 = node
-		else:
-			print("active_mech_1 set")
-			active_mech_1 = node
-		if node.peer_id == multiplayer.get_unique_id():
-			print("This is my entity. Calling general func.")
-			set_multiplayer_authority(node.peer_id)
-			_on_mech_character_spawned_general(node)
+#func _on_multiplayer_entity_spawned(node: Node):
+	#if node is MechCharacter:
+		#print("Mech spawned! peerId of mech: ", node.peer_id)
+		#if node.peer_id == 1:
+			#print("active_mech_0 set")
+			#active_mech_0 = node
+		#else:
+			#print("active_mech_1 set")
+			#active_mech_1 = node
+		#if node.peer_id == multiplayer.get_unique_id():
+			#print("This is my entity. Calling general func.")
+			#set_multiplayer_authority(node.peer_id)
+			#_on_mech_character_spawned_general(node)
 
 
 func _on_mech_character_spawned_general(mechChar: MechCharacter) -> void:
@@ -359,6 +359,10 @@ func reset() -> void:
 	_dev_canvas.mech_character = null
 	_game_camera.camera_mode = GameCamera.ECameraMode.FREE_FLIGHT
 	_game_camera.first_person_target = null
+
+
+func _exit_tree() -> void:
+	print("_exit_tree() called on MainScene.")
 
 
 func _input(event: InputEvent) -> void:

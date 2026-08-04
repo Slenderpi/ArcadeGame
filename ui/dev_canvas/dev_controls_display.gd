@@ -16,8 +16,10 @@ var _trigger_right : ColorRect
 @export
 var _trigger_both : ColorRect
 @export
+@warning_ignore("unused_private_class_variable")
 var _button_left : ColorRect # TODO
 @export
+@warning_ignore("unused_private_class_variable")
 var _button_right : ColorRect # TODO
 
 var _stick_center_pos : Vector2
