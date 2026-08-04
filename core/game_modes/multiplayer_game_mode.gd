@@ -10,10 +10,10 @@ class_name MultiplayerGameMode
 func start() -> void:
 	Debug.print_success("[GameMode]: MultiplayerGameMode starting!")
 	# TODO: choose level (randomly?)
-	_main_scene.spawn_level(StageRefs.get_stage(StageRefs.EStage.DEV))
+	_main_scene.spawn_stage(StageRefs.get_stage(StageRefs.EStage.DEV))
 	# TODO: allow players to choose character, then spawn characters
 	
-	_main_scene.spawn_mech(
+	_main_scene.spawn_mechs(
 		MechRefs.EMech.MECH_GUY, 1,
 		MechRefs.EMech.MECH_GUY, 1
 	)

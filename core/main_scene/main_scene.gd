@@ -61,7 +61,7 @@ var _state : EMainSceneState = EMainSceneState.BOOTING
 var game_mode : GameMode = null
 
 ## The currently spawned [StageData]
-var active_stage : LevelData
+var active_stage : StageData
 ### The currently spawned [MechCharacter] for Player 0
 #var active_mech_0 : MechCharacter
 ### The currently spawned [MechCharacter] for Player 1
@@ -197,12 +197,12 @@ func _on_state_multiplayer() -> void:
 
 #region PUBLIC METHODS
 
-## Spawns the level.
+## Spawns a stage.
 ## Should only be called by the host.
-func spawn_level(levelResource: Resource) -> void:
+func spawn_stage(levelResource: Resource) -> void:
 	print("[MainScene]: Spawning level")
 	var stage := levelResource.instantiate() as Node3D
-	active_stage = stage as LevelData
+	active_stage = stage as StageData
 	_folder_level.add_child(stage)
 
 
@@ -210,7 +210,7 @@ func spawn_level(levelResource: Resource) -> void:
 ## so their peerId will always be 0.
 ## [br]
 ## [b]This function is server locked.[/b]
-func spawn_mech(mechType0: MechRefs.EMech, controllerType0: int, mechType1: MechRefs.EMech, controllerType1: int) -> void:
+func spawn_mechs(mechType0: MechRefs.EMech, controllerType0: int, mechType1: MechRefs.EMech, controllerType1: int) -> void:
 	if not multiplayer.is_server():
 		return
 	print("[MainScene]: Spawning mechs. My peerId: ", multiplayer.get_unique_id(), " | Other: ", NetworkManager.other_peer_id)
