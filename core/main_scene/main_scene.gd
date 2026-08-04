@@ -116,10 +116,8 @@ func _ready() -> void:
 		reset()
 		multiplayer.multiplayer_peer = NetworkManager.multiplayer.multiplayer_peer
 		if isMultiplayer:
-			NetworkManager.can_versus = false
 			state = EMainSceneState.MULTIPLAYER
 		else:
-			NetworkManager.can_versus = true
 			state = EMainSceneState.SINGLEPLAYER
 	)
 	NetworkManager.disconnected.connect(func():
@@ -170,6 +168,7 @@ func _on_state_booting() -> void:
 
 func _on_state_attraction_mode() -> void:
 	Debug.print_info("MainScene state: ATTRACTION_MODE.")
+	NetworkManager.can_versus = false
 	# TODO: On any controller input, enter 
 	#print("Attraction not yet implemented. Going straight to LOGIN.")
 	#state = EMainSceneState.LOGIN
@@ -192,12 +191,14 @@ func _on_state_matchmaking() -> void:
 
 func _on_state_singleplayer() -> void:
 	Debug.print_info("MainScene state: SINGLEPLAYER.")
+	NetworkManager.can_versus = true
 	game_mode = SingleplayerGameMode.new(self)
 	game_mode.start()
 
 
 func _on_state_multiplayer() -> void:
 	Debug.print_info("MainScene state: MULTIPLAYER.")
+	NetworkManager.can_versus = false
 	if not multiplayer.is_server():
 		return
 	game_mode = MultiplayerGameMode.new(self)

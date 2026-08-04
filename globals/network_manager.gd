@@ -90,24 +90,20 @@ var _curr_call_attempts := 0 # TODO: reset value
 
 func _ready() -> void:
 	multiplayer.peer_connected.connect(func(peerId: int):
-		print_rich("[color=orange]peer_connected fired with peerId %d." % peerId)
+		print_rich("[color=orange]peer_connected signaled with peerId %d." % peerId)
 		if peerId != multiplayer.get_unique_id():
 			other_peer_id = peerId
 			server_started.emit(true)
 	)
 	multiplayer.peer_disconnected.connect(func(peerId: int):
-		print_rich("[color=orange]peer_disconnected fired with peerId %d." % peerId)
+		print_rich("[color=orange]peer_disconnected signaled with peerId %d." % peerId)
 		disconnected.emit()
 	)
-	#multiplayer.connected_to_server.connect(_on_connected_to_server)
+	multiplayer.connected_to_server.connect(func(): print("[color=orange]connected_to_server signaled."))
 	multiplayer.server_disconnected.connect(func():
-		print_rich("[color=orange]server_disconnected fired.")
+		print_rich("[color=orange]server_disconnected signaled.")
 		disconnected.emit()
 	)
-	#multiplayer.peer_connected.connect(_on_peer_connected)
-	#multiplayer.peer_disconnected.connect(_on_peer_disconnected)
-	#multiplayer.connected_to_server.connect(_on_connected_to_server)
-	#multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
 	_print_local_interfaces()
 	_set_local_ips()
@@ -225,7 +221,6 @@ func start_singleplayer_server() -> void:
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	other_peer_id = 0
 	print_rich("[color=green]Server started successfully.")
-	#can_versus = false
 	state = ENetworkManagerState.IDLE # TODO: what state should be next?
 	server_started.emit(false)
 
@@ -283,13 +278,13 @@ func make_packet(message: String) -> String:
 
 ## Stops the server. Only the host should call this.
 func close_server() -> void:
-	Debug.print_info("Closing server.")
+	Debug.print_info("Closing multiplayer peer.")
 	#assert(state == ENetworkManagerState.HOST, "close_server() caller was not in HOST state. Only the HOST should call this.")
 	if multiplayer.multiplayer_peer:
 		multiplayer.multiplayer_peer.close()
 		multiplayer.multiplayer_peer = null
 	else:
-		Debug.print_warning("Attempted to close server but there is currently no multiplayer peer set yet.")
+		Debug.print_warning("Attempted to close multiplayer peer but there is currently none set yet.")
 	# TODO: MainScene should probably trigger returning to CALL state, and this code should instead go to IDLE
 	state = ENetworkManagerState.IDLE
 	#state = ENetworkManagerState.CALLING
@@ -317,7 +312,6 @@ func _create_server() -> void:
 		return
 	multiplayer.multiplayer_peer = peer
 	print_rich("[color=green]Server started successfully.")
-	#can_versus = false
 	state = ENetworkManagerState.IDLE # TODO: what state should be next?
 	_broadcast_server_created()
 
@@ -331,10 +325,8 @@ func _create_client() -> void:
 		Debug.print_error("Failed to create client. Error: %s" % error)
 		return
 	multiplayer.multiplayer_peer = peer
-	other_peer_id = 1
 	print_rich("[color=green]Client created and joined successfully.")
 	#state = ENetworkManagerState.CLIENT
-	#can_versus = false
 	state = ENetworkManagerState.IDLE # TODO: what state should be next?
 	#player_connected.emit(peer.get_unique_id())
 	# TODO: server_started needs to be emitted on probably the peer_connected signal
