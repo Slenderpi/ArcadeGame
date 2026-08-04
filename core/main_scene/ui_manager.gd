@@ -50,6 +50,11 @@ func on_matchmaking_result(foundPeer: bool) -> void:
 	_matchmaking_canvas.on_matchmaking_result(foundPeer)
 
 
+func on_versus_found() -> void:
+	_matchmaking_canvas.show()
+	_matchmaking_canvas.on_matchmaking_result(true)
+
+
 func on_mech_spawned(mechChar: MechCharacter) -> void:
 	_dev_canvas.mech_character = mechChar
 	_dev_canvas.show()

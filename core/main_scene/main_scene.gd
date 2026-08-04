@@ -306,6 +306,7 @@ func _choose_host_ip(peerIp: String) -> String:
 func _on_versus_peer_found() -> void:
 	print("[MainScene]: Versus peer found. Current game should get paused and UI'd.")
 	reset()
+	_ui_manager.on_versus_found()
 	state = EMainSceneState.IDLE
 
 
