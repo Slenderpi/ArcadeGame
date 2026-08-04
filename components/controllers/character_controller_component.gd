@@ -26,5 +26,4 @@ class_name CharacterControllerComponent
 
 
 ## Reference to the [MechCharacter] this component has been put as a child of.
-## Only set at [code]_ready()[/code] time.
-@onready var mech_character: MechCharacter = get_parent()
+var mech_character: MechCharacter

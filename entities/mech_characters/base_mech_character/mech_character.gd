@@ -19,26 +19,48 @@ var movement_force : float = 1.0
 @export
 var gravity_coefficient : float = 1.0
 
+## Should be set by MainScene when this character is instantiated.
+## The following values map to the following controller types:[br]
+## - 0: [DummyControllerComponent][br]
+## - 1: [PlayerControllerComponent][br]
+## - 2: [AIControllerComponent]
+@export
+var controller_type : int
+
+
 var _stick_input_left : Vector2
 var _stick_input_right : Vector2
-var _is_attack_left : bool
-var _is_attack_right : bool
-var _is_attack_both : bool
+var _is_trigger_left : bool
+var _is_trigger_right : bool
+var _is_trigger_both : bool
+var _is_button_left : bool
+var _is_button_right : bool
+
+
+func _ready() -> void:
+	_init_authority()
+	if not is_multiplayer_authority():
+		return
+	_init_controller()
 
 
 func _physics_process(delta: float) -> void:
 	# TODO: _handle_movement()
 	var moveL := Vector3(_stick_input_left.x, 0, _stick_input_left.y)
 	var moveR := Vector3(_stick_input_right.x, 0, _stick_input_right.y)
-	velocity += moveL * 3 + moveR * 3
-	# TODO: _handle_attack()
-	if _is_attack_both:
-		print("ATK_B")
+	velocity += (moveL * 3 + moveR * 3) * transform.basis
+	# TODO: _handle_trigger(), _handle_button()
+	if _is_trigger_both:
+		print("TRG_B")
 	else:
-		if _is_attack_left:
-			print("ATK_L")
-		if _is_attack_right:
-			print("ATK_R")
+		if _is_trigger_left:
+			print("TRG_L")
+		if _is_trigger_right:
+			print("TRG_R")
+	if _is_button_left:
+		print("BTN_L")
+	if _is_button_right:
+		print("BTN_R")
 	# TODO: _handle_drag()
 	velocity *= 0.7
 	_handle_gravity(delta)
@@ -58,24 +80,57 @@ func set_movement_intent(stickL: Vector2, stickR: Vector2) -> void:
 
 
 ## A [CharacterControllerComponent] should call this function when the left stick's
-## attack input is fired.
-func set_attack_left() -> void:
-	_is_attack_left = true
+## trigger input is fired.
+func set_trigger_left() -> void:
+	_is_trigger_left = true
 
 
 ## A [CharacterControllerComponent] should call this function when the right stick's
-## attack input is fired.
-func set_attack_right() -> void:
-	_is_attack_right = true
+## trigger input is fired.
+func set_trigger_right() -> void:
+	_is_trigger_right = true
 
 
-## A [CharacterControllerComponent] should call this function when both stick attack
+## A [CharacterControllerComponent] should call this function when both stick trigger
 ## inputs are fired at the same time.
-func set_attack_both() -> void:
-	_is_attack_both = true
+func set_trigger_both() -> void:
+	_is_trigger_both = true
+
+
+## A [CharacterControllerComponent] should call this function when the left stick's
+## button input is fired.
+func set_button_left() -> void:
+	_is_button_left = true
+
+
+## A [CharacterControllerComponent] should call this function when the right stick's
+## button input is fired.
+func set_button_right() -> void:
+	_is_button_right = true
 
 
 func _reset_attack_input_states() -> void:
-	_is_attack_left = false
-	_is_attack_right = false
-	_is_attack_both = false
+	_is_trigger_left = false
+	_is_trigger_right = false
+	_is_trigger_both = false
+	_is_button_left = false
+	_is_button_right = false
+
+
+func _init_authority() -> void:
+	var peerId := name.to_int()
+	if peerId != 0:
+		set_multiplayer_authority(peerId)
+
+
+func _init_controller() -> void:
+	var cntrlr : CharacterControllerComponent = null
+	match controller_type:
+		0:
+			cntrlr = DummyControllerComponent.new()
+		1:
+			cntrlr = PlayerControllerComponent.new()
+		2:
+			cntrlr = AIControllerComponent.new()
+	cntrlr.mech_character = self
+	add_child(cntrlr)
