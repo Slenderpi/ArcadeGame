@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://sadwmo5w5424"]
+
+[ext_resource type="Script" uid="uid://b3mlyqr4jevk6" path="res://ui/transition_canvas/transition_canvas.gd" id="1_ltcdm"]
+
+[node name="TransitionCanvas" type="CanvasLayer" unique_id=179553619]
+script = ExtResource("1_ltcdm")
