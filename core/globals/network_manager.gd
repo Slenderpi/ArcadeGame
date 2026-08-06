@@ -105,16 +105,6 @@ var _curr_call_attempts := 0
 func _ready() -> void:
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
-	
-	if VERBOSE:
-		_print_local_interfaces()
-	_set_local_ips()
-	_init_udp()
-	#state = ENetworkManagerState.CALLING
-	Debug.print_success("[NetMan]: Setup finished. Changing to IDLE state.\n\
------------------------------------------------------------------------------\
-\n")
-	state = ENetworkManagerState.IDLE
 
 
 func _process(_delta: float) -> void:
@@ -129,6 +119,21 @@ func _process(_delta: float) -> void:
 #endregion
 
 #region PUBLIC METHODS
+
+## Gets local IPs, preferred IP, and initializes UDP.
+func init() -> void:
+	Debug.print_info(Debug.HORIZONTAL_LINE_STR)
+	Debug.print_info("[NetMan]: Initializing.")
+	if VERBOSE:
+		_print_local_interfaces()
+	_set_local_ips()
+	_init_udp()
+	#state = ENetworkManagerState.CALLING
+	#if VERBOSE:
+	Debug.print_success("[NetMan]: Setup finished. Changing to IDLE state.")
+	Debug.print_info(Debug.HORIZONTAL_LINE_STR)
+	state = ENetworkManagerState.IDLE
+
 
 ## Tells the NetworkManager to start looking for a peer.[br][br]
 ## This function is asynchronous.[br][br]
@@ -245,11 +250,12 @@ func _set_local_ips() -> void:
 				addri += 1
 				ipOption = addresses[addri]
 		my_ip = ipOption
-	Debug.print_info("[NetMan]: Local ips on this device: \n%s" % str(my_local_ips))
+	if VERBOSE:
+		Debug.print_info("[NetMan]: Local ips on this device: \n%s" % str(my_local_ips))
 	if my_ip.is_empty():
 		Debug.print_error("[NetMan]: No ethernet IP was found!")
 	else:
-		Debug.print_success("[NetMan]: Found my %s address: %s" % ["ETHERNET" if USE_ETH_IP else "WIFI", my_ip])
+		Debug.print_notify("[NetMan]: Found my %s address: %s" % ["ETHERNET" if USE_ETH_IP else "WIFI", my_ip])
 
 
 func _friendly_interface_req(friendlyLowered: String) -> bool:
@@ -389,7 +395,7 @@ func _print_local_interfaces() -> void:
 	var interfaces := IP.get_local_interfaces()
 	Debug.print_info("[NetMan]: PRINTING LOCAL INTERFACES. Unorganized listing:")
 	print(interfaces)
-	Debug.print_info("-----------------------------------------------------------------------------")
+	print(Debug.HORIZONTAL_LINE_STR)
 	for interface in interfaces:
 		print(
 			"index: ", interface["index"], '\n',
@@ -397,6 +403,8 @@ func _print_local_interfaces() -> void:
 			"friendly: ", interface["friendly"], '\n',
 			"addresses: ", interface["addresses"], '\n'
 		)
-	Debug.print_info("Done printing interfaces.\n-----------------------------------------------------------------------------\n")
+	Debug.print_info("Done printing interfaces.")
+	print(Debug.HORIZONTAL_LINE_STR)
+	print()
 
 #endregion

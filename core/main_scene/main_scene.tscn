@@ -7,14 +7,14 @@
 [ext_resource type="PackedScene" uid="uid://ktk85mqyxoxj" path="res://ui/dev_canvas/dev_canvas.tscn" id="4_et8y5"]
 [ext_resource type="PackedScene" uid="uid://466rsrq2ccb7" path="res://ui/matchmaking_canvas/matchmaking_canvas.tscn" id="5_0lowg"]
 
-[node name="MainScene" type="Node" unique_id=1180811448 node_paths=PackedStringArray("_game_camera", "_folder_level", "_folder_characters", "_folder_effects", "_folder_local_only", "_ui_manager", "level_mspawner")]
+[node name="MainScene" type="Node" unique_id=1180811448 node_paths=PackedStringArray("_game_camera", "_folder_level", "_folder_characters", "_folder_effects", "folder_arcade_visuals", "_ui_manager", "level_mspawner")]
 process_mode = 3
 script = ExtResource("1_awcct")
 _game_camera = NodePath("World/GameCamera")
 _folder_level = NodePath("World/Level")
 _folder_characters = NodePath("World/Characters")
 _folder_effects = NodePath("World/Effects")
-_folder_local_only = NodePath("World/LocalOnly")
+folder_arcade_visuals = NodePath("ArcadeVisuals")
 _ui_manager = NodePath("UI")
 level_mspawner = NodePath("Multiplayer/Spawners/LevelMSpawner")
 
@@ -31,7 +31,7 @@ transform = Transform3D(1, 0, 0, 0, 0.86602545, 0.50000006, 0, -0.50000006, 0.86
 [node name="Effects" type="Node3D" parent="World" unique_id=1181375799]
 visible = false
 
-[node name="LocalOnly" type="Node3D" parent="World" unique_id=685286075]
+[node name="ArcadeVisuals" type="Node" parent="." unique_id=1031369584]
 
 [node name="UI" type="Node" parent="." unique_id=690036975 node_paths=PackedStringArray("_attraction_mode_canvas", "_matchmaking_canvas", "_dev_canvas")]
 script = ExtResource("3_frsyw")

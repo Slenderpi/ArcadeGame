@@ -23,6 +23,7 @@ enum EMainSceneState {
 
 #region INSPECTOR EXPORTS
 
+# TODO: maybe folders should be public instead of private?
 @export_group("References")
 @export_subgroup("World")
 @export
@@ -34,9 +35,9 @@ var _folder_characters : Node3D
 @export
 @warning_ignore("unused_private_class_variable")
 var _folder_effects : Node3D
+@export_subgroup("ArcadeVisuals")
 @export
-@warning_ignore("unused_private_class_variable")
-var _folder_local_only : Node3D
+var folder_arcade_visuals : Node
 @export_subgroup("UI")
 @export
 var _ui_manager : UiManager
@@ -73,11 +74,13 @@ var active_stage : StageData
 #region NODE OVERRIDES
 
 func _ready() -> void:
-	NetworkManager.versus_peer_found.connect(_on_versus_peer_found)
-	NetworkManager.server_started.connect(_on_server_started)
-	NetworkManager.disconnected.connect(_on_disconnected)
-	_ui_manager._main_scene = self
-	state = EMainSceneState.BOOTING
+	GameStateManager.folder_arcade_visuals = folder_arcade_visuals
+	GameStateManager.start()
+	#NetworkManager.versus_peer_found.connect(_on_versus_peer_found)
+	#NetworkManager.server_started.connect(_on_server_started)
+	#NetworkManager.disconnected.connect(_on_disconnected)
+	#_ui_manager._main_scene = self
+	#state = EMainSceneState.BOOTING
 
 
 func _process(_delta: float) -> void:

@@ -21,6 +21,8 @@ Debug="*uid://cu7bimfn6fy4k"
 NetworkManager="*uid://cc0bu236eu6gu"
 StageRefs="*uid://3xmhx6ujbonj"
 MechRefs="*uid://dno30suxsuaq5"
+StateFactory="*uid://bvwh2welguxak"
+GameStateManager="*uid://cu45ybo3nkhm2"
 
 [display]
 

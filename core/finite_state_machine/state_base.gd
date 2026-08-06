@@ -3,6 +3,11 @@ class_name StateBase
 ## Base class for all states.
 
 
+## Emitted by a state when it has reached a transition condition.
+@warning_ignore("unused_signal")
+signal finished(payload: Dictionary)
+
+
 ## Reference to the owning [StateMachine]. Set this on creation.
 var machine: StateMachine
 
