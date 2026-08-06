@@ -7,14 +7,33 @@ script = ExtResource("1_ybrop")
 
 [node name="CharacterSelectCanvasLayer" type="CanvasLayer" parent="." unique_id=1404735186]
 
-[node name="Title" type="Label" parent="CharacterSelectCanvasLayer" unique_id=1083540503]
-anchors_preset = 1
+[node name="Control" type="Control" parent="CharacterSelectCanvasLayer" unique_id=1581338755]
+layout_mode = 3
+anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -545.0
-offset_top = 32.0
-offset_right = -35.0
-offset_bottom = 101.0
+anchor_bottom = 1.0
+offset_left = -707.0
 grow_horizontal = 0
-theme_override_font_sizes/font_size = 50
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="CharacterSelectCanvasLayer/Control" unique_id=1083540503]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 69.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 65
 text = "CHOOSE YOUR MECH"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MechOptionsContainer" type="VBoxContainer" parent="CharacterSelectCanvasLayer/Control" unique_id=1624599732]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 90.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1

@@ -101,6 +101,14 @@ func _physics_process(_delta: float) -> void:
 
 #region PUBLIC METHODS
 
+func is_any_stick_up() -> bool:
+	return left_stick.y > 0 or right_stick.y > 0
+
+
+func is_any_stick_down() -> bool:
+	return left_stick.y < 0 or right_stick.y < 0
+
+
 ## Returns true if any trigger/button is down,
 ## or if any stick has a non-zero input.
 func is_any_input_active() -> bool:

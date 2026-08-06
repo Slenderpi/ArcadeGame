@@ -2,7 +2,7 @@ extends Node
 
 
 ## If true, will skip from BootingState to GameplayState/CombatState
-const DEV_SKIP_TO_COMBAT : bool = true
+const DEV_SKIP_TO_COMBAT : bool = false
 ## If SKIP_TO_COMBAT is true, this stage will be the one that gets spawned.
 const DEV_SKIP_STAGE : StageRefs.EStage = StageRefs.EStage.DEV
 ## If SKIP_TO_COMBAT is true, this stage will be the mech that's spawned for Player0.

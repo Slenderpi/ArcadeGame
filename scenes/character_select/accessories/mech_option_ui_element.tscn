@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://crhsh3tdb7q8q"]
+
+[ext_resource type="Script" uid="uid://x82w8w1sisgp" path="res://scenes/character_select/accessories/mech_option_ui_element.gd" id="1_c1gf7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v0o2x"]
+bg_color = Color(1, 1, 1, 0)
+
+[node name="MechOption" type="PanelContainer" unique_id=1871565670 node_paths=PackedStringArray("_mech_name", "_colorbg")]
+offset_right = 182.0
+offset_bottom = 42.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_v0o2x")
+script = ExtResource("1_c1gf7")
+_mech_name = NodePath("MechNameLabel")
+_colorbg = NodePath("ColorBg")
+
+[node name="ColorBg" type="ColorRect" parent="." unique_id=1428462273]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0, 0, 0, 1)
+
+[node name="MechNameLabel" type="Label" parent="." unique_id=1291958033]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "MECH NAME"
+horizontal_alignment = 1
+vertical_alignment = 1

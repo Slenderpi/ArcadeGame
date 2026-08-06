@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://dpur4ohedv0cr"]
+
+[ext_resource type="PackedScene" uid="uid://dgykbgiwf7lyp" path="res://entities/mech_characters/base_mech_character/mech_character.tscn" id="1_rfdrp"]
+[ext_resource type="Material" uid="uid://4gde1ns6vkty" path="res://assets/basic_materials/m_red.tres" id="2_e0ehq"]
+[ext_resource type="Material" uid="uid://btkumge4biux0" path="res://assets/basic_materials/m_green.tres" id="2_www8m"]
+[ext_resource type="Material" uid="uid://dl140m1352mpw" path="res://assets/basic_materials/m_blue.tres" id="3_ignb2"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_itdpc"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_tkwxs"]
+size = Vector3(0.5, 0.333, 0.5)
+
+[sub_resource type="TorusMesh" id="TorusMesh_xse17"]
+inner_radius = 0.35
+outer_radius = 0.6
+
+[node name="CharacterBody3D" unique_id=1402290052 instance=ExtResource("1_rfdrp")]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="1" unique_id=1888775768]
+material_override = ExtResource("2_e0ehq")
+mesh = SubResource("CapsuleMesh_itdpc")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="." index="2" unique_id=1940781591]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.5)
+material_override = ExtResource("3_ignb2")
+mesh = SubResource("BoxMesh_tkwxs")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="." index="3" unique_id=1707213659]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+material_override = ExtResource("2_www8m")
+mesh = SubResource("TorusMesh_xse17")
