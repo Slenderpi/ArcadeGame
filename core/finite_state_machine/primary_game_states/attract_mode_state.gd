@@ -13,9 +13,10 @@ func enter(_payload: Dictionary = {}) -> void:
 
 
 func update(_delta: float) -> void:
-	# TODO TEMP
-	if Input.is_action_just_pressed(&"insert_coin"):
-		print("Coin insert detected")
+	if not CreditManager.has_credits():
+		return
+	if InputReader.is_any_binary_active():
+		print("[State][Primary][AttractMode]: Binary input detected. Game starting!")
 		finished.emit()
 
 

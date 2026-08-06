@@ -18,10 +18,11 @@ config/icon="res://icon.svg"
 [autoload]
 
 Debug="*uid://cu7bimfn6fy4k"
+StateFactory="*uid://bvwh2welguxak"
 NetworkManager="*uid://cc0bu236eu6gu"
 StageRefs="*uid://3xmhx6ujbonj"
 MechRefs="*uid://dno30suxsuaq5"
-StateFactory="*uid://bvwh2welguxak"
+CreditManager="*uid://bq6iep24jqbwu"
 Transitioner="*uid://0t4sirk62alu"
 InputReader="*uid://cfkhdv867l8hl"
 GameStateManager="*uid://cu45ybo3nkhm2"
@@ -111,6 +112,11 @@ right_button={
 insert_coin={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":89,"key_label":0,"unicode":121,"location":0,"echo":false,"script":null)
+]
+}
+toggle_freeplay={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":80,"key_label":0,"unicode":112,"location":0,"echo":false,"script":null)
 ]
 }
 
