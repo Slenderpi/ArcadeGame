@@ -51,8 +51,6 @@ func _enter_state_attract_mode() -> void:
 
 
 func _enter_state_gameplay() -> void:
-	var gameplayState := GameplayState.new()
-	gameplayState.finished.connect(_enter_state_attract_mode, CONNECT_ONE_SHOT)
-	fsm.change_state(gameplayState)
+	fsm.change_state(StateFactory.create(GameplayState, _enter_state_attract_mode))
 
 #endregion

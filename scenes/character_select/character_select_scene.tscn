@@ -4,3 +4,17 @@
 
 [node name="CharacterSelectScene" type="Node" unique_id=810698279]
 script = ExtResource("1_ybrop")
+
+[node name="CharacterSelectCanvasLayer" type="CanvasLayer" parent="." unique_id=1404735186]
+
+[node name="Title" type="Label" parent="CharacterSelectCanvasLayer" unique_id=1083540503]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -545.0
+offset_top = 32.0
+offset_right = -35.0
+offset_bottom = 101.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 50
+text = "CHOOSE YOUR MECH"

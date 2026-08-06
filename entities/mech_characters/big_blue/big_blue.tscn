@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://chkvtt5oby7v0"]
+
+[ext_resource type="PackedScene" uid="uid://dgykbgiwf7lyp" path="res://entities/mech_characters/base_mech_character/mech_character.tscn" id="1_kjemn"]
+[ext_resource type="Material" uid="uid://4gde1ns6vkty" path="res://assets/basic_materials/m_red.tres" id="3_6sqr2"]
+[ext_resource type="Material" uid="uid://vorepyqm7cm3" path="res://assets/basic_materials/m_cyan.tres" id="3_dt8xs"]
+[ext_resource type="Material" uid="uid://dl140m1352mpw" path="res://assets/basic_materials/m_blue.tres" id="3_lj7mc"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_44t86"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_xse17"]
+size = Vector3(0.5, 1.2, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tkwxs"]
+size = Vector3(0.5, 0.333, 0.5)
+
+[node name="CharacterBody3D" unique_id=1402290052 instance=ExtResource("1_kjemn")]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="1" unique_id=1888775768]
+material_override = ExtResource("3_lj7mc")
+mesh = SubResource("CylinderMesh_44t86")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="MeshInstance3D" index="0" unique_id=1791445430]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.2, 0)
+material_override = ExtResource("3_dt8xs")
+mesh = SubResource("BoxMesh_xse17")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="MeshInstance3D" index="1" unique_id=429425682]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.2, 0)
+material_override = ExtResource("3_dt8xs")
+mesh = SubResource("BoxMesh_xse17")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="." index="2" unique_id=1940781591]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.5)
+material_override = ExtResource("3_6sqr2")
+mesh = SubResource("BoxMesh_tkwxs")

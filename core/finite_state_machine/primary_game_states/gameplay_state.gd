@@ -20,6 +20,8 @@ func exit() -> void:
 	Debug.print_info("[State][Primary][Gameplay]: << exit()")
 
 
+#region STATE PROCESSES
+
 func _enter_state_character_select() -> void:
 	fsm.change_state(StateFactory.create(CharacterSelectState, _enter_state_stage_select))
 
@@ -44,6 +46,7 @@ func _enter_state_results(payload: Dictionary) -> void:
 	print("[State][Primary][Gameplay]: _enter_state_results() given payload %s." % str(payload))
 	fsm.change_state(StateFactory.create(ResultsState, _on_gameplay_state_finished), payload)
 
+
 # TODO
 # payload idea: rematch yes/no
 func _on_gameplay_state_finished(payload: Dictionary) -> void:
@@ -51,3 +54,5 @@ func _on_gameplay_state_finished(payload: Dictionary) -> void:
 	await fsm.change_state(StateBase.new())
 	# TODO TEMP: no rematch
 	finished.emit()
+
+#endregion
