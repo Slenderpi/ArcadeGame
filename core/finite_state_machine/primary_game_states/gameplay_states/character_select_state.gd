@@ -15,7 +15,7 @@ func enter(_payload: Dictionary = {}) -> void:
 func update(_delta: float) -> void:
 	# TODO: Character selection
 	if InputReader.is_any_binary_active():
-		finished.emit({&"player0": MechRefs.EMech.MECH_GUY, &"player1": MechRefs.EMech.BIG_BLUE})
+		finished.emit({&"mech0": MechRefs.EMech.MECH_GUY, &"mech1": MechRefs.EMech.BIG_BLUE})
 
 
 func exit() -> void:

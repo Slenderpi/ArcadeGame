@@ -4,7 +4,7 @@ class_name BootingState
 
 func enter(payload: Dictionary = {}) -> void:
 	Debug.print_info("[State][Primary][Booting]: >> enter()")
-	var mainScene : MainScene = payload["main_scene"]
+	var mainScene : MainScene = payload[&"main_scene"]
 	CreditManager.init()
 	NetworkManager.init()
 	Transitioner.init(mainScene)

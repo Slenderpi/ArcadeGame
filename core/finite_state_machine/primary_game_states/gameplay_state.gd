@@ -8,7 +8,14 @@ var fsm : StateMachine
 func enter(_payload: Dictionary = {}) -> void:
 	Debug.print_info("[State][Primary][Gameplay]: >> enter()")
 	fsm = StateMachine.new()
-	_enter_state_character_select()
+	if GameStateManager.DEV_SKIP_TO_COMBAT:
+		_enter_state_combat({
+			&"mech0": GameStateManager.DEV_SKIP_MECH_0,
+			&"mech1": GameStateManager.DEV_SKIP_MECH_1,
+			&"stage": GameStateManager.DEV_SKIP_STAGE
+		})
+	else:
+		_enter_state_character_select()
 	await Transitioner.end_transition()
 
 

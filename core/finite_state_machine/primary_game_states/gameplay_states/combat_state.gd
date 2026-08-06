@@ -13,12 +13,12 @@ func enter(payload: Dictionary = {}) -> void:
 	_spawned_stage = StageRefs.instantiate_stage(StageRefs.EStage.DEV)
 	GameStateManager.folder_arcade_visuals.add_child(_spawned_stage)
 	
-	_mech_0 = MechRefs.instantiate_mech(payload[&"player0"])
+	_mech_0 = MechRefs.instantiate_mech(payload[&"mech0"])
 	_mech_0.controller_type = 1
 	_mech_0.name = "1"
 	_mech_0.transform = _spawned_stage.spawn_point_0.transform
 	
-	_mech_1 = MechRefs.instantiate_mech(payload[&"player1"])
+	_mech_1 = MechRefs.instantiate_mech(payload[&"mech1"])
 	_mech_1.controller_type = 0
 	_mech_1.name = "0"
 	_mech_1.transform = _spawned_stage.spawn_point_1.transform
