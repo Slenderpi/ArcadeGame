@@ -9,7 +9,7 @@ signal finished(payload: Dictionary)
 
 
 ## Reference to the owning [StateMachine]. Set this on creation.
-var machine: StateMachine
+var fsm_owner: StateMachine
 
 
 ## Called when the owning [StateMachine] switches to this state.

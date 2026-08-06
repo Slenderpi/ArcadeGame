@@ -26,8 +26,6 @@ var _stick_center_pos : Vector2
 #var _attack_left_color : Color
 #var _attack_
 
-var _mech_character : MechCharacter
-
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -36,18 +34,16 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if not _mech_character:
-		return
-	_stick_left.position = _stick_center_pos + _stick_size * _mech_character._stick_input_left
-	_stick_right.position = _stick_center_pos + _stick_size * _mech_character._stick_input_right
-	if _mech_character._is_trigger_both:
+	_stick_left.position = _stick_center_pos + _stick_size * InputReader.left_stick
+	_stick_right.position = _stick_center_pos + _stick_size * InputReader.right_stick
+	if InputReader.both_triggers_down:
 		_trigger_both.color.a = 1.0
 		_trigger_left.color.a = 0.0
 		_trigger_right.color.a = 0.0
 	else:
 		_trigger_both.color.a = 0.0
-		_trigger_left.color.a = 1.0 if _mech_character._is_trigger_left else 0.0
-		_trigger_right.color.a = 1.0 if _mech_character._is_trigger_right else 0.0
+		_trigger_left.color.a = 1.0 if InputReader.left_trigger_down else 0.0
+		_trigger_right.color.a = 1.0 if InputReader.right_trigger_down else 0.0
 
 
 func _init_sticks() -> void:

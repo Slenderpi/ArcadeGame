@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://cwdijfbd8pejl"]
+
+[ext_resource type="PackedScene" uid="uid://c18chs8n78i2r" path="res://scenes/attract_mode/attraction_mode_canvas.tscn" id="1_nlw2i"]
+
+[node name="AttractModeScene" type="Node" unique_id=607145183]
+
+[node name="Node3D" type="Node3D" parent="." unique_id=904379251]
+
+[node name="AttractionModeCanvas" parent="." unique_id=806381166 instance=ExtResource("1_nlw2i")]

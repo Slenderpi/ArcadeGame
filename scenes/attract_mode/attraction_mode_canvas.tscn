@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c18chs8n78i2r"]
 
-[ext_resource type="Script" uid="uid://cu0hshis8nvgo" path="res://ui/attraction_mode_canvas/attraction_mode_canvas.gd" id="1_ml8s1"]
+[ext_resource type="Script" uid="uid://cu0hshis8nvgo" path="res://scenes/attract_mode/attraction_mode_canvas.gd" id="1_ml8s1"]
 [ext_resource type="Texture2D" uid="uid://ct3sd0mcxvukg" path="res://assets/images/virtual_on_logo.png" id="2_0h5f8"]
 
 [node name="AttractionModeCanvas" type="CanvasLayer" unique_id=806381166]

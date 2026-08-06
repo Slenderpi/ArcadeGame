@@ -9,9 +9,8 @@
 [ext_resource type="Script" uid="uid://xuoarewnke7n" path="res://ui/dev_canvas/dev_controls_display.gd" id="7_bfnto"]
 [ext_resource type="Texture2D" uid="uid://bi24qsjbteoq3" path="res://icon.svg" id="7_uw75p"]
 
-[node name="DevCanvas" type="CanvasLayer" unique_id=159376391 node_paths=PackedStringArray("_controls_display")]
+[node name="DevCanvas" type="CanvasLayer" unique_id=159376391]
 script = ExtResource("1_urbsn")
-_controls_display = NodePath("ControlsDisplay")
 
 [node name="Panel" type="Panel" parent="." unique_id=529319228]
 offset_right = 172.0

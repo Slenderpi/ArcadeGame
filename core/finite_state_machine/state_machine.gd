@@ -38,7 +38,7 @@ func change_state(nextState: StateBase, payload: Dictionary = {}) -> void:
 	if current_state:
 		await current_state.exit()
 	current_state = nextState
-	current_state.machine = self
+	current_state.fsm_owner = self
 	await current_state.enter(payload)
 	_transitioning = false
 	_drain_event_queue()

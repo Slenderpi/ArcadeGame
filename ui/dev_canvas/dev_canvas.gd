@@ -2,8 +2,8 @@ extends CanvasBase
 class_name DevCanvas
 
 
-@export
-var _controls_display : DevControlsDisplay
+#@export
+#var _controls_display : DevControlsDisplay
 
 
 var mech_character : MechCharacter:
@@ -16,7 +16,8 @@ var _mech_character : MechCharacter
 
 
 func _set_children_mech_character_refs() -> void:
-	_controls_display._mech_character = mech_character
+	#_controls_display._mech_character = mech_character
+	pass
 
 
 func _on_hide() -> void:

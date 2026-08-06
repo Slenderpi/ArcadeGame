@@ -10,7 +10,7 @@ var _matchmaking_canvas : MatchmakingCanvas
 @export
 var _dev_canvas : DevCanvas
 
-var _main_scene : MainScene
+#var _main_scene : MainScene
 
 
 func _ready() -> void:

@@ -40,6 +40,8 @@ var _folder_effects : Node3D
 var folder_arcade_visuals : Node
 @export_subgroup("UI")
 @export
+var transition_canvas : TransitionCanvas
+@export
 var _ui_manager : UiManager
 @export_subgroup("Multiplayer")
 @export
@@ -74,8 +76,8 @@ var active_stage : StageData
 #region NODE OVERRIDES
 
 func _ready() -> void:
-	GameStateManager.folder_arcade_visuals = folder_arcade_visuals
-	GameStateManager.start()
+	#GameStateManager.folder_arcade_visuals = folder_arcade_visuals
+	GameStateManager.start(self)
 	#NetworkManager.versus_peer_found.connect(_on_versus_peer_found)
 	#NetworkManager.server_started.connect(_on_server_started)
 	#NetworkManager.disconnected.connect(_on_disconnected)
@@ -84,12 +86,13 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	if Input.is_action_just_pressed(&"insert_coin"):
-		# TODO: TEMP, should be done in a coin manager
-		print_rich("[color=orange][MainScene]: COIN KEY PRESSED. COIN INSERT SIMULATED.")
-		if state == EMainSceneState.ATTRACTION_MODE:
-			Debug.print_success("[MainScene]: Matchmaking triggered.")
-			state = EMainSceneState.MATCHMAKING
+	pass
+	#if Input.is_action_just_pressed(&"insert_coin"):
+		## TODO: TEMP, should be done in a coin manager
+		#print_rich("[color=orange][MainScene]: COIN KEY PRESSED. COIN INSERT SIMULATED.")
+		#if state == EMainSceneState.ATTRACTION_MODE:
+			#Debug.print_success("[MainScene]: Matchmaking triggered.")
+			#state = EMainSceneState.MATCHMAKING
 
 
 func _input(event: InputEvent) -> void:

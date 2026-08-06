@@ -2,12 +2,13 @@
 
 [ext_resource type="Script" uid="uid://dqgs0suqdr0ic" path="res://core/main_scene/main_scene.gd" id="1_awcct"]
 [ext_resource type="PackedScene" uid="uid://dn3hp2lqhrwn8" path="res://core/game_camera/game_camera.tscn" id="3_3gbtc"]
-[ext_resource type="PackedScene" uid="uid://c18chs8n78i2r" path="res://ui/attraction_mode_canvas/attraction_mode_canvas.tscn" id="3_et8y5"]
+[ext_resource type="PackedScene" uid="uid://c18chs8n78i2r" path="res://scenes/attract_mode/attraction_mode_canvas.tscn" id="3_et8y5"]
 [ext_resource type="Script" uid="uid://bfmvmxjsy7hbo" path="res://core/main_scene/ui_manager.gd" id="3_frsyw"]
 [ext_resource type="PackedScene" uid="uid://ktk85mqyxoxj" path="res://ui/dev_canvas/dev_canvas.tscn" id="4_et8y5"]
+[ext_resource type="PackedScene" uid="uid://sadwmo5w5424" path="res://ui/transition_canvas/transition_canvas.tscn" id="4_v3gik"]
 [ext_resource type="PackedScene" uid="uid://466rsrq2ccb7" path="res://ui/matchmaking_canvas/matchmaking_canvas.tscn" id="5_0lowg"]
 
-[node name="MainScene" type="Node" unique_id=1180811448 node_paths=PackedStringArray("_game_camera", "_folder_level", "_folder_characters", "_folder_effects", "folder_arcade_visuals", "_ui_manager", "level_mspawner")]
+[node name="MainScene" type="Node" unique_id=1180811448 node_paths=PackedStringArray("_game_camera", "_folder_level", "_folder_characters", "_folder_effects", "folder_arcade_visuals", "transition_canvas", "_ui_manager", "level_mspawner")]
 process_mode = 3
 script = ExtResource("1_awcct")
 _game_camera = NodePath("World/GameCamera")
@@ -15,6 +16,7 @@ _folder_level = NodePath("World/Level")
 _folder_characters = NodePath("World/Characters")
 _folder_effects = NodePath("World/Effects")
 folder_arcade_visuals = NodePath("ArcadeVisuals")
+transition_canvas = NodePath("UI/TransitionCanvas")
 _ui_manager = NodePath("UI")
 level_mspawner = NodePath("Multiplayer/Spawners/LevelMSpawner")
 
@@ -40,10 +42,15 @@ _matchmaking_canvas = NodePath("MatchmakingCanvas")
 _dev_canvas = NodePath("DevCanvas")
 
 [node name="AttractionModeCanvas" parent="UI" unique_id=806381166 instance=ExtResource("3_et8y5")]
+visible = false
 
 [node name="MatchmakingCanvas" parent="UI" unique_id=1058228126 instance=ExtResource("5_0lowg")]
+visible = false
+
+[node name="TransitionCanvas" parent="UI" unique_id=179553619 instance=ExtResource("4_v3gik")]
 
 [node name="DevCanvas" parent="UI" unique_id=159376391 instance=ExtResource("4_et8y5")]
+visible = false
 
 [node name="Multiplayer" type="Node" parent="." unique_id=2046824306]
 

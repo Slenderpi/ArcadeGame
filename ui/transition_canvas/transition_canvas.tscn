@@ -4,3 +4,11 @@
 
 [node name="TransitionCanvas" type="CanvasLayer" unique_id=179553619]
 script = ExtResource("1_ltcdm")
+
+[node name="BlackFadeTransition" type="ColorRect" parent="." unique_id=2010197852]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0)

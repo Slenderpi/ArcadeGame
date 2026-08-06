@@ -30,11 +30,11 @@ var controller_type : int
 
 var _stick_input_left : Vector2
 var _stick_input_right : Vector2
-var _is_trigger_left : bool
-var _is_trigger_right : bool
-var _is_trigger_both : bool
-var _is_button_left : bool
-var _is_button_right : bool
+var _is_left_trigger : bool
+var _is_right_trigger : bool
+var _is_both_triggers : bool
+var _is_left_button : bool
+var _is_right_button : bool
 
 
 func _ready() -> void:
@@ -50,16 +50,16 @@ func _physics_process(delta: float) -> void:
 	var moveR := Vector3(_stick_input_right.x, 0, _stick_input_right.y)
 	velocity += (moveL * 3 + moveR * 3) * transform.basis
 	# TODO: _handle_trigger(), _handle_button()
-	if _is_trigger_both:
+	if _is_both_triggers:
 		print("TRG_B")
 	else:
-		if _is_trigger_left:
+		if _is_left_trigger:
 			print("TRG_L")
-		if _is_trigger_right:
+		if _is_right_trigger:
 			print("TRG_R")
-	if _is_button_left:
+	if _is_left_button:
 		print("BTN_L")
-	if _is_button_right:
+	if _is_right_button:
 		print("BTN_R")
 	# TODO: _handle_drag()
 	velocity *= 0.7
@@ -81,40 +81,40 @@ func set_movement_intent(stickL: Vector2, stickR: Vector2) -> void:
 
 ## A [CharacterControllerComponent] should call this function when the left stick's
 ## trigger input is fired.
-func set_trigger_left() -> void:
-	_is_trigger_left = true
+func set_left_trigger() -> void:
+	_is_left_trigger = true
 
 
 ## A [CharacterControllerComponent] should call this function when the right stick's
 ## trigger input is fired.
-func set_trigger_right() -> void:
-	_is_trigger_right = true
+func set_right_trigger() -> void:
+	_is_right_trigger = true
 
 
 ## A [CharacterControllerComponent] should call this function when both stick trigger
 ## inputs are fired at the same time.
-func set_trigger_both() -> void:
-	_is_trigger_both = true
+func set_both_triggers() -> void:
+	_is_both_triggers = true
 
 
 ## A [CharacterControllerComponent] should call this function when the left stick's
 ## button input is fired.
 func set_button_left() -> void:
-	_is_button_left = true
+	_is_left_button = true
 
 
 ## A [CharacterControllerComponent] should call this function when the right stick's
 ## button input is fired.
 func set_button_right() -> void:
-	_is_button_right = true
+	_is_right_button = true
 
 
 func _reset_attack_input_states() -> void:
-	_is_trigger_left = false
-	_is_trigger_right = false
-	_is_trigger_both = false
-	_is_button_left = false
-	_is_button_right = false
+	_is_left_trigger = false
+	_is_right_trigger = false
+	_is_both_triggers = false
+	_is_left_button = false
+	_is_right_button = false
 
 
 func _init_authority() -> void:

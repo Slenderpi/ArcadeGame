@@ -31,18 +31,19 @@ func _process(delta: float) -> void:
 ## Starts the state machine.
 ## Should be called by [method MainScene._ready].[br][br]
 ## The state machine will start in the [BootingState].
-func start() -> void:
+func start(mainScene: MainScene) -> void:
 	Debug.print_notify("[GameStateManager]: Game state starting.")
+	folder_arcade_visuals = mainScene.folder_arcade_visuals
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	fsm  = StateMachine.new()
-	_enter_state_booting()
+	_enter_state_booting(mainScene)
 
 #endregion
 
 #region STATE PROCESSES
 
-func _enter_state_booting() -> void:
-	fsm.change_state(StateFactory.create(BootingState, _enter_state_attract_mode))
+func _enter_state_booting(mainScene: MainScene) -> void:
+	fsm.change_state(StateFactory.create(BootingState, _enter_state_attract_mode), {"main_scene": mainScene})
 
 
 func _enter_state_attract_mode() -> void:

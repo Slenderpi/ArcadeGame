@@ -2,9 +2,12 @@ extends StateBase
 class_name BootingState
 
 
-func enter(_payload: Dictionary = {}) -> void:
+func enter(payload: Dictionary = {}) -> void:
 	Debug.print_info("[State][Primary][Booting]: >> enter()")
+	var mainScene : MainScene = payload["main_scene"]
 	NetworkManager.init()
+	Transitioner.init(mainScene)
+	Transitioner.begin_transition(Transitioner.EType.BLACK_FADE)
 
 
 func update(_delta: float) -> void:
