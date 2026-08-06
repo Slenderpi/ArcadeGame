@@ -3,6 +3,8 @@ extends Node
 
 ## Emitted when a credit is inserted.
 signal credit_inserted
+## Emitted when a credit is spent.
+signal credit_spent
 ## Emitted if freeplay mode changes.
 signal freeplay_mode_changed
 
@@ -44,6 +46,19 @@ func init() -> void:
 ## (always true if are in freeplay mode).
 func has_credits() -> bool:
 	return credits != 0
+
+
+## Spend a credit.[br][br]
+## This method does nothing when freeplay mode is active.
+func spend_credit() -> void:
+	if not is_in_freeplay_mode():
+		if credits > 0:
+			_credits -= 1
+			credit_spent.emit()
+		else:
+			Debug.print_error(
+				"[CreditManager]: spend_credit() called when there are 0 credits!"
+			)
 
 
 ## Returns true if freeplay mode is currently enabled.

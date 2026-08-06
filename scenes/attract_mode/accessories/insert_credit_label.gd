@@ -8,6 +8,10 @@ func _ready() -> void:
 		if not CreditManager.is_in_freeplay_mode():
 			_set_text_to_credit_count()
 	)
+	CreditManager.credit_spent.connect(func():
+		if not CreditManager.is_in_freeplay_mode():
+			_set_text_to_credit_count()
+	)
 	_on_freeplay_mode_changed()
 
 
