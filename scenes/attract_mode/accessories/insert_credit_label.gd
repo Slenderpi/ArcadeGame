@@ -4,7 +4,10 @@ extends Label
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	CreditManager.freeplay_mode_changed.connect(_on_freeplay_mode_changed)
-	CreditManager.credit_inserted.connect(_set_text_to_credit_count)
+	CreditManager.credit_inserted.connect(func():
+		if not CreditManager.is_in_freeplay_mode():
+			_set_text_to_credit_count()
+	)
 	_on_freeplay_mode_changed()
 
 
