@@ -2,8 +2,101 @@
 
 [ext_resource type="Script" uid="uid://b3mlyqr4jevk6" path="res://ui/transition_canvas/transition_canvas.gd" id="1_ltcdm"]
 
+[sub_resource type="Animation" id="Animation_ulad6"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("RightDoor:pivot_offset_ratio")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(2, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("LeftDoor:pivot_offset_ratio")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(-1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_ltcdm"]
+resource_name = "normal_begin"
+length = 0.66
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("RightDoor:pivot_offset_ratio")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.66),
+"transitions": PackedFloat32Array(0.2, 1),
+"update": 0,
+"values": [Vector2(2, 0), Vector2(1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("LeftDoor:pivot_offset_ratio")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.66),
+"transitions": PackedFloat32Array(0.2, 1),
+"update": 0,
+"values": [Vector2(-1, 0), Vector2(0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_7aav1"]
+resource_name = "normal_end"
+length = 0.66
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("RightDoor:pivot_offset_ratio")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.66),
+"transitions": PackedFloat32Array(0.4, 1),
+"update": 0,
+"values": [Vector2(1, 0), Vector2(2, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("LeftDoor:pivot_offset_ratio")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.66),
+"transitions": PackedFloat32Array(0.4, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(-1, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ulad6"]
+_data = {
+&"RESET": SubResource("Animation_ulad6"),
+&"normal_begin": SubResource("Animation_ltcdm"),
+&"normal_end": SubResource("Animation_7aav1")
+}
+
 [node name="TransitionCanvas" type="CanvasLayer" unique_id=179553619]
 script = ExtResource("1_ltcdm")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=808103726]
+libraries/ = SubResource("AnimationLibrary_ulad6")
 
 [node name="BlackFadeTransition" type="ColorRect" parent="." unique_id=2010197852]
 anchors_preset = 15
@@ -12,3 +105,23 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0)
+
+[node name="LeftDoor" type="ColorRect" parent="." unique_id=1967030112]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.5, 1)
+pivot_offset_ratio = Vector2(-1, 0)
+color = Color(0.95, 0.35720003, 0.20900002, 1)
+
+[node name="RightDoor" type="ColorRect" parent="." unique_id=255825486]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.5, 1)
+pivot_offset_ratio = Vector2(2, 0)
+color = Color(0.26054493, 0.63827914, 1, 1)

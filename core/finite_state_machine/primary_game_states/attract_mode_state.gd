@@ -22,5 +22,5 @@ func update(_delta: float) -> void:
 
 func exit() -> void:
 	Debug.print_info("[State][Primary][AttractMode]: << exit()")
-	await Transitioner.begin_transition(Transitioner.EType.BLACK_FADE)
+	await Transitioner.begin_transition()
 	_attract_mode_visuals.queue_free()

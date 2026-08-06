@@ -6,8 +6,8 @@ extends Node
 
 # TODO
 enum EType {
-	NORMAL = 0,
-	BLACK_FADE = 1
+	BLACK_FADE = 0,
+	NORMAL = 1,
 }
 
 
@@ -35,9 +35,9 @@ func begin_transition(type: EType = EType.NORMAL) -> void:
 	_transition_in_type = type
 	match type:
 		EType.NORMAL:
-			pass
+			await _transition_canvas.begin_transition_normal()
 		EType.BLACK_FADE:
-			await _begin_trans_black_fade()
+			await _transition_canvas.begin_transition_black_fade()
 
 
 ## Ends the current transition. The transition animation is based on the current
@@ -48,19 +48,7 @@ func end_transition() -> void:
 		return
 	match _transition_in_type:
 		EType.NORMAL:
-			pass
+			await _transition_canvas.end_transition_normal()
 		EType.BLACK_FADE:
-			await _end_trans_black_fade()
+			await _transition_canvas.end_transition_black_fade()
 	is_transitioned_in = false
-
-
-func _begin_trans_black_fade() -> void:
-	var tween = get_tree().create_tween()
-	tween.tween_property(_transition_canvas.black_fade_transition, "color", Color(0, 0, 0, 1), BLACK_FADE_DURATION)
-	await tween.finished
-
-
-func _end_trans_black_fade() -> void:
-	var tween = get_tree().create_tween()
-	tween.tween_property(_transition_canvas.black_fade_transition, "color", Color(0, 0, 0, 0), BLACK_FADE_DURATION)
-	await tween.finished
