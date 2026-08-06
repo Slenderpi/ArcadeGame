@@ -1,9 +1,70 @@
 [gd_scene format=3 uid="uid://cwdijfbd8pejl"]
 
 [ext_resource type="PackedScene" uid="uid://c18chs8n78i2r" path="res://scenes/attract_mode/attraction_mode_canvas.tscn" id="1_nlw2i"]
+[ext_resource type="Script" uid="uid://bfmi3oyjgk54i" path="res://scenes/attract_mode/accessories/attract_skybox_thing.gd" id="2_xjk2d"]
+
+[sub_resource type="Shader" id="Shader_v0gnm"]
+code = "shader_type spatial;
+
+/**
+Size of checkers.
+Checkers are uniform in size, regardless of the size and scale of the mesh.
+The position of the checkers also ignores the position and rotation of the mesh.
+ */
+uniform float checker_size : hint_range(0.1, 10) = 1.0;
+/** Color for half of the checkers. */
+uniform vec4 color1 : source_color = vec4(1.0, 1.0, 1.0, 1.0);
+/** Color for other half of the checkers. */
+uniform vec4 color2 : source_color = vec4(0.66, 0.66, 0.66, 1.0);
+
+varying vec3 world_pos;
+
+void vertex() {
+    world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+
+void fragment() {
+	vec2 grid = floor(world_pos.xz / checker_size);
+    float checker = mod(grid.x + grid.y, 2.0);
+    ALBEDO = mix(color1.rgb, color2.rgb, checker);
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ew7be"]
+render_priority = 0
+shader = SubResource("Shader_v0gnm")
+shader_parameter/checker_size = 1.0
+shader_parameter/color1 = Color(0.40392157, 1, 1, 1)
+shader_parameter/color2 = Color(0.61424005, 0.66, 0.44880003, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_xjk2d"]
+material = SubResource("ShaderMaterial_ew7be")
+flip_faces = true
+radius = 34.375
+height = 100.0
 
 [node name="AttractModeScene" type="Node" unique_id=607145183]
 
 [node name="Node3D" type="Node3D" parent="." unique_id=904379251]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D" unique_id=1137827095]
+transform = Transform3D(0.49999997, -0.49999994, -0.7071067, 0.7071067, 0.70710665, 0, 0.49999997, -0.49999994, 0.7071067, 0, 0, 0)
+cast_shadow = 0
+mesh = SubResource("CapsuleMesh_xjk2d")
+script = ExtResource("2_xjk2d")
+
+[node name="Node3D" type="Node3D" parent="Node3D" unique_id=1103729543]
+transform = Transform3D(1, 0, 0, 0, 1.3113416e-07, 1, 0, -1, 1.3113416e-07, 0, 0, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Node3D/Node3D" unique_id=1814171409]
+transform = Transform3D(0.70710677, -0.35355338, 0.6123725, 0, 0.8660254, 0.5, -0.7071068, -0.35355335, 0.61237246, 0, 0, 0)
+light_bake_mode = 1
+
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="Node3D/Node3D" unique_id=287708656]
+transform = Transform3D(0.7071069, -0.35355332, -0.61237234, 2.9802326e-08, 0.86602545, -0.49999994, 0.70710665, 0.35355338, 0.6123726, 0, 0, 0)
+light_bake_mode = 1
+
+[node name="DirectionalLight3D3" type="DirectionalLight3D" parent="Node3D/Node3D" unique_id=1788724878]
+transform = Transform3D(-0.25881907, 0.8365163, -0.48296288, 0, 0.49999994, 0.86602545, 0.9659259, 0.22414388, -0.1294095, 0, 0, 0)
+light_bake_mode = 1
 
 [node name="AttractionModeCanvas" parent="." unique_id=806381166 instance=ExtResource("1_nlw2i")]
