@@ -2,7 +2,7 @@ extends Node
 
 ## If true, NetworkManager will look for an ethernet IP to use.
 ## Otherwise, it will look for a wifi IP.
-const USE_ETH_IP : bool = true
+const USE_ETH_IP : bool = false
 ## If true, NetworkManager will print many more messages in the console.
 const VERBOSE : bool = false
 

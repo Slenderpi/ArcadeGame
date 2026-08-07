@@ -19,6 +19,9 @@ const DEV_SKIP_MECH_1 : MechRefs.EMech = MechRefs.EMech.BIG_BLUE
 ## 2. AttractModeState[br]
 ## 3. GameplayState
 var fsm : StateMachine
+## Reference to the GameCamera.
+## The MainScene should contain it when calling [method GameStateManager.start].
+var camera : GameCamera
 
 var folder_arcade_visuals : Node
 
@@ -44,6 +47,7 @@ func _process(delta: float) -> void:
 func start(mainScene: MainScene) -> void:
 	Debug.print_notify("[GameStateManager]: Game state starting.")
 	folder_arcade_visuals = mainScene.folder_arcade_visuals
+	camera = mainScene._game_camera
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	fsm  = StateMachine.new()
 	_enter_state_booting(mainScene)

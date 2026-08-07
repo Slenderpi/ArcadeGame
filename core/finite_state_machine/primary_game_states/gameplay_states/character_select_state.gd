@@ -4,12 +4,12 @@ class_name CharacterSelectState
 
 var selected_option : int:
 	get:
-		return _character_select_visuals.curr_selection
+		return _visuals.curr_selection
 	set(value):
-		_character_select_visuals.curr_selection = value
+		_visuals.curr_selection = value
 
 
-var _character_select_visuals : CharacterSelectScene
+var _visuals : CharacterSelectScene
 
 # -1 = down, 0 = none, 1 = up
 var _last_lstick_read : int = 0
@@ -19,22 +19,24 @@ var _last_rstick_read : int = 0
 
 func enter(_payload: Dictionary = {}) -> void:
 	Debug.print_info("[State][Gameplay][CharacterSelect]: >> enter()")
-	_character_select_visuals = load("res://scenes/character_select/character_select_scene.tscn").instantiate()
-	GameStateManager.folder_arcade_visuals.add_child(_character_select_visuals)
+	_visuals = load("res://scenes/character_select/character_select_scene.tscn").instantiate()
+	GameStateManager.folder_arcade_visuals.add_child(_visuals)
+	GameStateManager.camera.first_person_target = _visuals.cam_target
+	GameStateManager.camera.camera_mode = GameCamera.ECameraMode.FIRST_PERSON
 	await Transitioner.end_transition()
 
 
 func update(_delta: float) -> void:
 	_navigate_menu()
 	if InputReader.is_any_binary_active():
-		_character_select_visuals.on_option_chosen()
+		_visuals.on_option_chosen()
 		finished.emit({&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
 
 
 func exit() -> void:
 	Debug.print_info("[State][Gameplay][CharacterSelect]: << exit()")
 	await Transitioner.begin_transition()
-	_character_select_visuals.queue_free()
+	_visuals.queue_free()
 
 
 func _navigate_menu() -> void:

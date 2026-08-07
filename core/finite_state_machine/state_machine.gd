@@ -56,8 +56,8 @@ func update(delta: float) -> void:
 ## the events will immediately get processed (if the node supports it).[br][br]
 ## Nopte that an event that cannot be processed by the current node
 ## will remain in the event queue.
-func push_event(event_name: StringName, data: Dictionary = {}) -> void:
-	_event_queue.append({&"name": event_name, &"data": data})
+func push_event(eventName: StringName, data: Dictionary = {}) -> void:
+	_event_queue.append({&"name": eventName, &"data": data})
 	if not _transitioning:
 		_drain_event_queue()
 

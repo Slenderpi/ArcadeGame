@@ -2,6 +2,10 @@ extends StateBase
 class_name GameplayState
 
 
+## If true, skips StageSelectState.
+const DEV_SKIP_STAGE_SELECT_STATE = true
+
+
 var fsm : StateMachine
 
 
@@ -37,7 +41,11 @@ func _enter_state_character_select() -> void:
 # payload idea: character choices
 func _enter_state_stage_select(payload: Dictionary) -> void:
 	print("[State][Primary][Gameplay]: _enter_state_stage_select() given payload %s." % str(payload))
-	fsm.change_state(StateFactory.create(StageSelectState, _enter_state_combat), payload)
+	if DEV_SKIP_STAGE_SELECT_STATE:
+		payload[&"stage"] = StageRefs.EStage.DEV
+		_enter_state_combat(payload)
+	else:
+		fsm.change_state(StateFactory.create(StageSelectState, _enter_state_combat), payload)
 
 
 # TODO

@@ -1,9 +1,54 @@
 [gd_scene format=3 uid="uid://pde8fgwa6k0d"]
 
 [ext_resource type="Script" uid="uid://bc18vpq34qbbs" path="res://scenes/character_select/character_select_scene.gd" id="1_ybrop"]
+[ext_resource type="Script" uid="uid://bfmi3oyjgk54i" path="res://scenes/attract_mode/accessories/attract_skybox_thing.gd" id="2_2jec7"]
 
-[node name="CharacterSelectScene" type="Node" unique_id=810698279]
+[sub_resource type="Shader" id="Shader_v0gnm"]
+code = "shader_type spatial;
+
+/**
+Size of checkers.
+Checkers are uniform in size, regardless of the size and scale of the mesh.
+The position of the checkers also ignores the position and rotation of the mesh.
+ */
+uniform float checker_size : hint_range(0.1, 10) = 1.0;
+/** Color for half of the checkers. */
+uniform vec4 color1 : source_color = vec4(1.0, 1.0, 1.0, 1.0);
+/** Color for other half of the checkers. */
+uniform vec4 color2 : source_color = vec4(0.66, 0.66, 0.66, 1.0);
+
+varying vec3 world_pos;
+
+void vertex() {
+    world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+
+void fragment() {
+	vec2 grid = floor(world_pos.xz / checker_size);
+    float checker = mod(grid.x + grid.y, 2.0);
+    ALBEDO = mix(color1.rgb, color2.rgb, checker);
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2jec7"]
+render_priority = 0
+shader = SubResource("Shader_v0gnm")
+shader_parameter/checker_size = 1.0
+shader_parameter/color1 = Color(0, 0.98039216, 0.47843137, 1)
+shader_parameter/color2 = Color(0.78, 0.67444, 0.3276, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xse17"]
+flip_faces = true
+size = Vector3(100, 100, 100)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_xse17"]
+top_radius = 1.15
+bottom_radius = 1.0
+height = 0.2
+
+[node name="CharacterSelectScene" type="Node" unique_id=810698279 node_paths=PackedStringArray("_mech_options_container", "cam_target")]
 script = ExtResource("1_ybrop")
+_mech_options_container = NodePath("CharacterSelectCanvasLayer/Control/MechOptionsContainer")
+cam_target = NodePath("Node3D/CameraTarget")
 
 [node name="CharacterSelectCanvasLayer" type="CanvasLayer" parent="." unique_id=1404735186]
 
@@ -37,3 +82,31 @@ offset_top = 90.0
 grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
+
+[node name="Node3D" type="Node3D" parent="." unique_id=650829276]
+
+[node name="CameraTarget" type="Marker3D" parent="Node3D" unique_id=537063166]
+transform = Transform3D(0.86956716, -0.20966783, -0.44709343, 0.14556384, 0.9739905, -0.1736482, 0.47187316, 0.08591812, 0.87747025, 0, 1.2, 3.469)
+gizmo_extents = 1.0
+
+[node name="Lighting" type="Node3D" parent="Node3D" unique_id=728552518]
+transform = Transform3D(0.9999999, 1.4901161e-08, 0, 0, 0.9999999, -1.4901161e-08, 5.9604645e-08, 1.4901161e-08, 0.99999994, 0, 0, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Node3D/Lighting" unique_id=749340070]
+transform = Transform3D(0.5, -2.1844002e-08, 0.86602557, 0.22414389, 0.965926, -0.12940952, -0.8365165, 0.2588191, 0.48296288, 0, 0, 0)
+light_bake_mode = 1
+
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="Node3D/Lighting" unique_id=1950727033]
+transform = Transform3D(0.7071069, 1.7216724e-08, -0.7071068, 0.18301272, 0.965926, 0.18301278, 0.6830128, -0.2588191, 0.68301284, 0, 0, 0)
+light_bake_mode = 1
+
+[node name="Meshes" type="Node3D" parent="Node3D" unique_id=424281521]
+
+[node name="SkyboxCube" type="MeshInstance3D" parent="Node3D/Meshes" unique_id=213197732]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.934071, -2.2142773, -1.6513531)
+material_override = SubResource("ShaderMaterial_2jec7")
+mesh = SubResource("BoxMesh_xse17")
+script = ExtResource("2_2jec7")
+
+[node name="Stage" type="MeshInstance3D" parent="Node3D/Meshes" unique_id=814866546]
+mesh = SubResource("CylinderMesh_xse17")

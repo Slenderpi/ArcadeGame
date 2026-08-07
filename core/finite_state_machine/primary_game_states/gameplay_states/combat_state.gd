@@ -25,6 +25,9 @@ func enter(payload: Dictionary = {}) -> void:
 	
 	GameStateManager.folder_arcade_visuals.add_child(_mech_0, true)
 	GameStateManager.folder_arcade_visuals.add_child(_mech_1, true)
+	
+	GameStateManager.camera.camera_target = _mech_0
+	
 	await Transitioner.end_transition()
 
 

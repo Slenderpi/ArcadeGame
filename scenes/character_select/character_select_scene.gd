@@ -9,8 +9,10 @@ var curr_selection : int:
 		set_selection(value)
 
 
-@onready
-var _mech_options_container := $CharacterSelectCanvasLayer/Control/MechOptionsContainer
+@export
+var _mech_options_container : Container
+@export
+var cam_target : Node3D
 
 var _mech_option_ui_element_scene := preload("res://scenes/character_select/accessories/mech_option_ui_element.tscn")
 
