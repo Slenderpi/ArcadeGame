@@ -15,9 +15,9 @@ const DEV_SKIP_MECH_1 : MechRefs.EMech = MechRefs.EMech.BIG_BLUE
 
 ## The state machine that manages the game as a whole.[br][br]
 ## There are three primary states:[br]
-## 1. BootingState[br]
-## 2. AttractModeState[br]
-## 3. GameplayState
+## 1. [BootingState][br]
+## 2. [AttractModeState][br]
+## 3. [GameplayState]
 var fsm : StateMachine
 ## Reference to the GameCamera.
 ## The MainScene should contain it when calling [method GameStateManager.start].
@@ -31,6 +31,8 @@ var folder_arcade_visuals : Node
 #region NODE OVERRIDES
 
 func _ready() -> void:
+	NetworkManager.connection_established.connect(_on_connection_established)
+	NetworkManager.connection_lost.connect(_on_connection_lost)
 	process_mode = Node.PROCESS_MODE_DISABLED
 
 
@@ -71,3 +73,11 @@ func _enter_state_gameplay() -> void:
 	fsm.change_state(StateFactory.create(GameplayState, _enter_state_attract_mode))
 
 #endregion
+
+
+func _on_connection_established(is_multiplayer: bool, is_host: bool) -> void:
+	fsm.push_event(&"peer_connected", {"multiplayer": is_multiplayer, "is_host": is_host})
+
+
+func _on_connection_lost() -> void:
+	fsm.push_event(&"peer_disconnected", {})

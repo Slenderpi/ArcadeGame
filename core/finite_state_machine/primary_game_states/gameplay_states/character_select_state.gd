@@ -39,6 +39,22 @@ func exit() -> void:
 	_visuals.queue_free()
 
 
+func handles_event(eventName: StringName) -> bool:
+	return eventName == &"peer_connected"
+
+
+func on_event(eventName: StringName, data: Dictionary) -> void:
+	if eventName == &"peer_connected":
+		if data.multiplayer:
+			print("A challenger approaches!")
+			if data.is_host:
+				print("I will be the host")
+			else:
+				print("I will be the client")
+		else:
+			print("No challenger approaching. Singleplayer it is.")
+
+
 func _navigate_menu() -> void:
 	var lstick := InputReader.left_stick
 	if lstick.y > 0:

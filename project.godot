@@ -19,12 +19,12 @@ config/icon="res://icon.svg"
 
 Debug="*uid://cu7bimfn6fy4k"
 StateFactory="*uid://bvwh2welguxak"
-NetworkManager="*uid://cc0bu236eu6gu"
 StageRefs="*uid://3xmhx6ujbonj"
 MechRefs="*uid://dno30suxsuaq5"
 CreditManager="*uid://bq6iep24jqbwu"
 Transitioner="*uid://0t4sirk62alu"
 InputReader="*uid://cfkhdv867l8hl"
+NetworkManager="*uid://bats0qh0rhuli"
 GameStateManager="*uid://cu45ybo3nkhm2"
 
 [display]

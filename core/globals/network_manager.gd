@@ -1,101 +1,83 @@
+## NetworkManager (autoload)
+##
+## Facade over LAN peer discovery + ENet session setup. Talks to the rest
+## of the game ONLY via signals -- it has no knowledge of GameStateManager,
+## States, or anything else upstream. GameStateManager listens to these
+## signals and translates them into fsm events; that's the only bridge.
+##
+## Discovery model: every machine continuously broadcasts its own status
+## (CLOSED/OPEN/BUSY) at a fixed interval, and continuously listens for
+## the same from others, maintaining a live PeerRoster. This means
+## "finding a peer" is just reading an already-warm table, not an
+## active search -- so joining feels immediate rather than requiring
+## a visible "searching..." step.
 extends Node
 
-## If true, NetworkManager will look for an ethernet IP to use.
-## Otherwise, it will look for a wifi IP.
-const USE_ETH_IP : bool = false
-## If true, NetworkManager will print many more messages in the console.
+#region CONFIG
+
+## If true, prints verbose debug logs.
 const VERBOSE : bool = false
 
-## The states of NetworkManager.
-enum ENetworkManagerState {
-	IDLE,
-	CALLING,
-	#WAITING_SERVER,
-	#HOST,
-	#CLIENT
-}
+## Ports.
+const PORT_DISCOVERY := 31983
+const PORT_GAME := 21983
 
+## Broadcast target on the direct-link subnet. If you move to a switch
+## with multiple cabinets on a shared subnet, this still works as long
+## as they all share a subnet broadcast address; for anything fancier
+## (routed segments), switch this to the subnet's specific broadcast
+## address or move to multicast.
+const BROADCAST_IP := "192.168.31.255"
+
+## How often to broadcast our own status.
+const HEARTBEAT_INTERVAL := 0.5
+
+## How long to wait for a CLAIM_ACK before giving up on a claim attempt.
+const CLAIM_TIMEOUT := 1.0
+
+## How long to wait for the ENet handshake (SERVER_CREATED/REQUEST ->
+## peer_connected) to complete before giving up on a pairing attempt.
+const PAIRING_TIMEOUT := 5.0
+
+#endregion
+
+#region PROTOCOL STRINGS
+
+const UDPSTR_HEADER := "VirtualOff"
+const MSG_STATUS := "STATUS"
+const MSG_CLAIM := "CLAIM"
+const MSG_CLAIM_ACK := "CLAIM_ACK"
+const MSG_SERVER_CREATED := "SERVER_CREATED"
+const MSG_SERVER_REQUEST := "SERVER_REQUEST"
+
+#endregion
 
 #region SIGNALS
 
-## Emitted when this devices receives a CALL and
-## [member NetworkManager.can_versus] is true.
-signal versus_peer_found
-## Emitted when both devices have connected to each other via ENet.
-signal server_started(multiplayer: bool)
-## Emitted if connection to the peer has been lost.
-signal disconnected
-
-signal _call_result(result: String)
+## Fired once ENet reports the peer is actually connected.
+signal connection_established(is_multiplayer: bool, is_host: bool)
+## Fired if a connected session drops, OR if a pairing/claim attempt
+## fails/times out before ever connecting.
+signal connection_lost
 
 #endregion
 
-#region PORT CONSTANTS
+#region STATE
 
-## Port to use for discovery
-const PORT_NETWORKING := 31983
-## Port to use for the game
-const PORT_GAME := 21983
+enum EStatus { CLOSED, OPEN, BUSY }
 
-#endregion
+var my_ip : String = ""
+var other_ip : String = ""
+var other_peer_id : int = 0
 
-#region UDP STR CONSTANTS
-
-## This string is appended to all packets sent over UDP.
-## NetworkManager will expect packets it receives to have this header.
-const UDPSTR_HEADER := &"VirtualOff"
-## Sent when in the [enum ENetworkManagerState.CALLING] state.
-const UDPSTR_CALL := &"CALL"
-## Sent when in the [enum ENetworkManagerState.CALLING] state AND this
-## NetworkManager receives a CALL AND there is someone playing.
-const UDPSTR_RESPONSE := &"RESPONSE"
-## Sent when inthe [enum ENetworkManagerState.CALLING] state AND this
-## NetworkManager receives a CALL AND the game does not have a Player on it.
-const UDPSTR_NOPLAY := &"NOPLAY"
-## A server has been created. Request the other device to join.
-const UDPSTR_SERVER_CREATED := &"SERVER_CREATED"
-## Request the other device to create the server.
-const UDPSTR_SERVER_REQUEST := &"SERVER_REQUEST"
-
-#endregion
-
-## Global IP when calling out to everyone on the network.
-const GLOBAL_IP := &"255.255.255.255"
-
-#region PUBLIC MEMBERS
-
-var state := ENetworkManagerState.IDLE
-
-## Set this value to tell NetworkManager whether or not this device can be
-## challenged by another device for versus mode.[br]
-## [br]
-## [b]Example:[/b] no coin has been inserted on this device yet, so this value
-## should be false.
-## Then, a coin is inserted. This value should then get set to true.
-var can_versus : bool = false
-
-## An array of all currently known IPs on this device.
-var my_local_ips : Array[String] = []
-## The preferred IP of this device.
-var my_ip : String
-## The preferred IP of a peer's device.
-var other_ip : String
-## The peer ID of a peer.
-var other_peer_id : int
-
-## How long to wait between unanswered CALLs.
-var call_retry_time : float = 1
-## Maximum number of CALL tries.
-var max_call_attempts : int = 3
-
-#endregion
-
-#region PRIVATE MEMBERS
-
+var _status : int = EStatus.CLOSED
+var _roster := PeerRoster.new()
 var _udp := PacketPeerUDP.new()
 
-var _last_call_time : int = -10000
-var _curr_call_attempts := 0
+var _heartbeat_timer : float = 0.0
+var _claim_ack_waiters := {}   # ip (String) -> Signal-like Callable resolution via _claim_result
+var _claim_result : Signal
+var _pairing_active := false
 
 #endregion
 
@@ -105,306 +87,268 @@ var _curr_call_attempts := 0
 func _ready() -> void:
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+	_load_config_ip()
+	_init_udp()
 
 
-func _process(_delta: float) -> void:
-	if state == ENetworkManagerState.CALLING:
-		_call_for_peer()
-	if _udp.get_available_packet_count() > 0:
-		var packetStr := _udp.get_packet().get_string_from_ascii()
-		var senderIp := _udp.get_packet_ip()
-		if _udp_packet_is_valid(packetStr, senderIp):
-			_process_udp_msg(senderIp, packetStr.trim_prefix(UDPSTR_HEADER + ',').split(','))
+func _process(delta: float) -> void:
+	_poll_udp()
+	if _status != EStatus.CLOSED:
+		_heartbeat_timer -= delta
+		if _heartbeat_timer <= 0.0:
+			_heartbeat_timer = HEARTBEAT_INTERVAL
+			_broadcast_status()
 
 #endregion
 
-#region PUBLIC METHODS
 
-## Gets local IPs, preferred IP, and initializes UDP.
-func init() -> void:
-	Debug.print_info(Debug.HORIZONTAL_LINE_STR)
-	Debug.print_info("[NetMan]: Initializing.")
-	if VERBOSE:
-		_print_local_interfaces()
-	_set_local_ips()
-	_init_udp()
-	#state = ENetworkManagerState.CALLING
-	#if VERBOSE:
-	Debug.print_success("[NetMan]: Setup finished. Changing to IDLE state.")
-	Debug.print_info(Debug.HORIZONTAL_LINE_STR)
-	state = ENetworkManagerState.IDLE
+#region PUBLIC API
+
+## Call once when a coin-start begins a new play session. Starts this
+## machine advertising itself as OPEN (available to be joined).
+func begin_session() -> void:
+	_status = EStatus.OPEN
+	_heartbeat_timer = 0.0  # broadcast immediately rather than waiting a full interval
 
 
-## Tells the NetworkManager to start looking for a peer.[br][br]
-## This function is asynchronous.[br][br]
-## Returns "" if no peer found, otherwise returns their IP.
-func find_peer() -> String:
-	state = ENetworkManagerState.CALLING
-	return await _call_result
+## States call this to toggle whether a mid-session join is currently
+## acceptable (true at Character Select / Results, false during Combat).
+## Has no effect if no session is active or a peer is already connected.
+func set_open_for_challengers(open: bool) -> void:
+	if _status != EStatus.CLOSED and other_peer_id == 0:
+		_status = EStatus.OPEN if open else EStatus.BUSY
 
 
-## Starts a server for singleplayer (i.e. an offline server).
-## This triggers similar processes that [method NetworkManager.start_server] would.
-func start_singleplayer_server() -> void:
-	print("[NetMan]: start_singleplayer_server() called.")
-	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
-	other_peer_id = 0
-	print("[NetMan]: Server started successfully.")
-	state = ENetworkManagerState.IDLE # TODO: what state should be next?
-	server_started.emit(false)
-
-
-## Starts a server for multiplayer versus (i.e. an online server).
-## The IP given in [param serverIp] should be the IP of the device that will
-## become the server.[br][br]
-## If this device is to become the [b][color=pink]server[/color][/b],
-## it will create a server and broadcast [b]SERVER_CREATED[/b].[br][br]
-## If this device is to become the [b][color=pink]client[/color][/b],
-## it will broadcast a [b]SERVER_REQUEST[/b].[br][br]
-## NetworkManager listens for either [b]SERVER_CREATED[/b] or [b]SERVER_REQUEST[/b], and then
-## either joins the created server or creates one.[br][br]
-## When the lobby is fully setup (i.e. the server is created AND the client has joined),
-## the [signal NetworkManager.server_started] signal will be emitted.
-func start_server(serverIp: String) -> void:
-	print("[NetMan]: start_server() called.")
-	if serverIp == my_ip:
-		print_rich("[NetMan]: I will be the [b][color=pink]host!")
-		_create_server()
-	else:
-		print_rich("[NetMan]: I will be the [b][color=pink]client!")
-		print("[NetMan]: Broadcasting SERVER_REQUEST.")
-		_broadcast_server_request()
-
-
-## Stops the server (or, if you're the client, closes the client). Resets
-## the multiplayer_peer to null.[br][br]
-## Also resets other internal properties so that another calling session is
-## available.
-func close_server() -> void:
-	Debug.print_info("[NetMan]: Closing multiplayer peer.")
+## Ends the current session entirely: closes any ENet connection, stops
+## advertising, clears roster entry for the old peer. Called on return
+## to Attract mode.
+func end_session() -> void:
+	_status = EStatus.CLOSED
+	_pairing_active = false
+	if not other_ip.is_empty():
+		_roster.remove(other_ip)
 	if multiplayer.multiplayer_peer:
 		multiplayer.multiplayer_peer.close.call_deferred()
 		multiplayer.set_deferred("multiplayer_peer", null)
-	else:
-		Debug.print_warning("[NetMan]: Attempted to close multiplayer peer but there is currently none set yet.")
-	other_ip = &""
+	other_ip = ""
 	other_peer_id = 0
-	_last_call_time = -10000
-	_curr_call_attempts = 0
-	# TODO: MainScene should probably trigger returning to CALL state, and this code should instead go to IDLE
-	state = ENetworkManagerState.IDLE
-	#state = ENetworkManagerState.CALLING
+
+
+## Synchronous lookup -- the roster is already warm from continuous
+## listening, so this never blocks. Returns "" if nobody is open.
+func find_open_peer() -> String:
+	return _roster.find_open_peer()
+
+
+## Starts a fully local (offline) session -- no networking involved.
+func start_as_singleplayer() -> void:
+	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	other_peer_id = 0
+	connection_established.emit(false, true)
+
+
+## Attempts to claim a peer the roster believes is open, then runs the
+## full ENet pairing handshake. Await this. Resolves true if a full
+## connection was established, false if the claim was rejected/timed
+## out (caller should fall back to start_as_singleplayer()).
+func try_claim(peer_ip: String) -> bool:
+	if VERBOSE:
+		print("[NetMan]: Attempting to claim %s" % peer_ip)
+	_send(peer_ip, MSG_CLAIM)
+
+	var acked := false
+	var elapsed := 0.0
+	var ack_signal_name := "_claim_ack_%s" % peer_ip.replace(".", "_")
+	# Simplest robust wait: poll a dictionary flag set by _process_udp_msg,
+	# rather than juggling one-off Signals per IP.
+	_claim_ack_waiters[peer_ip] = null  # null = pending
+	while elapsed < CLAIM_TIMEOUT:
+		await get_tree().process_frame
+		elapsed += get_process_delta_time()
+		if _claim_ack_waiters.get(peer_ip) != null:
+			acked = _claim_ack_waiters[peer_ip]
+			break
+	_claim_ack_waiters.erase(peer_ip)
+
+	if not acked:
+		if VERBOSE:
+			print("[NetMan]: Claim on %s failed or timed out." % peer_ip)
+		_roster.remove(peer_ip)
+		return false
+
+	other_ip = peer_ip
+	_roster.remove(peer_ip)
+	return await _run_pairing()
 
 #endregion
 
-#region ENET HELPERS
+
+#region PAIRING / ENET
+
+func _run_pairing() -> bool:
+	_pairing_active = true
+	if my_ip > other_ip:
+		_create_server()
+	else:
+		_broadcast_server_request_to(other_ip)
+
+	var elapsed := 0.0
+	while _pairing_active and elapsed < PAIRING_TIMEOUT:
+		await get_tree().process_frame
+		elapsed += get_process_delta_time()
+
+	if not _pairing_active:
+		return true  # _on_peer_connected already cleared this flag on success
+
+	# Timed out.
+	_pairing_active = false
+	Debug.print_error("[NetMan]: Pairing with %s timed out." % other_ip)
+	connection_lost.emit()
+	return false
+
 
 func _create_server() -> void:
-	print("[NetMan]: Creating ENet server...")
 	var peer := ENetMultiplayerPeer.new()
 	var error := peer.create_server(PORT_GAME, 2)
 	if error != OK:
 		Debug.print_error("[NetMan]: Failed to start server. Error: %s" % error)
+		_pairing_active = false
 		return
 	multiplayer.multiplayer_peer = peer
-	print("[NetMan]: Server started successfully.")
-	state = ENetworkManagerState.IDLE # TODO: what state should be next?
-	_broadcast_server_created()
+	if VERBOSE:
+		print("[NetMan]: ENet server created.")
+	_send(other_ip, MSG_SERVER_CREATED)
 
 
 func _create_client() -> void:
-	print("[NetMan]: Creating ENet client...")
 	var peer := ENetMultiplayerPeer.new()
 	var error := peer.create_client(other_ip, PORT_GAME)
 	if error != OK:
 		Debug.print_error("[NetMan]: Failed to create client. Error: %s" % error)
+		_pairing_active = false
 		return
 	multiplayer.multiplayer_peer = peer
-	Debug.print_success("[NetMan]: Client created and joined successfully.")
-	#state = ENetworkManagerState.CLIENT
-	state = ENetworkManagerState.IDLE # TODO: what state should be next?
-
-#endregion
-
-#region MISC HELPERS
-
-func _set_local_ips() -> void:
-	my_local_ips.clear()
-	var interfaces := IP.get_local_interfaces()
-	for iface in interfaces:
-		var addresses : Array = iface["addresses"]
-		for addr in addresses: # TODO: Might remove
-			my_local_ips.append(addr)
-		if not my_ip.is_empty() or not _friendly_interface_req(iface["friendly"].to_lower()):
-			continue
-		if addresses.size() == 0:
-			Debug.print_warning(
-				"[NetMan]: Possible ethernet address found with 0 addresses. Index: %s | Name: %s | Friendly: %s" \
-				% [iface["index"], iface["name"], iface["friendly"]]
-			)
-			continue
-		var ipOption : String = addresses[0]
-		if addresses.size() > 1:
-			var addri := 0
-			while addri < addresses.size() and ipOption.split('.').size() != 4:
-				addri += 1
-				ipOption = addresses[addri]
-		my_ip = ipOption
 	if VERBOSE:
-		Debug.print_info("[NetMan]: Local ips on this device: \n%s" % str(my_local_ips))
+		print("[NetMan]: ENet client created, joining %s." % other_ip)
+
+#endregion
+
+
+#region UDP -- SEND
+
+func _send(ip: String, message: String) -> void:
+	_udp.set_dest_address(ip, PORT_DISCOVERY)
+	_udp.put_packet((UDPSTR_HEADER + "," + message).to_utf8_buffer())
+
+
+func _broadcast_status() -> void:
+	var status_str : String = ["CLOSED", "OPEN", "BUSY"][_status]
+	_udp.set_dest_address(BROADCAST_IP, PORT_DISCOVERY)
+	_udp.put_packet((UDPSTR_HEADER + "," + MSG_STATUS + "," + my_ip + "," + status_str).to_utf8_buffer())
+
+
+func _broadcast_server_request_to(ip: String) -> void:
+	_send(ip, MSG_SERVER_REQUEST)
+
+#endregion
+
+
+#region UDP -- RECEIVE
+
+func _poll_udp() -> void:
+	while _udp.get_available_packet_count() > 0:
+		var packet_str := _udp.get_packet().get_string_from_utf8()
+		var sender_ip := _udp.get_packet_ip()
+		if sender_ip == my_ip:
+			continue  # our own broadcast, ignore
+		if not packet_str.begins_with(UDPSTR_HEADER):
+			continue
+		var args := packet_str.trim_prefix(UDPSTR_HEADER + ",").split(",")
+		_process_udp_msg(sender_ip, args)
+
+
+func _process_udp_msg(sender_ip: String, args: PackedStringArray) -> void:
+	match args[0]:
+		MSG_STATUS:
+			# args[1] = sender's self-reported IP (may differ from sender_ip
+			# if NAT/multi-homed; we trust their self-reported value since
+			# that's what we'd need to dial back)
+			_roster.update(args[1], args[2])
+
+		MSG_CLAIM:
+			if _status == EStatus.OPEN:
+				_status = EStatus.BUSY  # provisional lock, guards against a double-claim race
+				other_ip = sender_ip
+				_send(sender_ip, MSG_CLAIM_ACK + ",1")
+				_run_pairing()  # fire-and-forget on this side; connection_established will follow
+			else:
+				_send(sender_ip, MSG_CLAIM_ACK + ",0")
+
+		MSG_CLAIM_ACK:
+			if _claim_ack_waiters.has(sender_ip):
+				_claim_ack_waiters[sender_ip] = (args[1] == "1")
+
+		MSG_SERVER_CREATED:
+			_create_client()
+
+		MSG_SERVER_REQUEST:
+			_create_server()
+
+		_:
+			if VERBOSE:
+				print("[NetMan]: Unknown message from %s: %s" % [sender_ip, str(args)])
+
+#endregion
+
+
+#region SIGNAL HANDLERS
+
+func _on_peer_connected(peer_id: int) -> void:
+	if peer_id == multiplayer.get_unique_id():
+		return
+	other_peer_id = peer_id
+	_pairing_active = false
+	_status = EStatus.BUSY  # full -- no more room, stop advertising OPEN
+	connection_established.emit(true, multiplayer.is_server())
+
+
+func _on_peer_disconnected(_peer_id: int) -> void:
+	other_peer_id = 0
+	connection_lost.emit()
+
+#endregion
+
+
+#region SETUP HELPERS
+
+func _load_config_ip() -> void:
+	var cfg := ConfigFile.new()
+	if cfg.load("res://cabinet.cfg") == OK:
+		my_ip = cfg.get_value("network", "my_ip", "")
 	if my_ip.is_empty():
-		Debug.print_error("[NetMan]: No ethernet IP was found!")
+		Debug.print_error("[NetMan]: No my_ip configured in cabinet.cfg!")
+		return
+
+	# Sanity check: confirm the configured IP is actually live on this
+	# machine right now (cable plugged in, static IP applied correctly).
+	var found := false
+	for iface in IP.get_local_interfaces():
+		if my_ip in iface["addresses"]:
+			found = true
+			break
+	if found:
+		Debug.print_success("[NetMan]: Using configured IP %s (confirmed live)." % my_ip)
 	else:
-		Debug.print_notify("[NetMan]: Found my %s address: %s" % ["ETHERNET" if USE_ETH_IP else "WIFI", my_ip])
-
-
-func _friendly_interface_req(friendlyLowered: String) -> bool:
-	if USE_ETH_IP:
-		return "eth" in friendlyLowered
-	else:
-		for c in friendlyLowered:
-			if c.is_valid_int():
-				return false
-		return "wi-fi" in friendlyLowered or "wifi" in friendlyLowered
-
-#endregion
-
-#region UDP AND CALL PROCESSING
-
-func _call_for_peer() -> void:
-	var currTime := Time.get_ticks_msec()
-	if currTime - _last_call_time >= call_retry_time * 1000:
-		_curr_call_attempts += 1
-		if _curr_call_attempts > max_call_attempts:
-			state = ENetworkManagerState.IDLE
-			print_rich("[color=orange][NetMan]: Call attempts have timed out. Firing _call_result with empty string.")
-			_call_result.emit("")
-		else:
-			_last_call_time = currTime
-			print("[NetMan]: Broadcasting CALL...")
-			_broadcast_call()
-
-
-func _process_udp_msg(senderIp: String, msgArgs: Array[String]) -> void:
-	if msgArgs[0] == UDPSTR_CALL:
-		Debug.print_success("[NetMan]: Received CALL from %s with preferred IP %s" % [senderIp, msgArgs[1]])
-		senderIp = msgArgs[1]
-		if can_versus:
-			Debug.print_success("[NetMan]: can_versus is true. Replying with RESPONSE.")
-			other_ip = msgArgs[1]
-			versus_peer_found.emit()
-			_broadcast_response()
-		else:
-			print_rich("[color=orange][NetMan]: can_versus is false. Replying with NOPLAY.")
-			_broadcast_noplay(senderIp)
-	elif msgArgs[0] == UDPSTR_RESPONSE:
-		Debug.print_success("[NetMan]: Received RESPONSE from %s with preferred IP %s" % [senderIp, msgArgs[1]])
-		other_ip = msgArgs[1]
-		state = ENetworkManagerState.IDLE
-		_call_result.emit(other_ip)
-	elif msgArgs[0] == UDPSTR_NOPLAY:
-		Debug.print_success("[NetMan]: Received NOPLAY from %s" % senderIp)
-		if state == ENetworkManagerState.CALLING:
-			state = ENetworkManagerState.IDLE
-			_call_result.emit("")
-		else:
-			print("[NetMan]: NetworkManager is in IDLE state. The NOPLAY will be ignored.")
-	elif msgArgs[0] == UDPSTR_SERVER_CREATED:
-		Debug.print_success("[NetMan]: Received SERVER_CREATED from %s" % senderIp)
-		_create_client()
-	elif msgArgs[0] == UDPSTR_SERVER_REQUEST:
-		Debug.print_success("[NetMan]: Received SERVER_REQUEST from %s" % senderIp)
-		_create_server()
-	else:
-		print_rich("[NetMan]: Received unkown message from %s: %s" % [senderIp, str(msgArgs)])
-
-
-func _udp_packet_is_valid(packetStr: String, senderIp: String) -> bool:
-	if my_local_ips.has(senderIp):
-		print("[NetMan]: Received my own message (ip: %s | message: %s)" % [senderIp, packetStr])
-		return false
-	elif not packetStr.begins_with(UDPSTR_HEADER):
-		Debug.print_warning("[NetMan]: Received unrelated message (ip: %s | message: %s)" % [senderIp, packetStr])
-		return false
-	else:
-		return true
-
-#endregion
-
-#region UDP BROADCASTING
-
-func make_packet(message: String) -> String:
-	return UDPSTR_HEADER + ',' + message
-
-
-func _broadcast_call() -> void:
-	_last_call_time = Time.get_ticks_msec()
-	_udp.set_dest_address(GLOBAL_IP, PORT_NETWORKING)
-	_udp.put_packet(make_packet(UDPSTR_CALL + ',' + my_ip).to_utf8_buffer())
-
-
-func _broadcast_response() -> void:
-	_udp.set_dest_address(other_ip, PORT_NETWORKING)
-	_udp.put_packet(make_packet(UDPSTR_RESPONSE + ',' + my_ip).to_utf8_buffer())
-
-
-func _broadcast_noplay(senderIp: String) -> void:
-	_udp.set_dest_address(senderIp, PORT_NETWORKING)
-	_udp.put_packet(make_packet(UDPSTR_NOPLAY).to_utf8_buffer())
-
-
-func _broadcast_server_created() -> void:
-	_udp.set_dest_address(other_ip, PORT_NETWORKING)
-	_udp.put_packet(make_packet(UDPSTR_SERVER_CREATED).to_utf8_buffer())
-
-
-func _broadcast_server_request() -> void:
-	_udp.set_dest_address(other_ip, PORT_NETWORKING)
-	_udp.put_packet(make_packet(UDPSTR_SERVER_REQUEST).to_utf8_buffer())
+		Debug.print_error("[NetMan]: Configured IP %s not found on any local interface! Check the Ethernet cable / static IP setting." % my_ip)
 
 
 func _init_udp() -> void:
-	var error = _udp.bind(PORT_NETWORKING)
+	var error := _udp.bind(PORT_DISCOVERY)
 	if error != OK:
-		Debug.print_error("[NetMan]: Encountered an error when binding to UDP socket for discovery: %s" % error)
+		Debug.print_error("[NetMan]: Failed to bind UDP discovery socket: %s" % error)
 		return
 	_udp.set_broadcast_enabled(true)
 	if VERBOSE:
-		print("[NetMan]: UDP setup on port %d." % _udp.get_local_port())
-
-#endregion
-
-#region SIGNAL BINDING
-
-func _on_peer_connected(peerId: int):
-	print_rich("[color=orange][NetMan]: peer_connected signaled with peerId %d." % peerId)
-	if peerId != multiplayer.get_unique_id():
-		other_peer_id = peerId
-		server_started.emit(true)
-
-
-func _on_peer_disconnected(peerId: int):
-	print_rich("[color=orange][NetMan]: peer_disconnected signaled with peerId %d." % peerId)
-	disconnected.emit()
-
-#endregion
-
-#region DEBUGGING
-
-func _print_local_interfaces() -> void:
-	var interfaces := IP.get_local_interfaces()
-	Debug.print_info("[NetMan]: PRINTING LOCAL INTERFACES. Unorganized listing:")
-	print(interfaces)
-	print(Debug.HORIZONTAL_LINE_STR)
-	for interface in interfaces:
-		print(
-			"index: ", interface["index"], '\n',
-			"name: ", interface["name"], '\n',
-			"friendly: ", interface["friendly"], '\n',
-			"addresses: ", interface["addresses"], '\n'
-		)
-	Debug.print_info("Done printing interfaces.")
-	print(Debug.HORIZONTAL_LINE_STR)
-	print()
+		print("[NetMan]: UDP discovery bound on port %d." % PORT_DISCOVERY)
 
 #endregion

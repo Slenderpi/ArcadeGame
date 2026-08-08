@@ -6,7 +6,7 @@ func enter(payload: Dictionary = {}) -> void:
 	Debug.print_info("[State][Primary][Booting]: >> enter()")
 	var mainScene : MainScene = payload[&"main_scene"]
 	CreditManager.init()
-	NetworkManager.init()
+	#NetworkManager.init()
 	Transitioner.init(mainScene)
 	Transitioner.begin_transition(Transitioner.EType.BLACK_FADE)
 

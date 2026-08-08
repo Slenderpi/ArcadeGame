@@ -57,6 +57,7 @@ func update(delta: float) -> void:
 ## Nopte that an event that cannot be processed by the current node
 ## will remain in the event queue.
 func push_event(eventName: StringName, data: Dictionary = {}) -> void:
+	Debug.print_notify("[StateMachine]: Pushed event \"%s\" with data %s" % [eventName, str(data)])
 	_event_queue.append({&"name": eventName, &"data": data})
 	if not _transitioning:
 		_drain_event_queue()
