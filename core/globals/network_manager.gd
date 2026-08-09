@@ -23,6 +23,8 @@ const UDP_STATUS_REQUEST = "REQUEST"
 const UDP_STATUS_ACTIVE = "ACTIVE"
 const UDP_STATUS_LOOKING = "LOOKING"
 const UDP_STATUS_INACTIVE = "INACTIVE"
+const UDP_SERVER_REQUEST = "SERVER_REQUEST"
+const UDP_SERVER_CREATED = "SERVER_CREATED"
 
 ## In ms.
 const CONNECTION_ATTEMPT_TIMEOUT : int = 3000
@@ -51,6 +53,8 @@ var _connection_attempt_time : int
 
 
 func _ready() -> void:
+	multiplayer.connected_to_server.connect(_on_connected_to_server)
+	multiplayer.peer_connected.connect(_on_peer_connected)
 	process_mode = Node.PROCESS_MODE_DISABLED
 
 
@@ -76,13 +80,29 @@ func _process_udp_msg(msgArgs: Array[String]) -> void:
 			return
 		elif msgArgs[1] == UDP_STATUS_INACTIVE:
 			# Start our own server
+			_create_server()
 			pass
 		elif msgArgs[1] == UDP_STATUS_LOOKING:
 			# Compare IPs and start a server as necessary
-			pass
+			# Other machine is ready to connect
+			if my_ip < other_ip:
+				_create_server()
+			else:
+				_broadcast(UDP_SERVER_REQUEST)
 		elif msgArgs[1] == UDP_STATUS_ACTIVE:
 			# They are a server already. Request to join
+			_join_server()
 			pass
+	elif msgArgs[0] == UDP_SERVER_REQUEST:
+		if _status == EStatus.INACTIVE:
+			return
+		# Other machine is ready to connect
+		_create_server()
+	elif msgArgs[0] == UDP_SERVER_CREATED:
+		if _status == EStatus.INACTIVE:
+			return
+		_join_server()
+		pass
 
 
 func _process(_delta: float) -> void:
@@ -144,14 +164,51 @@ func begin_matchmaking() -> void:
 
 
 func _on_connected_to_server() -> void:
+	Debug.print_info("[NetMan]: Connected to the server!")
+	_status = EStatus.INACTIVE
 	#_join_peer_result = EJoinPeerResult.SUCCESS
-	multiplayer.connection_failed.disconnect(_on_connection_failed)
+	#multiplayer.connection_failed.disconnect(_on_connection_failed)
 
 
-func _on_connection_failed() -> void:
-	#_join_peer_result = EJoinPeerResult.FAIL
-	multiplayer.connected_to_server.disconnect(_on_connected_to_server)
-	multiplayer.multiplayer_peer.close()
+#func _on_connection_failed() -> void:
+	##_join_peer_result = EJoinPeerResult.FAIL
+	#multiplayer.connected_to_server.disconnect(_on_connected_to_server)
+	#multiplayer.multiplayer_peer.close()
+
+
+func _on_peer_connected(peerId: int) -> void:
+	if peerId == multiplayer.get_unique_id():
+		return
+	Debug.print_info("[NetMan]: Peer %d connected!" % peerId)
+	_status = EStatus.INACTIVE
+
+
+func _create_server() -> void:
+	print("[NetMan]: Creating ENet server...")
+	var peer := ENetMultiplayerPeer.new()
+	var error := peer.create_server(PORT_GAME, 2)
+	if error != OK:
+		Debug.print_error("[NetMan]: Failed to start server. Error: %s" % error)
+		return
+	multiplayer.multiplayer_peer = peer
+	print("[NetMan]: Server started successfully.")
+	_status = EStatus.ACTIVE
+	_broadcast(UDP_SERVER_CREATED)
+	connection_result
+
+
+func _join_server() -> void:
+	print("[NetMan]: Creating ENet client to join existing server...")
+	var peer := ENetMultiplayerPeer.new()
+	var error := peer.create_client(other_ip, PORT_GAME)
+	if error != OK:
+		Debug.print_error("[NetMan]: Failed to create client. Error: %s" % error)
+		return
+	multiplayer.multiplayer_peer = peer
+	Debug.print_success("[NetMan]: Client created and joined successfully.")
+	#state = ENetworkManagerState.CLIENT
+	#state = ENetworkManagerState.IDLE # TODO: what state should be next?
+	_status = EStatus.INACTIVE
 
 
 func _on_join_peer_result(success: bool) -> void:
