@@ -123,9 +123,9 @@ var _curr_call_attempts := 0
 
 #region NODE OVERRIDES
 
-func _ready() -> void:
-	multiplayer.peer_connected.connect(_on_peer_connected)
-	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+#func _ready() -> void:
+	#multiplayer.peer_connected.connect(_on_peer_connected)
+	#multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 
 
 func _process(_delta: float) -> void:

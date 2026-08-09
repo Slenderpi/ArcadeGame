@@ -35,8 +35,9 @@ const CONNECTION_ATTEMPT_TIMEOUT : int = 3000
 
 ## Fired by [method NetworkManager.begin_connection_attempt] once a
 ## connection result occurs.[br]
-## If the connection is successful, [param successful] will be true.
-signal connection_result(successful: bool)
+## [param isMultiplayer] is true if there is an active client connected.[br]
+## [param isServer] is true if we are the server.
+signal connection_result(isMultiplayer: bool, isServer: bool)
 
 #endregion
 
@@ -45,6 +46,8 @@ var other_ip : String
 
 
 var _udp : PacketPeerUDP
+
+var _expecting_client := false
 
 #var _join_peer_result : EJoinPeerResult = EJoinPeerResult.NOT_JOINING
 #var _is_attempting_join := false
@@ -58,53 +61,6 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_DISABLED
 
 
-func _is_udp_packet_valid(packetStr: String) -> bool:
-	return packetStr.begins_with(UDP_HEADER)
-
-
-func _process_udp_msg(msgArgs: Array[String]) -> void:
-	if msgArgs[0] == UDP_STATUS:
-		if msgArgs[1] == UDP_STATUS_REQUEST:
-			match _status:
-				EStatus.INACTIVE:
-					_broadcast_status(UDP_STATUS_INACTIVE)
-				EStatus.LOOKING:
-					# Reset connection attempt time
-					_connection_attempt_time = Time.get_ticks_msec()
-					_broadcast_status(UDP_STATUS_LOOKING)
-				EStatus.ACTIVE:
-					_broadcast_status(UDP_STATUS_ACTIVE)
-		elif _status == EStatus.ACTIVE:
-			# Occurs when other devices fail to respond to a STATUS REQUEST
-			# in time and we've already gone into ACTIVE (i.e. singleplayer).
-			return
-		elif msgArgs[1] == UDP_STATUS_INACTIVE:
-			# Start our own server
-			_create_server()
-			pass
-		elif msgArgs[1] == UDP_STATUS_LOOKING:
-			# Compare IPs and start a server as necessary
-			# Other machine is ready to connect
-			if my_ip < other_ip:
-				_create_server()
-			else:
-				_broadcast(UDP_SERVER_REQUEST)
-		elif msgArgs[1] == UDP_STATUS_ACTIVE:
-			# They are a server already. Request to join
-			_join_server()
-			pass
-	elif msgArgs[0] == UDP_SERVER_REQUEST:
-		if _status == EStatus.INACTIVE:
-			return
-		# Other machine is ready to connect
-		_create_server()
-	elif msgArgs[0] == UDP_SERVER_CREATED:
-		if _status == EStatus.INACTIVE:
-			return
-		_join_server()
-		pass
-
-
 func _process(_delta: float) -> void:
 	while (_udp.get_available_packet_count() > 0):
 		var packetStr := _udp.get_packet().get_string_from_ascii()
@@ -115,6 +71,12 @@ func _process(_delta: float) -> void:
 		else:
 			Debug.print_warning("[NetMan]: Received unrelated message (ip: %s | message: %s)" % [senderIp, packetStr])
 	
+	if _status == EStatus.LOOKING:
+		if Time.get_ticks_msec() - _connection_attempt_time > CONNECTION_ATTEMPT_TIMEOUT:
+			print("[NetMan]: Connection search timed out. Beginning server as singleplayer.")
+			_create_server()
+			_expecting_client = false
+			connection_result.emit(false, true)
 	
 	#match _join_peer_result:
 		#EJoinPeerResult.WAITING_RESULT:
@@ -163,6 +125,56 @@ func begin_matchmaking() -> void:
 	#multiplayer.multiplayer_peer = peer
 
 
+func _is_udp_packet_valid(packetStr: String) -> bool:
+	return packetStr.begins_with(UDP_HEADER)
+
+
+func _process_udp_msg(msgArgs: Array[String]) -> void:
+	if msgArgs[0] == UDP_STATUS:
+		if msgArgs[1] == UDP_STATUS_REQUEST:
+			match _status:
+				EStatus.INACTIVE:
+					_broadcast_status(UDP_STATUS_INACTIVE)
+				EStatus.LOOKING:
+					# Reset connection attempt time
+					_connection_attempt_time = Time.get_ticks_msec()
+					_broadcast_status(UDP_STATUS_LOOKING)
+				EStatus.ACTIVE:
+					_broadcast_status(UDP_STATUS_ACTIVE)
+		elif _status == EStatus.ACTIVE:
+			# Occurs when other devices fail to respond to a STATUS REQUEST
+			# in time and we've already gone into ACTIVE (i.e. singleplayer).
+			return
+		elif msgArgs[1] == UDP_STATUS_INACTIVE:
+			# Start our own server
+			_create_server()
+			_expecting_client = false
+			connection_result.emit(false, true)
+		elif msgArgs[1] == UDP_STATUS_LOOKING:
+			# Compare IPs and start a server as necessary
+			# Other machine is ready to connect
+			if my_ip < other_ip:
+				_create_server()
+				_expecting_client = true
+				_broadcast(UDP_SERVER_CREATED)
+			else:
+				_broadcast(UDP_SERVER_REQUEST)
+		elif msgArgs[1] == UDP_STATUS_ACTIVE:
+			# They are a server already. Request to join
+			_join_server()
+	elif msgArgs[0] == UDP_SERVER_REQUEST:
+		if _status == EStatus.INACTIVE:
+			return
+		# Other machine is ready to connect
+		_create_server()
+		_expecting_client = true
+		_broadcast(UDP_SERVER_CREATED)
+	elif msgArgs[0] == UDP_SERVER_CREATED:
+		if _status == EStatus.INACTIVE:
+			return
+		_join_server()
+
+
 func _on_connected_to_server() -> void:
 	Debug.print_info("[NetMan]: Connected to the server!")
 	_status = EStatus.INACTIVE
@@ -181,6 +193,8 @@ func _on_peer_connected(peerId: int) -> void:
 		return
 	Debug.print_info("[NetMan]: Peer %d connected!" % peerId)
 	_status = EStatus.INACTIVE
+	if _expecting_client:
+		connection_result.emit(true, multiplayer.is_server())
 
 
 func _create_server() -> void:
@@ -193,8 +207,6 @@ func _create_server() -> void:
 	multiplayer.multiplayer_peer = peer
 	print("[NetMan]: Server started successfully.")
 	_status = EStatus.ACTIVE
-	_broadcast(UDP_SERVER_CREATED)
-	connection_result
 
 
 func _join_server() -> void:

@@ -16,6 +16,6 @@ func exit() -> void:
 	Debug.print_info("[State][Primary][Matchmaking]: << exit()")
 
 
-func _on_connection_result(success: bool) -> void:
-	print("[State][Primary][Matchmaking]: A connection result was given! Result: %s" % str(success))
+func _on_connection_result(isMultiplayer: bool, isServer: bool) -> void:
+	print("[State][Primary][Matchmaking]: A connection result was given! isMultiplayer: %s | isServer: %s" % [str(isMultiplayer), str(isServer)])
 	finished.emit()
