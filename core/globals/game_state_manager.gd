@@ -66,7 +66,11 @@ func _enter_state_attract_mode() -> void:
 	if DEV_SKIP_TO_COMBAT:
 		_enter_state_gameplay()
 	else:
-		fsm.change_state(StateFactory.create(AttractModeState, _enter_state_gameplay))
+		fsm.change_state(StateFactory.create(AttractModeState, _enter_state_matchmaking))
+
+
+func _enter_state_matchmaking() -> void:
+	fsm.change_state(StateFactory.create(MatchmakingState, _enter_state_gameplay))
 
 
 func _enter_state_gameplay() -> void:
