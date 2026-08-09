@@ -25,7 +25,7 @@ const UDP_STATUS_LOOKING = "LOOKING"
 const UDP_STATUS_INACTIVE = "INACTIVE"
 
 ## In ms.
-const CONNECTION_ATTEMPT_TIMEOUT : int = 2000
+const CONNECTION_ATTEMPT_TIMEOUT : int = 3000
 
 #endregion
 
@@ -70,6 +70,10 @@ func _process_udp_msg(msgArgs: Array[String]) -> void:
 					_broadcast_status(UDP_STATUS_LOOKING)
 				EStatus.ACTIVE:
 					_broadcast_status(UDP_STATUS_ACTIVE)
+		elif _status == EStatus.ACTIVE:
+			# Occurs when other devices fail to respond to a STATUS REQUEST
+			# in time and we've already gone into ACTIVE (i.e. singleplayer).
+			return
 		elif msgArgs[1] == UDP_STATUS_INACTIVE:
 			# Start our own server
 			pass
@@ -122,8 +126,9 @@ func init() -> void:
 ## Attempts to join the server of other_ip.
 ## If the other device does not have a server up (i.e. no one is playing on it),
 ## 
-func join_or_start_server() -> void:
-	print("[NetMan]: join_or_start_server() called! Beginning join attempt...")
+func begin_matchmaking() -> void:
+	print("[NetMan]: begin_matchmaking() called! Beginning join attempt...")
+	_connection_attempt_time = Time.get_ticks_msec()
 	_status = EStatus.LOOKING
 	_broadcast_status(UDP_STATUS_REQUEST)
 	#_join_peer_result = EJoinPeerResult.WAITING_RESULT
@@ -165,13 +170,17 @@ func _on_join_peer_result(success: bool) -> void:
 
 
 func _broadcast(...args: Array) -> void:
-	var packet : String = UDP_HEADER + ","
-	packet += ",".join(args)
+	var packet : String = UDP_HEADER
+	for arg in args:
+		packet += ',' + str(arg)
 	_udp.put_packet(packet.to_utf8_buffer())
 
 
 func _broadcast_status(...args: Array) -> void:
-	_broadcast(UDP_STATUS, args)
+	var argStr : String = UDP_STATUS
+	for arg in args:
+		argStr += ',' + str(arg)
+	_broadcast(argStr)
 
 
 func _load_config_ip() -> void:
