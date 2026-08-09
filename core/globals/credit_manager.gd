@@ -37,9 +37,9 @@ func _process(_delta: float) -> void:
 
 
 func init() -> void:
-	Debug.print_info("[CredMan]: Initializing.")
+	print("[CredMan]: Initializing.")
 	process_priority = PROCESS_MODE_ALWAYS
-	Debug.print_info("[CredMan]: Setup finished.")
+	print("[CredMan]: Setup finished.")
 
 
 ## Returns true if there are credits in the machine
