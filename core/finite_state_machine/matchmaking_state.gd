@@ -65,10 +65,12 @@ func _join_other_server() -> void:
 func _on_peer_connected(peerId: int) -> void:
 	if peerId == NetworkManager.multiplayer.get_unique_id():
 		return
+	print("[State][Primary][Matchmaking]: The peer connected to my server!")
 	_made_connection = true
 
 
 func _on_connected_to_server() -> void:
+	print("[State][Primary][Matchmaking]: Conneted to peer's server!")
 	_made_connection = true
 
 

@@ -25,3 +25,8 @@ func exit() -> void:
 	Debug.print_info("[State][Primary][AttractMode]: << exit()")
 	await Transitioner.begin_transition()
 	_attract_mode_visuals.queue_free()
+
+
+func handles_event(eventName: StringName) -> bool:
+	# Flush other_matchmaking event
+	return eventName == &"other_matchmaking"

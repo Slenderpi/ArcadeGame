@@ -77,7 +77,7 @@ var _expecting_peer := false
 #var _join_peer_result : EJoinPeerResult = EJoinPeerResult.NOT_JOINING
 #var _is_attempting_join := false
 #var _status := EStatus.INACTIVE
-var _connection_attempt_time : int
+#var _connection_attempt_time : int
 
 
 func _ready() -> void:
@@ -90,7 +90,7 @@ func _process(_delta: float) -> void:
 	while (_udp.get_available_packet_count() > 0):
 		var packetStr := _udp.get_packet().get_string_from_ascii()
 		var senderIp := _udp.get_packet_ip()
-		print("[NetMan]: New packet: \"%s\"" % packetStr)
+		print("[NetMan]: RECEIVED: %s" % packetStr)
 		if _is_udp_packet_valid(packetStr):
 			_process_udp_msg(packetStr.trim_prefix(UDP_HEADER + ',').split(','))
 		else:
@@ -225,8 +225,8 @@ func _on_peer_connected(peerId: int) -> void:
 		return
 	Debug.print_info("[NetMan]: Peer %d connected!" % peerId)
 	#_status = EStatus.INACTIVE
-	if _expecting_peer:
-		connection_result.emit(true, multiplayer.is_server())
+	#if _expecting_peer:
+		#connection_result.emit(true, multiplayer.is_server())
 
 
 func _create_server() -> void:
