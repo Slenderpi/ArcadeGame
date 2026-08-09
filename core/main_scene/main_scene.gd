@@ -162,7 +162,7 @@ func _on_state_matchmaking() -> void:
 	
 	if foundPeer:
 		Debug.print_info("[MainScene]: Matchmaking result: NetworkManager found a peer! Peer ip: %s" % peerIp)
-		var serverIp : String = _choose_host_ip(peerIp)
+		var serverIp : String = peerIp # _choose_host_ip(peerIp)
 		print("[MainScene]: The IP that will be the server is: %s" % serverIp)
 		NetworkManager.start_server(serverIp)
 	else:
@@ -281,29 +281,29 @@ func _on_mech_character_instantiated(mechChar: MechCharacter) -> void:
 # Not IPv6
 # Smaller IPv4 numeric value (i.e. 1.1.1.1 becomes 1111)
 # String-based comparison of IPv6: my_ip if my_ip < peerIp else peerIp
-func _choose_host_ip(peerIp: String) -> String:
-	var myIp4Parts := NetworkManager.my_ip.split('.')
-	var peerIp4Parts := peerIp.split('.')
-	if myIp4Parts.size() != 4:
-		if peerIp4Parts.size() != 4:
-			# IPv6 vs IPv6
-			return NetworkManager.my_ip if NetworkManager.my_ip < peerIp else peerIp
-		else:
-			# Only peer is IPv4
-			return peerIp
-	elif peerIp4Parts.size() != 4:
-		# Only my IP is IPv4
-		return NetworkManager.my_ip
-	else:
-		# IPv4 vs IPv4
-		var myNumeric := 0
-		var peerNumeric := 0
-		for i in range(0, 4):
-			for c in myIp4Parts[i]:
-				myNumeric = myNumeric * 10 + c.to_int()
-			for c in peerIp4Parts[i]:
-				peerNumeric = peerNumeric * 10 + c.to_int()
-		return NetworkManager.my_ip if myNumeric < peerNumeric else peerIp
+#func _choose_host_ip(peerIp: String) -> String:
+	#var myIp4Parts := NetworkManager.my_ip.split('.')
+	#var peerIp4Parts := peerIp.split('.')
+	#if myIp4Parts.size() != 4:
+		#if peerIp4Parts.size() != 4:
+			## IPv6 vs IPv6
+			#return NetworkManager.my_ip if NetworkManager.my_ip < peerIp else peerIp
+		#else:
+			## Only peer is IPv4
+			#return peerIp
+	#elif peerIp4Parts.size() != 4:
+		## Only my IP is IPv4
+		#return NetworkManager.my_ip
+	#else:
+		## IPv4 vs IPv4
+		#var myNumeric := 0
+		#var peerNumeric := 0
+		#for i in range(0, 4):
+			#for c in myIp4Parts[i]:
+				#myNumeric = myNumeric * 10 + c.to_int()
+			#for c in peerIp4Parts[i]:
+				#peerNumeric = peerNumeric * 10 + c.to_int()
+		#return NetworkManager.my_ip if myNumeric < peerNumeric else peerIp
 
 #endregion
 

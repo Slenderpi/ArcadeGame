@@ -19,12 +19,12 @@ func enter(_payload: Dictionary = {}) -> void:
 			&"stage": GameStateManager.DEV_SKIP_STAGE
 		})
 	else:
-		NetworkManager.begin_session()
-		var peer_ip := NetworkManager.find_open_peer()
-		if not peer_ip.is_empty() and await NetworkManager.try_claim(peer_ip):
-			pass  # multiplayer, connection_established already fired
-		else:
-			NetworkManager.start_as_singleplayer()
+		#NetworkManager.begin_session()
+		#var peer_ip := NetworkManager.find_open_peer()
+		#if not peer_ip.is_empty() and await NetworkManager.try_claim(peer_ip):
+			#pass  # multiplayer, connection_established already fired
+		#else:
+			#NetworkManager.start_as_singleplayer()
 		_enter_state_character_select()
 	await Transitioner.end_transition()
 

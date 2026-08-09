@@ -31,8 +31,8 @@ var folder_arcade_visuals : Node
 #region NODE OVERRIDES
 
 func _ready() -> void:
-	NetworkManager.connection_established.connect(_on_connection_established)
-	NetworkManager.connection_lost.connect(_on_connection_lost)
+	#NetworkManager.connection_established.connect(_on_connection_established)
+	#NetworkManager.connection_lost.connect(_on_connection_lost)
 	process_mode = Node.PROCESS_MODE_DISABLED
 
 
