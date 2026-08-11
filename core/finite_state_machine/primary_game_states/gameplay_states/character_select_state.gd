@@ -2,7 +2,7 @@ extends StateBase
 class_name CharacterSelectState
 
 
-const CHAR_SELECT_TIME : float = 30
+const CHAR_SELECT_TIME : float = 30.99
 
 
 var selected_option : int:
@@ -23,13 +23,15 @@ var _last_lstick_read : int = 0
 var _last_rstick_read : int = 0
 
 # In seconds
-var _timer : float = CHAR_SELECT_TIME
+var _timer : float
 var _timer_enabled : bool = false
 
 
 func enter(_payload: Dictionary = {}) -> void:
 	Debug.print_info("[State][Gameplay][CharacterSelect]: >> enter()")
 	_visuals = load("res://scenes/character_select/character_select_scene.tscn").instantiate()
+	_timer = CHAR_SELECT_TIME
+	_visuals.time_as_int = floor(_timer)
 	GameStateManager.folder_arcade_visuals.add_child(_visuals)
 	GameStateManager.camera.first_person_target = _visuals.cam_target
 	GameStateManager.camera.camera_mode = GameCamera.ECameraMode.FIRST_PERSON
@@ -44,6 +46,7 @@ func update(_delta: float) -> void:
 		finished.emit({&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
 	if _timer_enabled:
 		_timer = max(_timer - _delta, 0)
+		_visuals.set_time_remaining(_timer)
 		if _timer == 0:
 			finished.emit({&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
 

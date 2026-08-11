@@ -13,6 +13,12 @@ var curr_selection : int:
 var _mech_options_container : Container
 @export
 var cam_target : Node3D
+@export
+var timer_label : Label
+@export
+var opponent_choice_mech_name : Label
+
+var time_as_int : int
 
 var _mech_option_ui_element_scene := preload("res://scenes/character_select/accessories/mech_option_ui_element.tscn")
 
@@ -42,3 +48,15 @@ func set_selection(selection: int) -> void:
 
 func on_option_chosen() -> void:
 	_instanced_mech_options[_curr_selection].on_chosen()
+
+
+func set_opponent_choice(option: int) -> void:
+	opponent_choice_mech_name.text = MechRefs.mech_metadata[option].mech_name
+
+
+func set_time_remaining(time: float) -> void:
+	var _time := floori(time)
+	if _time != time_as_int:
+		time_as_int = _time
+		timer_label.text = str(time_as_int)
+		# Possibly do an animation

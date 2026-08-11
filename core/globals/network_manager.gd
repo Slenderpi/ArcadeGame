@@ -39,10 +39,15 @@ const PORT_GAME := 21983
 
 ## This string is appended to all packets sent over UDP.
 ## NetworkManager will expect packets it receives to have this header.
-const UDP_HEADER := "VirtualOff"
-const UDP_MATCHMAKING := "MATCHMAKING"
-const UDP_REQUEST_SERVER := "REQUEST_SERVER"
-const UDP_SERVER_CREATED := "SERVER_CREATED"
+const UDP_HEADER = "VirtualOff"
+const UDP_REQUEST_JOIN = "REQUEST_JOIN"
+const UDP_OK = "OK"
+const UDP_SAME_TIME = "SAME_TIME"
+const UDP_NO_SERVER = "NO_SERVER"
+
+const UDP_MATCHMAKING = "MATCHMAKING"
+const UDP_REQUEST_SERVER = "REQUEST_SERVER"
+const UDP_SERVER_CREATED = "SERVER_CREATED"
 #const UDP_STATUS = "STATUS"
 #const UDP_STATUS_REQUEST = "REQUEST"
 #const UDP_STATUS_ACTIVE = "ACTIVE"
@@ -64,10 +69,21 @@ const CONNECTION_ATTEMPT_TIMEOUT : int = 3000
 ## [param isServer] is true if we are the server.
 signal connection_result(isMultiplayer: bool, isServer: bool)
 
+
+signal _peer_join_req_response(response: String)
+
 #endregion
 
 var my_ip : String
 var other_ip : String
+
+
+var _is_server_up : bool = false
+var _did_join_server : bool = false
+# Determines if we're in the joining phase
+var _is_joining : bool = false
+const MAX_JOIN_ATTEMPT_TIME : float = 3
+var _join_timer : float = 0
 
 
 var _udp : PacketPeerUDP
@@ -87,6 +103,11 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	if _is_joining:
+		_join_timer += _delta
+		if _join_timer > MAX_JOIN_ATTEMPT_TIME:
+			_peer_join_req_response.emit("")
+	
 	while (_udp.get_available_packet_count() > 0):
 		var packetStr := _udp.get_packet().get_string_from_ascii()
 		var senderIp := _udp.get_packet_ip()
@@ -156,12 +177,42 @@ func _is_udp_packet_valid(packetStr: String) -> bool:
 
 
 func _process_udp_msg(msgArgs: Array[String]) -> void:
-	if msgArgs[0] == UDP_MATCHMAKING:
-		GameStateManager.fsm.push_event(&"other_matchmaking")
+	if msgArgs[0] == UDP_REQUEST_JOIN:
+		if _is_joining:
+			_join_timer = 0
+			broadcast(UDP_SAME_TIME)
+		else:
+			if _is_server_up:
+				broadcast(UDP_OK)
+			else:
+				broadcast(UDP_NO_SERVER)
 	elif msgArgs[0] == UDP_REQUEST_SERVER:
-		GameStateManager.fsm.push_event(&"request_server")
+		if not _is_joining:
+			Debug.print_warning("[NetMan]: Received a REQUEST_SERVER while not in the _is_joining phase!")
+		if _is_server_up:
+			Debug.print_warning("[NetMan]: REQUEST_SERVER received but the server is already up. Broadcasting SERVER_CREATED.")
+			broadcast(UDP_SERVER_CREATED)
+			return
+		_join_timer = 0
+		create_server()
+		broadcast(UDP_SERVER_CREATED)
 	elif msgArgs[0] == UDP_SERVER_CREATED:
-		GameStateManager.fsm.push_event(&"server_created")
+		if _did_join_server:
+			Debug.print_warning("[NetMan]: SERVER_CREATED received but I've already joined the server.")
+			return
+		join_other_server()
+	else:
+		_peer_join_req_response.emit(msgArgs[0])
+	
+	
+	#if msgArgs[0] == UDP_MATCHMAKING:
+		#GameStateManager.fsm.push_event(&"other_matchmaking")
+	#elif msgArgs[0] == UDP_REQUEST_SERVER:
+		#GameStateManager.fsm.push_event(&"request_server")
+	#elif msgArgs[0] == UDP_SERVER_CREATED:
+		#GameStateManager.fsm.push_event(&"server_created")
+	
+	
 	#if msgArgs[0] == UDP_STATUS:
 		#if msgArgs[1] == UDP_STATUS_REQUEST:
 			#match _status:
@@ -279,6 +330,36 @@ func broadcast(...args: Array) -> void:
 	_udp.put_packet(packet.to_utf8_buffer())
 
 
+func join_or_begin_session() -> void:
+	Debug.print_info("[NetMan]: join_or_begin_session() called.")
+	_is_joining = true
+	broadcast(UDP_REQUEST_JOIN)
+	var response : String = await _peer_join_req_response
+	print("[NetMan]: Received response to join request: \"%s\"" % response)
+	_is_joining = false
+	if response == UDP_OK:
+		print("[NetMan]: The response was OK. Joining other server.")
+		join_other_server()
+		await multiplayer.connected_to_server
+	elif response == UDP_SAME_TIME:
+		print("[NetMan]: The response was SAME_TIME. Deciding who will be the server...")
+		if my_ip < other_ip:
+			print_rich("[NetMan]: I will be the [color=pink][b]server[/b][/color]. Creating server...")
+			create_server()
+			broadcast(UDP_SERVER_CREATED)
+			await multiplayer.peer_connected
+		else:
+			print_rich("[NetMan]: I will be the [color=pink][b]client[/b][/color]. Requesting server...")
+			broadcast(UDP_REQUEST_SERVER)
+			await multiplayer.connected_to_server
+	else:
+		if response.is_empty():
+			print("[NetMan]: Join request response timed out. Starting server.")
+		else:
+			print("[NetMan]: Join request received NO_SERVER. Starting server.")
+		create_server()
+
+
 func create_server() -> void:
 	print("[NetMan]: Creating ENet server...")
 	var peer := ENetMultiplayerPeer.new()
@@ -287,6 +368,7 @@ func create_server() -> void:
 		Debug.print_error("[NetMan]: Failed to start server. Error: %s" % error)
 		return
 	multiplayer.multiplayer_peer = peer
+	_is_server_up = true
 	print("[NetMan]: Server started successfully.")
 
 
@@ -298,6 +380,7 @@ func join_other_server() -> void:
 		Debug.print_error("[NetMan]: Failed to create client. Error: %s" % error)
 		return
 	multiplayer.multiplayer_peer = peer
+	_did_join_server = true
 	print("[NetMan]: Client created successfully.")
 
 

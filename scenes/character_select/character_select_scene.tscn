@@ -45,12 +45,27 @@ top_radius = 1.15
 bottom_radius = 1.0
 height = 0.2
 
-[node name="CharacterSelectScene" type="Node" unique_id=810698279 node_paths=PackedStringArray("_mech_options_container", "cam_target")]
+[node name="CharacterSelectScene" type="Node" unique_id=810698279 node_paths=PackedStringArray("_mech_options_container", "cam_target", "timer_label", "opponent_choice_mech_name")]
 script = ExtResource("1_ybrop")
 _mech_options_container = NodePath("CharacterSelectCanvasLayer/Control/MechOptionsContainer")
 cam_target = NodePath("Node3D/CameraTarget")
+timer_label = NodePath("CharacterSelectCanvasLayer/TimerLabel")
+opponent_choice_mech_name = NodePath("CharacterSelectCanvasLayer/Control2/OpponentChoiceMechName")
 
 [node name="CharacterSelectCanvasLayer" type="CanvasLayer" parent="." unique_id=1404735186]
+
+[node name="TimerLabel" type="Label" parent="CharacterSelectCanvasLayer" unique_id=1594164687]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -34.5
+offset_right = 34.5
+offset_bottom = 83.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 60
+text = "30"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Control" type="Control" parent="CharacterSelectCanvasLayer" unique_id=1581338755]
 layout_mode = 3
@@ -82,6 +97,32 @@ offset_top = 90.0
 grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
+
+[node name="Control2" type="VBoxContainer" parent="CharacterSelectCanvasLayer" unique_id=2130494302]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -120.0
+offset_right = 300.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="OpponentChoiceLabel" type="Label" parent="CharacterSelectCanvasLayer/Control2" unique_id=1440766572]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = " OPPONENT MECH:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OpponentChoiceMechName" type="Label" parent="CharacterSelectCanvasLayer/Control2" unique_id=844159002]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "----"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Node3D" type="Node3D" parent="." unique_id=650829276]
 

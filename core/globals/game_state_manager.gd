@@ -23,6 +23,8 @@ var fsm : StateMachine
 ## The MainScene should contain it when calling [method GameStateManager.start].
 var camera : GameCamera
 
+#var is_player1 := true
+
 var folder_arcade_visuals : Node
 
 #endregion
