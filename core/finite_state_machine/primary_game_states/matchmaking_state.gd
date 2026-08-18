@@ -3,7 +3,7 @@ class_name MatchmakingState
 ## Makes the NetworkManager attempts to find a peer to connect to.
 
 
-enum EState {TIMER, TIMER_JUST_FINISHED, READY, WAITING_MULTIPLAYER, DONE}
+enum EState {STARTING, TIMER, TIMER_JUST_FINISHED, READY, WAITING_MULTIPLAYER, DONE}
 
 
 
@@ -11,7 +11,7 @@ enum EState {TIMER, TIMER_JUST_FINISHED, READY, WAITING_MULTIPLAYER, DONE}
 const MAX_TIME : float = 10
 
 
-var _state := EState.TIMER
+var _state := EState.STARTING
 
 var _other_can_join := false
 var _other_ready := false
@@ -26,7 +26,6 @@ func enter(_payload: Dictionary = {}) -> void:
 	Debug.print_info("[State][Primary][Matchmaking]: >> enter()")
 	#await Transitioner.begin_transition()
 	_timer = 0
-	NetworkManager.broadcast(NetworkManager.UDP_STARTED)
 	print("[State][Primary][Matchmaking]: enter() finished. Beginning extra timer...")
 	#await GameStateManager.get_tree().create_timer(1).timeout
 	#print("[State][Primary][Matchmaking]: extra wait timer finished.")
@@ -104,6 +103,9 @@ func on_event(eventName: StringName, _data: Dictionary) -> void:
 
 func _handle_state():
 	match _state:
+		EState.STARTING:
+			NetworkManager.broadcast(NetworkManager.UDP_STARTED)
+			_state = EState.TIMER
 		EState.TIMER_JUST_FINISHED:
 			if _other_can_join:
 				Debug.print_info("[State][Primary][Matchmaking]: Other device [color=green]CAN JOIN[/color]! Starting multiplayer processes.")
