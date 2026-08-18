@@ -8,7 +8,7 @@ enum EState {TIMER, TIMER_JUST_FINISHED, READY, WAITING_MULTIPLAYER, DONE}
 
 
 # In ms
-const MAX_TIME : float = 2
+const MAX_TIME : float = 10
 
 
 var _state := EState.TIMER

@@ -38,10 +38,14 @@ func _ready() -> void:
 	NetworkManager.received_message.connect(func(msg: Array[String]):
 		if msg[0] == NetworkManager.UDP_STARTED:
 			fsm.push_event(&"started")
+		elif msg[0] == NetworkManager.UDP_NO_JOIN:
+			fsm.push_event(&"no_join")
+		elif msg[0] == NetworkManager.UDP_CAN_JOIN:
+			fsm.push_event(&"can_join")
 		elif msg[0] == NetworkManager.UDP_READY:
 			fsm.push_event(&"ready")
-		elif msg[0] == NetworkManager.UDP_NOT_READY:
-			fsm.push_event(&"not_ready")
+		elif msg[0] == NetworkManager.UDP_SERVER_CREATED:
+			fsm.push_event(&"server_created")
 	)
 	NetworkManager.server_setup_finished.connect(func():
 		fsm.push_event(&"server_setup_finished")
@@ -73,9 +77,9 @@ func handles_multiplayer_events(eventName: StringName) -> bool:
 	return eventName == &"started" \
 		|| eventName == &"can_join" \
 		|| eventName == &"ready" \
-		|| eventName == &"no_join" \
 		|| eventName == &"server_created" \
-		|| eventName == &"server_setup_finished"
+		|| eventName == &"server_setup_finished" \
+		|| eventName == &"no_join"
 
 #endregion
 
