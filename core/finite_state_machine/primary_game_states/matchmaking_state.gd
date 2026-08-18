@@ -108,11 +108,11 @@ func _handle_state():
 			if _other_can_join:
 				Debug.print_info("[State][Primary][Matchmaking]: Other device [color=green]CAN JOIN[/color]! Starting multiplayer processes.")
 				print("[State][Primary][Matchmaking]: Waiting for server setup to finish...")
-				#_state = EState.WAITING_MULTIPLAYER
-				_state = EState.READY
-				#NetworkManager.try_create_server()
-				_handle_state()
+				NetworkManager.try_create_server()
 				NetworkManager.broadcast(NetworkManager.UDP_READY)
+				_state = EState.WAITING_MULTIPLAYER
+				#_state = EState.READY
+				_handle_state()
 			else:
 				Debug.print_info("[State][Primary][Matchmaking]: Other device said [color=red]NO JOIN[/color]. Starting singleplayer processes.")
 				NetworkManager.setup_singleplayer_session()
@@ -120,7 +120,7 @@ func _handle_state():
 				_handle_state()
 		EState.READY:
 			Debug.print_info("[State][Primary][Matchmaking]: This machine is READY. Calling NetworkManager.setup_session() and waiting...")
-			NetworkManager.setup_session()
+			#NetworkManager.setup_session()
 			_state = EState.WAITING_MULTIPLAYER
 			_handle_state()
 		EState.WAITING_MULTIPLAYER:
