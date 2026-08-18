@@ -35,6 +35,17 @@ var folder_arcade_visuals : Node
 func _ready() -> void:
 	#NetworkManager.connection_established.connect(_on_connection_established)
 	#NetworkManager.connection_lost.connect(_on_connection_lost)
+	NetworkManager.received_message.connect(func(msg: Array[String]):
+		if msg[0] == NetworkManager.UDP_STARTED:
+			fsm.push_event(&"started")
+		elif msg[0] == NetworkManager.UDP_READY:
+			fsm.push_event(&"ready")
+		elif msg[0] == NetworkManager.UDP_NOT_READY:
+			fsm.push_event(&"not_ready")
+	)
+	NetworkManager.server_setup_finished.connect(func():
+		fsm.push_event(&"server_setup_finished")
+	)
 	process_mode = Node.PROCESS_MODE_DISABLED
 
 
@@ -55,6 +66,16 @@ func start(mainScene: MainScene) -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	fsm  = StateMachine.new()
 	_enter_state_booting(mainScene)
+
+
+## Can be used by other states to claim they handle events related to multiplayer setup.
+func handles_multiplayer_events(eventName: StringName) -> bool:
+	return eventName == &"started" \
+		|| eventName == &"can_join" \
+		|| eventName == &"ready" \
+		|| eventName == &"no_join" \
+		|| eventName == &"server_created" \
+		|| eventName == &"server_setup_finished"
 
 #endregion
 

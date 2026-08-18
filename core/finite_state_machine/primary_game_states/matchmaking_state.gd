@@ -3,24 +3,55 @@ class_name MatchmakingState
 ## Makes the NetworkManager attempts to find a peer to connect to.
 
 
-# In ms
-const MAX_TIME = 1500
+enum EState {TIMER, TIMER_JUST_FINISHED, READY, WAITING_MULTIPLAYER, DONE}
 
-#var _timer : int
+
+
+# In ms
+const MAX_TIME : float = 2
+
+
+var _state := EState.TIMER
+
+var _other_can_join := false
+var _other_ready := false
+var _other_server_up := false
+var _setup_finished := false
+
+var _timer : float
 #var _made_connection := false
 
 
 func enter(_payload: Dictionary = {}) -> void:
 	Debug.print_info("[State][Primary][Matchmaking]: >> enter()")
-	await NetworkManager.join_or_begin_session()
+	#await Transitioner.begin_transition()
+	_timer = 0
+	NetworkManager.broadcast(NetworkManager.UDP_STARTED)
+	print("[State][Primary][Matchmaking]: enter() finished. Beginning extra timer...")
+	#await GameStateManager.get_tree().create_timer(1).timeout
+	#print("[State][Primary][Matchmaking]: extra wait timer finished.")
+	
+	
+	#await NetworkManager.join_or_begin_session()
+	
 	#NetworkManager.connection_result.connect(_on_connection_result, CONNECT_ONE_SHOT)
 	#NetworkManager.begin_matchmaking()
 	#_timer = Time.get_ticks_msec()
 	#NetworkManager.broadcast(NetworkManager.UDP_MATCHMAKING)
 
 
-func update(_delta: float) -> void:
-	finished.emit()
+func update(delta: float) -> void:
+	if _state == EState.TIMER:
+		_timer += delta
+		if _timer > MAX_TIME:
+			_state = EState.TIMER_JUST_FINISHED
+			print("[State][Primary][Matchmaking]: ...timer finished.")
+			_handle_state()
+	else:
+		_handle_state()
+	
+	#finished.emit()
+	
 	#if _made_connection:
 		#finished.emit()
 	#elif Time.get_ticks_msec() - _timer > MAX_TIME:
@@ -33,13 +64,31 @@ func exit() -> void:
 	Debug.print_info("[State][Primary][Matchmaking]: << exit()")
 
 
-#func handles_event(eventName: StringName) -> bool:
+func handles_event(eventName: StringName) -> bool:
+	return GameStateManager.handles_multiplayer_events(eventName)
 	#return eventName == &"other_matchmaking" \
 		#or eventName == &"request_server" \
 		#or eventName == &"server_created"
-#
-#
-#func on_event(eventName: StringName, _data: Dictionary) -> void:
+
+
+func on_event(eventName: StringName, _data: Dictionary) -> void:
+	match eventName:
+		&"started":
+			_on_receive_started()
+		&"no_join":
+			_other_can_join = false
+			# Singleplayer will get started in update()
+		&"can_join":
+			_on_receive_can_join()
+		&"ready":
+			_other_ready = true
+		&"server_created":
+			_other_server_up = true
+			#NetworkManager.setup_session()
+			NetworkManager.join_other_server()
+		&"server_setup_finished":
+			#_other_server_up = true
+			_setup_finished = true
 	#_timer += Time.get_ticks_msec()
 	#match eventName:
 		#&"other_matchmaking":
@@ -51,6 +100,48 @@ func exit() -> void:
 			#_create_server()
 		#&"server_created":
 			#_join_other_server()
+
+
+func _handle_state():
+	match _state:
+		EState.TIMER_JUST_FINISHED:
+			if _other_can_join:
+				Debug.print_info("[State][Primary][Matchmaking]: Other device [color=green]CAN JOIN[/color]! Starting multiplayer processes.")
+				print("[State][Primary][Matchmaking]: Waiting for server setup to finish...")
+				#_state = EState.WAITING_MULTIPLAYER
+				_state = EState.READY
+				#NetworkManager.try_create_server()
+				_handle_state()
+				NetworkManager.broadcast(NetworkManager.UDP_READY)
+			else:
+				Debug.print_info("[State][Primary][Matchmaking]: Other device said [color=red]NO JOIN[/color]. Starting singleplayer processes.")
+				NetworkManager.setup_singleplayer_session()
+				_state = EState.DONE
+				_handle_state()
+		EState.READY:
+			Debug.print_info("[State][Primary][Matchmaking]: This machine is READY. Calling NetworkManager.setup_session() and waiting...")
+			NetworkManager.setup_session()
+			_state = EState.WAITING_MULTIPLAYER
+			_handle_state()
+		EState.WAITING_MULTIPLAYER:
+			if _setup_finished:
+				print("[State][Primary][Matchmaking]: ...session setup finished!")
+				_state = EState.DONE
+				_handle_state()
+		EState.DONE:
+			print("[State][Primary][Matchmaking]: Done.")
+			finished.emit()
+
+
+func _on_receive_started() -> void:
+	_other_can_join = true
+	NetworkManager.broadcast(NetworkManager.UDP_CAN_JOIN)
+	# GameplayState will need to also pause current activities
+
+
+func _on_receive_can_join() -> void:
+	_other_can_join = true
+	# My activities will need to be paused as necessary.
 
 
 #func _create_server() -> void:

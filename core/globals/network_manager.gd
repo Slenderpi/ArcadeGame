@@ -40,6 +40,11 @@ const PORT_GAME := 21983
 ## This string is appended to all packets sent over UDP.
 ## NetworkManager will expect packets it receives to have this header.
 const UDP_HEADER = "VirtualOff"
+const UDP_STARTED = "STARTED"
+const UDP_CAN_JOIN = "CAN_JOIN"
+const UDP_NO_JOIN = "NO_JOIN"
+const UDP_READY = "READY"
+
 const UDP_REQUEST_JOIN = "REQUEST_JOIN"
 const UDP_OK = "OK"
 const UDP_SAME_TIME = "SAME_TIME"
@@ -63,6 +68,12 @@ const CONNECTION_ATTEMPT_TIMEOUT : int = 3000
 
 #region SIGNALS
 
+# Emitted on receive STARTED, READY, NOT_READY
+signal received_message(msg: Array[String])
+# Emitted when server setup finishes.
+signal server_setup_finished
+
+
 ## Fired by [method NetworkManager.begin_connection_attempt] once a
 ## connection result occurs.[br]
 ## [param isMultiplayer] is true if there is an active client connected.[br]
@@ -76,6 +87,8 @@ signal _peer_join_req_response(response: String)
 
 var my_ip : String
 var other_ip : String
+
+var has_ip_priority := false
 
 
 var _is_server_up : bool = false
@@ -177,32 +190,35 @@ func _is_udp_packet_valid(packetStr: String) -> bool:
 
 
 func _process_udp_msg(msgArgs: Array[String]) -> void:
-	if msgArgs[0] == UDP_REQUEST_JOIN:
-		if _is_joining:
-			_join_timer = 0
-			broadcast(UDP_SAME_TIME)
-		else:
-			if _is_server_up:
-				broadcast(UDP_OK)
-			else:
-				broadcast(UDP_NO_SERVER)
-	elif msgArgs[0] == UDP_REQUEST_SERVER:
-		if not _is_joining:
-			Debug.print_warning("[NetMan]: Received a REQUEST_SERVER while not in the _is_joining phase!")
-		if _is_server_up:
-			Debug.print_warning("[NetMan]: REQUEST_SERVER received but the server is already up. Broadcasting SERVER_CREATED.")
-			broadcast(UDP_SERVER_CREATED)
-			return
-		_join_timer = 0
-		create_server()
-		broadcast(UDP_SERVER_CREATED)
-	elif msgArgs[0] == UDP_SERVER_CREATED:
-		if _did_join_server:
-			Debug.print_warning("[NetMan]: SERVER_CREATED received but I've already joined the server.")
-			return
-		join_other_server()
-	else:
-		_peer_join_req_response.emit(msgArgs[0])
+	received_message.emit(msgArgs)
+	
+	
+	#if msgArgs[0] == UDP_REQUEST_JOIN:
+		#if _is_joining:
+			#_join_timer = 0
+			#broadcast(UDP_SAME_TIME)
+		#else:
+			#if _is_server_up:
+				#broadcast(UDP_OK)
+			#else:
+				#broadcast(UDP_NO_SERVER)
+	#elif msgArgs[0] == UDP_REQUEST_SERVER:
+		#if not _is_joining:
+			#Debug.print_warning("[NetMan]: Received a REQUEST_SERVER while not in the _is_joining phase!")
+		#if _is_server_up:
+			#Debug.print_warning("[NetMan]: REQUEST_SERVER received but the server is already up. Broadcasting SERVER_CREATED.")
+			#broadcast(UDP_SERVER_CREATED)
+			#return
+		#_join_timer = 0
+		#create_server()
+		#broadcast(UDP_SERVER_CREATED)
+	#elif msgArgs[0] == UDP_SERVER_CREATED:
+		#if _did_join_server:
+			#Debug.print_warning("[NetMan]: SERVER_CREATED received but I've already joined the server.")
+			#return
+		#join_other_server()
+	#else:
+		#_peer_join_req_response.emit(msgArgs[0])
 	
 	
 	#if msgArgs[0] == UDP_MATCHMAKING:
@@ -330,6 +346,29 @@ func broadcast(...args: Array) -> void:
 	_udp.put_packet(packet.to_utf8_buffer())
 
 
+#func setup_session() -> void:
+	#if has_ip_priority:
+		#create_server()
+
+
+func try_create_server() -> void:
+	if has_ip_priority:
+		create_server()
+		# Wait for peer connection and then fire connection
+		multiplayer.peer_connected.connect(func(peerId: int):
+			if peerId != multiplayer.get_unique_id():
+				server_setup_finished.emit()
+			, CONNECT_ONE_SHOT
+		)
+
+
+func setup_singleplayer_session() -> void:
+	print("[NetMan]: Creating offline server...")
+	var peer := OfflineMultiplayerPeer.new()
+	multiplayer.multiplayer_peer = peer
+	print("[NetMan]: Singleplayer server started successfully.")
+
+
 func join_or_begin_session() -> void:
 	Debug.print_info("[NetMan]: join_or_begin_session() called.")
 	_is_joining = true
@@ -380,7 +419,8 @@ func join_other_server() -> void:
 		Debug.print_error("[NetMan]: Failed to create client. Error: %s" % error)
 		return
 	multiplayer.multiplayer_peer = peer
-	_did_join_server = true
+	#_did_join_server = true
+	server_setup_finished.emit()
 	print("[NetMan]: Client created successfully.")
 
 
@@ -402,6 +442,8 @@ func _load_config_ip() -> void:
 	if other_ip.is_empty():
 		Debug.print_error("[NetMan]: No my_ip configured in cabinet.cfg!")
 		return
+	
+	has_ip_priority = my_ip < other_ip
 	
 	# Sanity check: confirm the configured IP is actually live on this
 	# machine right now (cable plugged in, static IP applied correctly).

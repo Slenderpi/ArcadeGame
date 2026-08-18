@@ -38,7 +38,8 @@ func exit() -> void:
 
 
 func handles_event(eventName: StringName) -> bool:
-	return fsm.current_state.handles_event(eventName)
+	return fsm.current_state.handles_event(eventName) \
+		|| GameStateManager.handles_multiplayer_events(eventName)
 
 
 func on_event(eventName: StringName, data: Dictionary) -> void:

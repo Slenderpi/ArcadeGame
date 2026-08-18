@@ -28,5 +28,10 @@ func exit() -> void:
 
 
 func handles_event(eventName: StringName) -> bool:
-	# Flush other_matchmaking event
-	return eventName == &"other_matchmaking"
+	return eventName == &"started"
+
+
+func on_event(eventName: StringName, _data: Dictionary) -> void:
+	match eventName:
+		&"started":
+			NetworkManager.broadcast(NetworkManager.UDP_NO_JOIN)
