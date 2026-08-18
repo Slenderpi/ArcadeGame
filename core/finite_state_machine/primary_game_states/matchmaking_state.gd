@@ -143,6 +143,9 @@ func _on_receive_started() -> void:
 
 func _on_receive_can_join() -> void:
 	_other_can_join = true
+	if _state == EState.STARTING:
+		# Skip STARTING state
+		_state = EState.TIMER
 	# My activities will need to be paused as necessary.
 
 
