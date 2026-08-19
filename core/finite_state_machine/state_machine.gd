@@ -44,8 +44,9 @@ func change_state_OLD(nextState: StateBase, payload: Dictionary = {}) -> void:
 	_drain_event_queue()
 
 
-func change_state(nextState: int, payload: Dictionary = {}):
-	_change_state.rpc(nextState, payload)
+func change_state(nextState: int, payload: Dictionary = {}) -> void:
+	if multiplayer.is_server():
+		_change_state.rpc(nextState, payload)
 
 
 @rpc("authority", "call_local")
