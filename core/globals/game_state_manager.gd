@@ -29,14 +29,18 @@ var folder_arcade_visuals : Node
 
 #endregion
 
+var _reset_for_opponent := false
+
 
 #region NODE OVERRIDES
 
 func _ready() -> void:
 	NetworkManager.opponent_found.connect(func():
-		fsm.push_event(&"versus_started")
+		_reset_for_opponent = true
+		fsm.push_event(&"opponent_found")
 	)
 	NetworkManager.opponent_connected.connect(func():
+		_reset_for_opponent = true
 		fsm.push_event(&"opponent_connected")
 	)
 	
@@ -110,7 +114,10 @@ func _enter_state_matchmaking() -> void:
 
 
 func _enter_state_gameplay() -> void:
-	fsm.change_state(StateFactory.create(GameplayState, _enter_state_attract_mode))
+	if _reset_for_opponent:
+		_enter_state_gameplay()
+	else:
+		fsm.change_state(StateFactory.create(GameplayState, _enter_state_attract_mode))
 
 #endregion
 

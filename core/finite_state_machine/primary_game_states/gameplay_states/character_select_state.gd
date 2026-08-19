@@ -22,6 +22,9 @@ var _last_lstick_read : int = 0
 # -1 = down, 0 = none, 1 = up
 var _last_rstick_read : int = 0
 
+var _opponent_found := false
+var _opponent_connected := false
+
 # In seconds
 var _timer : float
 var _timer_enabled : bool = false
@@ -40,15 +43,18 @@ func enter(_payload: Dictionary = {}) -> void:
 
 
 func update(_delta: float) -> void:
-	_navigate_menu()
-	if InputReader.is_any_binary_active():
-		_visuals.on_option_chosen()
-		finished.emit({&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
-	if _timer_enabled:
-		_timer = max(_timer - _delta, 0)
-		_visuals.set_time_remaining(_timer)
-		if _timer == 0:
+	if not _opponent_found:
+		_navigate_menu()
+		if InputReader.is_any_binary_active():
+			_visuals.on_option_chosen()
 			finished.emit({&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
+		if _timer_enabled:
+			_timer = max(_timer - _delta, 0)
+			_visuals.set_time_remaining(_timer)
+			if _timer == 0:
+				finished.emit({&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
+	elif _opponent_connected:
+		finished.emit()
 
 
 func exit() -> void:
@@ -58,15 +64,22 @@ func exit() -> void:
 
 
 func handles_event(eventName: StringName) -> bool:
+	return eventName == &"opponent_found" \
+		or eventName == &"opponent_connected"
 	#return eventName == &"peer_connected"
-	return eventName == &"other_matchmaking"
+	#return eventName == &"other_matchmaking"
 
 
 func on_event(eventName: StringName, _data: Dictionary) -> void:
-	if eventName == &"other_matchmaking":
-		_reset_timer()
-		NetworkManager.broadcast(NetworkManager.UDP_SERVER_CREATED)
-		NetworkManager.multiplayer.peer_connected.connect(_on_peer_connected, CONNECT_ONE_SHOT)
+	match eventName:
+		&"opponent_found":
+			_opponent_found = true
+		&"opponnent_connected":
+			_opponent_connected = true
+	#if eventName == &"other_matchmaking":
+		#_reset_timer()
+		#NetworkManager.broadcast(NetworkManager.UDP_SERVER_CREATED)
+		#NetworkManager.multiplayer.peer_connected.connect(_on_peer_connected, CONNECT_ONE_SHOT)
 	#if eventName == &"peer_connected":
 		#if data.multiplayer:
 			#print("A challenger approaches!")

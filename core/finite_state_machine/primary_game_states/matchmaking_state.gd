@@ -11,14 +11,18 @@ enum EState {STARTING, TIMER, TIMER_JUST_FINISHED, READY, WAITING_MULTIPLAYER, D
 const MAX_TIME : float = 7
 
 
-var _state := EState.STARTING
+#var _state := EState.STARTING
+#
+#var _other_can_join := false
+#var _other_ready := false
+#var _other_server_up := false
+#var _setup_finished := false
 
-var _other_can_join := false
-var _other_ready := false
-var _other_server_up := false
-var _setup_finished := false
+var _opponent_found := false
+var _opponent_connected := false
 
 var _timer : float
+
 #var _made_connection := false
 
 
@@ -40,10 +44,14 @@ func enter(_payload: Dictionary = {}) -> void:
 
 
 func update(delta: float) -> void:
-	_timer += delta
-	if _timer > MAX_TIME:
-		print("[State][Primary][Matchmaking]: ...timer finished.")
-		finished.emit()
+	if not _opponent_found:
+		_timer += delta
+		if _timer > MAX_TIME:
+			print("[State][Primary][Matchmaking]: ...timer finished.")
+			finished.emit()
+	else:
+		if _opponent_connected:
+			finished.emit()
 	
 	#if _state == EState.TIMER:
 		#_timer += delta
@@ -69,14 +77,20 @@ func exit(_asInterrupt: bool = false) -> void:
 
 
 func handles_event(eventName: StringName) -> bool:
-	return GameStateManager.handles_multiplayer_events(eventName)
+	return eventName == &"opponent_found" \
+		or eventName == &"opponent_connected"
+	#return GameStateManager.handles_multiplayer_events(eventName)
 	#return eventName == &"other_matchmaking" \
 		#or eventName == &"request_server" \
 		#or eventName == &"server_created"
 
 
-#func on_event(eventName: StringName, _data: Dictionary) -> void:
-	#match eventName:
+func on_event(eventName: StringName, _data: Dictionary) -> void:
+	match eventName:
+		&"opponent_found":
+			_opponent_found = true
+		&"opponnent_connected":
+			_opponent_connected = true
 		#&"started":
 			#_on_receive_started()
 		#&"no_join":
