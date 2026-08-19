@@ -221,6 +221,7 @@ func _on_both_online() -> void:
 		while true:
 			if _other_server_up:
 				_join_server()
+				break
 			await get_tree().process_frame
 		Debug.print_success("[NetMan]: Joined the server! Emitting [code]connection_complete[/code].")
 		opponent_connected.emit()
