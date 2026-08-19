@@ -82,6 +82,7 @@ func start(mainScene: MainScene) -> void:
 	camera = mainScene._game_camera
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	fsm = StateMachine.new()
+	add_child(fsm)
 	_enter_state_booting(mainScene)
 
 

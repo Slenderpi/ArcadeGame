@@ -2,13 +2,20 @@ extends StateBase
 class_name CombatState
 
 
+# TODO: Put in some config file
+const ROUND_DURATION : float = 5
+
+
 var _spawned_stage : StageData
 var _mech_0 : MechCharacter
 var _mech_1 : MechCharacter
 
+var _timer : float
+
 
 func enter(payload: Dictionary = {}) -> void:
 	Debug.print_info("[State][Gameplay][Combat]: >> enter()")
+	_timer = ROUND_DURATION
 	# TODO TEMP
 	_spawned_stage = StageRefs.instantiate_stage(StageRefs.EStage.DEV)
 	GameStateManager.folder_arcade_visuals.add_child(_spawned_stage)
@@ -31,9 +38,10 @@ func enter(payload: Dictionary = {}) -> void:
 	await Transitioner.end_transition()
 
 
-func update(_delta: float) -> void:
+func update(delta: float) -> void:
 	# TODO
-	if false:
+	_timer = max(0, _timer - delta)
+	if _timer <= 0:
 		finished.emit({&"winner": &"player0"})
 
 

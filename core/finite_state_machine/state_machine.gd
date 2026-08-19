@@ -1,4 +1,4 @@
-extends RefCounted
+extends Node
 class_name StateMachine
 ## A [StateMachine] holds current state, handles the calling of state changes,
 ## and maintains an event queue.
@@ -30,6 +30,12 @@ var _event_queue: Array[Dictionary] = []
 ## [color=yellow]DO NOT SET [member StateMachine.current_state] MANUALLY.[br][br]
 ## CALL THIS METHOD TO CHANGE STATE.[/color]
 func change_state(nextState: StateBase, payload: Dictionary = {}) -> void:
+	_change_state.rpc(nextState, payload)
+
+
+@rpc("authority", "call_local")
+func _change_state(nextState: StateBase, payload: Dictionary = {}) -> void:
+	Debug.print_notify("[StateMachine]: _change_state() rpc called!")
 	assert(nextState != null, "[StateMachine]: change_state() was provided a null state!")
 	if _transitioning:
 		push_warning("State change requested mid-transition; queueing not implemented for this call")
