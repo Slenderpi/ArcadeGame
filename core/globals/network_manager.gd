@@ -105,6 +105,8 @@ var has_ip_priority := false
 var online := false
 var other_online := false
 
+var _server_setup_begun := false
+
 
 var _is_server_up : bool = false
 var _did_join_server : bool = false
@@ -193,6 +195,9 @@ func on_started() -> void:
 
 
 func _on_both_online() -> void:
+	if _server_setup_begun:
+		return
+	_server_setup_begun = true
 	print("[NetMan]: Beggining multiplayer session...")
 	opponent_found.emit()
 	if has_ip_priority:
