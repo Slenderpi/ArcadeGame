@@ -18,7 +18,6 @@ func update(_delta: float) -> void:
 	if InputReader.is_any_binary_active():
 		print("[State][Primary][AttractMode]: Binary input detected. Game starting!")
 		CreditManager.spend_credit()
-		NetworkManager.on_started()
 		finished.emit()
 
 

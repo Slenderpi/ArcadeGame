@@ -116,6 +116,7 @@ func _enter_state_matchmaking() -> void:
 
 func _enter_state_gameplay() -> void:
 	if _reset_for_opponent:
+		_reset_for_opponent = false
 		_enter_state_gameplay()
 	else:
 		fsm.change_state(StateFactory.create(GameplayState, _enter_state_attract_mode))

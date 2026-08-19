@@ -30,6 +30,7 @@ func enter(_payload: Dictionary = {}) -> void:
 	Debug.print_info("[State][Primary][Matchmaking]: >> enter()")
 	#await Transitioner.begin_transition()
 	_timer = 0
+	NetworkManager.on_started()
 	#print("[State][Primary][Matchmaking]: enter() finished. Beginning extra timer...")
 	#await GameStateManager.get_tree().create_timer(1).timeout
 	#print("[State][Primary][Matchmaking]: extra wait timer finished.")
@@ -89,7 +90,7 @@ func on_event(eventName: StringName, _data: Dictionary) -> void:
 	match eventName:
 		&"opponent_found":
 			_opponent_found = true
-		&"opponnent_connected":
+		&"opponent_connected":
 			_opponent_connected = true
 		#&"started":
 			#_on_receive_started()
