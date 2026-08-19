@@ -8,7 +8,8 @@ func enter(_payload: Dictionary = {}) -> void:
 
 func update(_delta: float) -> void:
 	# TODO: Results
-	_finish()
+	#_finish()
+	pass
 
 
 func exit() -> void:

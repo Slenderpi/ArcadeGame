@@ -18,6 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 Debug="*uid://cu7bimfn6fy4k"
+StateIds="*uid://bdrafxnbdhw3k"
 StateFactory="*uid://bvwh2welguxak"
 StageRefs="*uid://3xmhx6ujbonj"
 MechRefs="*uid://dno30suxsuaq5"

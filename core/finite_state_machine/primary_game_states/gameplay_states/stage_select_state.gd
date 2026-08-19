@@ -14,7 +14,8 @@ func enter(payload: Dictionary = {}) -> void:
 func update(_delta: float) -> void:
 	# TODO: Stage selection
 	_ret_payload[&"stage"] = StageRefs.EStage.DEV
-	finished.emit(_ret_payload)
+	#finished.emit(_ret_payload)
+	fsm_owner.change_state(StateIds.COMBAT, _ret_payload)
 
 
 func exit() -> void:

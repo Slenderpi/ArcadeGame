@@ -42,7 +42,8 @@ func update(delta: float) -> void:
 	# TODO
 	_timer = max(0, _timer - delta)
 	if _timer <= 0:
-		finished.emit({&"winner": &"player0"})
+		#finished.emit({&"winner": &"player0"})
+		fsm_owner.change_state(StateIds.RESULTS, {&"winner": &"player0"})
 
 
 func exit() -> void:

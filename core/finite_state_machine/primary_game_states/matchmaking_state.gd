@@ -49,10 +49,12 @@ func update(delta: float) -> void:
 		_timer += delta
 		if _timer > MAX_TIME:
 			print("[State][Primary][Matchmaking]: ...timer finished.")
-			finished.emit()
+			#finished.emit()
+			fsm_owner.change_state(StateIds.GAMEPLAY)
 	else:
 		if _opponent_connected:
-			finished.emit()
+			#finished.emit()
+			fsm_owner.change_state(StateIds.GAMEPLAY)
 	
 	#if _state == EState.TIMER:
 		#_timer += delta

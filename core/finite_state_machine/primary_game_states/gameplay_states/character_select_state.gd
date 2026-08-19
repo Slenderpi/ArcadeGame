@@ -47,19 +47,22 @@ func update(_delta: float) -> void:
 		_navigate_menu()
 		if InputReader.is_any_binary_active():
 			_visuals.on_option_chosen()
-			finished.emit({&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
+			#finished.emit({&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
+			fsm_owner.change_state(StateIds.STAGE_SELECT, {&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
 		if _timer_enabled:
 			_timer = max(_timer - _delta, 0)
 			_visuals.set_time_remaining(_timer)
 			if _timer == 0:
-				finished.emit({&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
+				#finished.emit({&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
+				fsm_owner.change_state(StateIds.STAGE_SELECT, {&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
 	elif _opponent_connected:
-		finished.emit()
+		fsm_owner.current_state.fsm_owner.change_state(StateIds.GAMEPLAY)
 
 
 func exit() -> void:
 	Debug.print_info("[State][Gameplay][CharacterSelect]: << exit()")
-	await Transitioner.begin_transition()
+	if not _opponent_connected:
+		await Transitioner.begin_transition()
 	_visuals.queue_free()
 
 

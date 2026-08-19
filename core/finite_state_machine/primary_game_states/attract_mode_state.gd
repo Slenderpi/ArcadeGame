@@ -18,7 +18,8 @@ func update(_delta: float) -> void:
 	if InputReader.is_any_binary_active():
 		print("[State][Primary][AttractMode]: Binary input detected. Game starting!")
 		CreditManager.spend_credit()
-		finished.emit()
+		#finished.emit()
+		fsm_owner.change_state(StateIds.MATCHMAKING)
 
 
 func exit() -> void:

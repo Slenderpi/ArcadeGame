@@ -3,10 +3,10 @@ class_name StateBase
 ## Base class for all states.
 
 
-## Emitted by a state when it has reached a transition condition.[br][br]
-## This CANNOT be emitted in either [code]enter()[/code] or [code]exit()[/code].
-@warning_ignore("unused_signal")
-signal finished(payload: Dictionary)
+### Emitted by a state when it has reached a transition condition.[br][br]
+### This CANNOT be emitted in either [code]enter()[/code] or [code]exit()[/code].
+#@warning_ignore("unused_signal")
+#signal finished(payload: Dictionary)
 
 
 ## Reference to the owning [StateMachine]. Set this on creation.
@@ -48,7 +48,7 @@ func on_event(eventName: StringName, data: Dictionary) -> void:
 	pass
 
 
-## Convenience function to emit [signal StateBase.finished] with an optional
-## payload.
-func _finish(payload: Dictionary = {}) -> void:
-	finished.emit(payload)
+### Convenience function to emit [signal StateBase.finished] with an optional
+### payload.
+#func _finish(payload: Dictionary = {}) -> void:
+	#finished.emit(payload)

@@ -13,7 +13,7 @@ func enter(payload: Dictionary = {}) -> void:
 
 func update(_delta: float) -> void:
 	#print("[State][Primary][Booting]: Booting not yet implemented. Firing finished().")
-	finished.emit()
+	fsm_owner.change_state(StateIds.ATTRACT_MODE)
 
 
 func exit() -> void:

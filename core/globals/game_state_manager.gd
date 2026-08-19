@@ -83,7 +83,8 @@ func start(mainScene: MainScene) -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	fsm = StateMachine.new()
 	add_child(fsm)
-	_enter_state_booting(mainScene)
+	fsm.change_state(StateIds.BOOTING, {&"main_scene": mainScene})
+	#_enter_state_booting(mainScene)
 
 
 ## Can be used by other states to claim they handle events related to multiplayer setup.
@@ -99,27 +100,27 @@ func handles_multiplayer_events(eventName: StringName) -> bool:
 
 #region STATE PROCESSES
 
-func _enter_state_booting(mainScene: MainScene) -> void:
-	fsm.change_state(StateFactory.create(BootingState, _enter_state_attract_mode), {&"main_scene": mainScene})
-
-
-func _enter_state_attract_mode() -> void:
-	if DEV_SKIP_TO_COMBAT:
-		_enter_state_gameplay()
-	else:
-		fsm.change_state(StateFactory.create(AttractModeState, _enter_state_matchmaking))
-
-
-func _enter_state_matchmaking() -> void:
-	fsm.change_state(StateFactory.create(MatchmakingState, _enter_state_gameplay))
-
-
-func _enter_state_gameplay() -> void:
-	if _reset_for_opponent:
-		_reset_for_opponent = false
-		_enter_state_gameplay()
-	else:
-		fsm.change_state(StateFactory.create(GameplayState, _enter_state_attract_mode))
+#func _enter_state_booting(mainScene: MainScene) -> void:
+	#fsm.change_state(StateFactory.create(StateFactory.EState.BOOTING, _enter_state_attract_mode), {&"main_scene": mainScene})
+#
+#
+#func _enter_state_attract_mode() -> void:
+	#if DEV_SKIP_TO_COMBAT:
+		#_enter_state_gameplay()
+	#else:
+		#fsm.change_state(StateFactory.create(AttractModeState, _enter_state_matchmaking))
+#
+#
+#func _enter_state_matchmaking() -> void:
+	#fsm.change_state(StateFactory.create(MatchmakingState, _enter_state_gameplay))
+#
+#
+#func _enter_state_gameplay() -> void:
+	#if _reset_for_opponent:
+		#_reset_for_opponent = false
+		#_enter_state_gameplay()
+	#else:
+		#fsm.change_state(StateFactory.create(GameplayState, _enter_state_attract_mode))
 
 #endregion
 
