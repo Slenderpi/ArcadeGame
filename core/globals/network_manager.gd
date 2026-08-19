@@ -106,6 +106,7 @@ var online := false
 var other_online := false
 
 var _server_setup_begun := false
+var _other_server_up := false
 
 
 var _is_server_up : bool = false
@@ -210,6 +211,7 @@ func _on_both_online() -> void:
 				Debug.print_warning("[NetMan]: Peer connected fired with peerId of self (%s)" % peerId)
 			, CONNECT_ONE_SHOT
 		)
+		broadcast(UDP_SERVER_CREATED)
 		await _join_server_result
 		Debug.print_success("[NetMan]: Other joined! Emitting [code]connection_complete[/code].")
 		#broadcast(SERVER_CREATED)
@@ -217,11 +219,12 @@ func _on_both_online() -> void:
 	else:
 		print("[NetMan]: Attempting to join other server...")
 		while true:
-			if await _try_join_server():
-				break
+			if _other_server_up:
+				_join_server()
 			await get_tree().process_frame
 		Debug.print_success("[NetMan]: Joined the server! Emitting [code]connection_complete[/code].")
 		opponent_connected.emit()
+	_server_setup_begun = false
 
 
 ## Attempts to join the server of other_ip.
@@ -258,6 +261,9 @@ func _process_udp_msg(msgArgs: Array[String]) -> void:
 			_on_both_online()
 		else:
 			print_rich("[NetMan]: I am [b][color=red]offline.")
+	elif msgArgs[0] == UDP_SERVER_CREATED:
+		print_rich("[NetMan]: Other server is online. Attempting to join...")
+		_other_server_up = true
 	
 	
 	#received_message.emit(msgArgs)
@@ -382,37 +388,38 @@ func _create_server() -> void:
 signal _join_server_result(successful: bool)
 
 
-func _try_join_server() -> bool:
-	print("[NetMan]: Creating ENet client to join existing server...")
-	var peer := ENetMultiplayerPeer.new()
-	var error := peer.create_client(other_ip, PORT_GAME)
-	if error != OK:
-		Debug.print_error("[NetMan]: Failed to create client. Error: %s" % error)
-		return false
-	multiplayer.multiplayer_peer = peer
-	print("[NetMan]: Client created successfully. Checking handshake...")
-	
-	var onConnectedToServer : Callable
-	var onConnectionFailed : Callable
-	
-	onConnectedToServer = func():
-		multiplayer.connected_to_server.disconnect(onConnectedToServer)
-		multiplayer.connection_failed.disconnect(onConnectionFailed)
-		_join_server_result.emit(true)
-	onConnectionFailed = func():
-		multiplayer.connected_to_server.disconnect(onConnectedToServer)
-		multiplayer.connection_failed.disconnect(onConnectionFailed)
-		_join_server_result.emit(false)
-	
-	multiplayer.connected_to_server.connect(onConnectedToServer)
-	multiplayer.connection_failed.connect(onConnectionFailed)
-	
-	var res : bool = await _join_server_result
-	if res:
-		print_rich("[NetMan]: Handshake [color=green]succeeded.")
-	else:
-		print_rich("[NetMan]: Handshake [color=red]failed.")
-	return res
+#func _try_join_server() -> bool:
+	#print("[NetMan]: Creating ENet client to join existing server...")
+	#var peer := ENetMultiplayerPeer.new()
+	#var error := peer.create_client(other_ip, PORT_GAME)
+	#if error != OK:
+		#Debug.print_error("[NetMan]: Failed to create client. Error: %s" % error)
+		#return false
+	#print("[NetMan]: Client created successfully. Checking handshake...")
+	#
+	##var onConnectedToServer : Callable
+	##var onConnectionFailed : Callable
+	##
+	##onConnectedToServer = func():
+		##multiplayer.connected_to_server.disconnect(onConnectedToServer)
+		##multiplayer.connection_failed.disconnect(onConnectionFailed)
+		##_join_server_result.emit(true)
+	##onConnectionFailed = func():
+		##multiplayer.connected_to_server.disconnect(onConnectedToServer)
+		##multiplayer.connection_failed.disconnect(onConnectionFailed)
+		##_join_server_result.emit(false)
+	##
+	##multiplayer.connected_to_server.connect(onConnectedToServer)
+	##multiplayer.connection_failed.connect(onConnectionFailed)
+	##
+	##var res : bool = await _join_server_result
+	##if res:
+		##print_rich("[NetMan]: Handshake [color=green]succeeded.")
+		##multiplayer.multiplayer_peer = peer
+	##else:
+		##print_rich("[NetMan]: Handshake [color=red]failed.")
+	##return res
+	#return peer.ConnectionStatus == MultiplayerPeer.ConnectionStatus.CONNECTION_CONNECTED
 
 
 func _join_server() -> void:
