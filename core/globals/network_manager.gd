@@ -72,13 +72,15 @@ const CONNECTION_ATTEMPT_TIMEOUT : int = 3000
 
 #region SIGNALS
 
+## Emitted when both machines are online.
+signal opponent_found
+## Emitted when both machines are connected to a server.
+signal opponent_connected
+
+
+
 # Emitted on receive STARTED, READY, NOT_READY
 signal received_message(msg: Array[String])
-## Emitted when both machines are online.
-signal versus_started
-## Emitted when both machines are connected to a server.
-signal connection_complete
-
 
 # Emitted when server setup finishes.
 signal server_setup_finished
@@ -192,24 +194,29 @@ func on_started() -> void:
 
 func _on_both_online() -> void:
 	print("[NetMan]: Beggining multiplayer session...")
-	versus_started.emit()
+	opponent_found.emit()
 	if has_ip_priority:
 		_create_server()
 		print("[NetMan]: Awaiting other to join the server...")
 		multiplayer.peer_connected.connect(func(peerId: int):
 			if peerId != multiplayer.get_unique_id():
 				_join_server_result.emit(true)
+			else:
+				Debug.print_warning("[NetMan]: Peer connected fired with peerId of self (%s)" % peerId)
 			, CONNECT_ONE_SHOT
 		)
 		await _join_server_result
+		Debug.print_success("[NetMan]: Other joined! Emitting [code]connection_complete[/code].")
 		#broadcast(SERVER_CREATED)
-		connection_complete.emit()
+		opponent_connected.emit()
 	else:
+		print("[NetMan]: Attempting to join other server...")
 		while true:
 			if await _try_join_server():
 				break
 			await get_tree().process_frame
-		connection_complete.emit()
+		Debug.print_success("[NetMan]: Joined the server! Emitting [code]connection_complete[/code].")
+		opponent_connected.emit()
 
 
 ## Attempts to join the server of other_ip.

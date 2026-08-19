@@ -33,23 +33,32 @@ var folder_arcade_visuals : Node
 #region NODE OVERRIDES
 
 func _ready() -> void:
+	NetworkManager.opponent_found.connect(func():
+		fsm.push_event(&"versus_started")
+	)
+	NetworkManager.opponent_connected.connect(func():
+		fsm.push_event(&"opponent_connected")
+	)
+	
 	#NetworkManager.connection_established.connect(_on_connection_established)
 	#NetworkManager.connection_lost.connect(_on_connection_lost)
-	NetworkManager.received_message.connect(func(msg: Array[String]):
-		if msg[0] == NetworkManager.UDP_STARTED:
-			fsm.push_event(&"started")
-		elif msg[0] == NetworkManager.UDP_NO_JOIN:
-			fsm.push_event(&"no_join")
-		elif msg[0] == NetworkManager.UDP_CAN_JOIN:
-			fsm.push_event(&"can_join")
-		elif msg[0] == NetworkManager.UDP_READY:
-			fsm.push_event(&"ready")
-		elif msg[0] == NetworkManager.UDP_SERVER_CREATED:
-			fsm.push_event(&"server_created")
-	)
-	NetworkManager.server_setup_finished.connect(func():
-		fsm.push_event(&"server_setup_finished")
-	)
+	
+	#NetworkManager.received_message.connect(func(msg: Array[String]):
+		#if msg[0] == NetworkManager.UDP_STARTED:
+			#fsm.push_event(&"started")
+		#elif msg[0] == NetworkManager.UDP_NO_JOIN:
+			#fsm.push_event(&"no_join")
+		#elif msg[0] == NetworkManager.UDP_CAN_JOIN:
+			#fsm.push_event(&"can_join")
+		#elif msg[0] == NetworkManager.UDP_READY:
+			#fsm.push_event(&"ready")
+		#elif msg[0] == NetworkManager.UDP_SERVER_CREATED:
+			#fsm.push_event(&"server_created")
+	#)
+	#NetworkManager.server_setup_finished.connect(func():
+		#fsm.push_event(&"server_setup_finished")
+	#)
+	
 	process_mode = Node.PROCESS_MODE_DISABLED
 
 
@@ -68,7 +77,7 @@ func start(mainScene: MainScene) -> void:
 	folder_arcade_visuals = mainScene.folder_arcade_visuals
 	camera = mainScene._game_camera
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	fsm  = StateMachine.new()
+	fsm = StateMachine.new()
 	_enter_state_booting(mainScene)
 
 
