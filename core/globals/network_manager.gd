@@ -40,6 +40,10 @@ const PORT_GAME := 21983
 ## This string is appended to all packets sent over UDP.
 ## NetworkManager will expect packets it receives to have this header.
 const UDP_HEADER = "VirtualOff"
+const UDP_ONLINE = "ONLINE"
+
+
+
 const UDP_STARTED = "STARTED"
 const UDP_CAN_JOIN = "CAN_JOIN"
 const UDP_NO_JOIN = "NO_JOIN"
@@ -70,6 +74,12 @@ const CONNECTION_ATTEMPT_TIMEOUT : int = 3000
 
 # Emitted on receive STARTED, READY, NOT_READY
 signal received_message(msg: Array[String])
+## Emitted when both machines are online.
+signal versus_started
+## Emitted when both machines are connected to a server.
+signal connection_complete
+
+
 # Emitted when server setup finishes.
 signal server_setup_finished
 
@@ -89,6 +99,9 @@ var my_ip : String
 var other_ip : String
 
 var has_ip_priority := false
+
+var online := false
+var other_online := false
 
 
 var _is_server_up : bool = false
@@ -164,6 +177,41 @@ func init() -> void:
 	print(Debug.HORIZONTAL_LINE_STR)
 
 
+## Call this function when the game starts.
+func on_started() -> void:
+	Debug.print_info("[NetMan]: Game started! Flagging self as online.")
+	online = true
+	broadcast(UDP_ONLINE)
+	if other_online:
+		print_rich("[NetMan]: Other is [b][color=green]also online!")
+		_on_both_online()
+	else:
+		print_rich("[NetMan]: Other is [b][color=red]offline.")
+		setup_singleplayer_session()
+
+
+func _on_both_online() -> void:
+	print("[NetMan]: Beggining multiplayer session...")
+	versus_started.emit()
+	if has_ip_priority:
+		_create_server()
+		print("[NetMan]: Awaiting other to join the server...")
+		multiplayer.peer_connected.connect(func(peerId: int):
+			if peerId != multiplayer.get_unique_id():
+				_join_server_result.emit(true)
+			, CONNECT_ONE_SHOT
+		)
+		await _join_server_result
+		#broadcast(SERVER_CREATED)
+		connection_complete.emit()
+	else:
+		while true:
+			if await _try_join_server():
+				break
+			await get_tree().process_frame
+		connection_complete.emit()
+
+
 ## Attempts to join the server of other_ip.
 ## If the other device does not have a server up (i.e. no one is playing on it),
 ## 
@@ -190,7 +238,17 @@ func _is_udp_packet_valid(packetStr: String) -> bool:
 
 
 func _process_udp_msg(msgArgs: Array[String]) -> void:
-	received_message.emit(msgArgs)
+	if msgArgs[0] == UDP_ONLINE:
+		print_rich("[NetMan]: Other detected as online!")
+		other_online = true
+		if online:
+			print_rich("[NetMan]: I am [b][color=green]also online!")
+			_on_both_online()
+		else:
+			print_rich("[NetMan]: I am [b][color=red]offline.")
+	
+	
+	#received_message.emit(msgArgs)
 	
 	
 	#if msgArgs[0] == UDP_REQUEST_JOIN:
@@ -306,6 +364,43 @@ func _create_server() -> void:
 	multiplayer.multiplayer_peer = peer
 	print("[NetMan]: Server started successfully.")
 	#_status = EStatus.ACTIVE
+
+
+# Used by _try_join_server()
+signal _join_server_result(successful: bool)
+
+
+func _try_join_server() -> bool:
+	print("[NetMan]: Creating ENet client to join existing server...")
+	var peer := ENetMultiplayerPeer.new()
+	var error := peer.create_client(other_ip, PORT_GAME)
+	if error != OK:
+		Debug.print_error("[NetMan]: Failed to create client. Error: %s" % error)
+		return false
+	multiplayer.multiplayer_peer = peer
+	print("[NetMan]: Client created successfully. Checking handshake...")
+	
+	var onConnectedToServer : Callable
+	var onConnectionFailed : Callable
+	
+	onConnectedToServer = func():
+		multiplayer.connected_to_server.disconnect(onConnectedToServer)
+		multiplayer.connection_failed.disconnect(onConnectionFailed)
+		_join_server_result.emit(true)
+	onConnectionFailed = func():
+		multiplayer.connected_to_server.disconnect(onConnectedToServer)
+		multiplayer.connection_failed.disconnect(onConnectionFailed)
+		_join_server_result.emit(false)
+	
+	multiplayer.connected_to_server.connect(onConnectedToServer)
+	multiplayer.connection_failed.connect(onConnectionFailed)
+	
+	var res : bool = await _join_server_result
+	if res:
+		print_rich("[NetMan]: Handshake [color=green]succeeded.")
+	else:
+		print_rich("[NetMan]: Handshake [color=red]failed.")
+	return res
 
 
 func _join_server() -> void:
