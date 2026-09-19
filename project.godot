@@ -11,22 +11,15 @@ config_version=5
 [application]
 
 config/name="ArcadeGame"
-run/main_scene="uid://dhgdgbr812rv2"
+run/main_scene="uid://b6f2dn6bvetk4"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
 Debug="*uid://cu7bimfn6fy4k"
-StateIds="*uid://bdrafxnbdhw3k"
-StateFactory="*uid://bvwh2welguxak"
-StageRefs="*uid://3xmhx6ujbonj"
-MechRefs="*uid://dno30suxsuaq5"
-CreditManager="*uid://bq6iep24jqbwu"
-Transitioner="*uid://0t4sirk62alu"
 InputReader="*uid://cfkhdv867l8hl"
-NetworkManager="*uid://cxv0ufyyxrxx1"
-GameStateManager="*uid://c44n27eas6xt1"
+CreditManager="*uid://bq6iep24jqbwu"
 
 [display]
 

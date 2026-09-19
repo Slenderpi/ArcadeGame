@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://c44n27eas6xt1"]
+
+[ext_resource type="Script" uid="uid://cu45ybo3nkhm2" path="res://OLD/globals/game_state_manager/game_state_manager.gd" id="1_1vepm"]
+[ext_resource type="Script" uid="uid://bccxo0iwme07k" path="res://OLD/core/finite_state_machine/state_machine.gd" id="2_cxdw2"]
+[ext_resource type="Script" uid="uid://bwl2cjktqfhvw" path="res://OLD/core/finite_state_machine/primary_game_states/booting_state.gd" id="3_j08a3"]
+[ext_resource type="Script" uid="uid://dcxtcevkfwkvc" path="res://OLD/core/finite_state_machine/primary_game_states/matchmaking_state.gd" id="5_j08a3"]
+[ext_resource type="Script" uid="uid://ceni8mkyl56u4" path="res://OLD/core/finite_state_machine/primary_game_states/attract_mode_state.gd" id="5_q1oyf"]
+[ext_resource type="Script" uid="uid://b7ujy87c3nhch" path="res://OLD/core/finite_state_machine/primary_game_states/gameplay_state.gd" id="6_q1oyf"]
+[ext_resource type="Script" uid="uid://dgevoh1o5osg4" path="res://OLD/core/finite_state_machine/primary_game_states/gameplay_states/character_select_state.gd" id="7_c5hlm"]
+
+[node name="GameStateManager" type="Node" unique_id=174142614]
+script = ExtResource("1_1vepm")
+
+[node name="GameStateFsm" type="Node" parent="." unique_id=949480160 node_paths=PackedStringArray("state_to_children_map")]
+script = ExtResource("2_cxdw2")
+state_to_children_map = {
+1: NodePath("BootingState"),
+2: NodePath("AttractModeState"),
+3: NodePath("MatchmakingState"),
+4: NodePath("GameplayState")
+}
+metadata/_custom_type_script = "uid://bccxo0iwme07k"
+
+[node name="BootingState" type="Node" parent="GameStateFsm" unique_id=1427491478]
+script = ExtResource("3_j08a3")
+metadata/_custom_type_script = "uid://bwl2cjktqfhvw"
+
+[node name="AttractModeState" type="Node" parent="GameStateFsm" unique_id=595391355]
+script = ExtResource("5_q1oyf")
+metadata/_custom_type_script = "uid://ceni8mkyl56u4"
+
+[node name="MatchmakingState" type="Node" parent="GameStateFsm" unique_id=853707845]
+script = ExtResource("5_j08a3")
+metadata/_custom_type_script = "uid://dcxtcevkfwkvc"
+
+[node name="GameplayState" type="Node" parent="GameStateFsm" unique_id=1829850318]
+script = ExtResource("6_q1oyf")
+metadata/_custom_type_script = "uid://b7ujy87c3nhch"
+
+[node name="GameplayFsm" type="Node" parent="GameStateFsm/GameplayState" unique_id=1485691804]
+script = ExtResource("2_cxdw2")
+metadata/_custom_type_script = "uid://bccxo0iwme07k"
+
+[node name="CharacterSelectState" type="Node" parent="GameStateFsm/GameplayState/GameplayFsm" unique_id=1003932364]
+script = ExtResource("7_c5hlm")
+metadata/_custom_type_script = "uid://dgevoh1o5osg4"
