@@ -18,7 +18,8 @@ const DEV_SKIP_MECH_1 : MechRefs.EMech = MechRefs.EMech.BIG_BLUE
 ## 1. [BootingState][br]
 ## 2. [AttractModeState][br]
 ## 3. [GameplayState]
-var fsm : StateMachine
+@onready
+var fsm : StateMachine = $GameStateFsm
 ## Reference to the GameCamera.
 ## The MainScene should contain it when calling [method GameStateManager.start].
 var camera : GameCamera
@@ -81,8 +82,8 @@ func start(mainScene: MainScene) -> void:
 	folder_arcade_visuals = mainScene.folder_arcade_visuals
 	camera = mainScene._game_camera
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	fsm = StateMachine.new()
-	add_child(fsm)
+	#fsm = StateMachine.new()
+	#add_child(fsm)
 	fsm.change_state(StateIds.BOOTING, {&"main_scene": mainScene})
 	#_enter_state_booting(mainScene)
 

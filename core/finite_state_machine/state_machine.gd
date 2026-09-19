@@ -5,10 +5,12 @@ class_name StateMachine
 
 
 ## The current state.
-## Use a default [method StateBase.new] for idle behaviour.[br][br]
+## Use a default [method StateNode.new] for idle behaviour.[br][br]
 ## [color=yellow]DO NOT SET THIS VALUE MANUALLY.[br][br]
 ## CALL THE METHOD [method StateMachine.change_state] TO CHANGE STATE.
-var current_state : StateBase = StateBase.new()
+var current_state : StateNode
+@export
+var state_to_children_map : Dictionary[StateIds.Enum, StateNode] = {}
 
 var _transitioning := false
 var _event_queue: Array[Dictionary] = []
@@ -17,10 +19,10 @@ var _event_queue: Array[Dictionary] = []
 ## Changes the current state. This begins a chain of processes:[br][br]
 ## 1. Sets an internal [code]_transitioning[/code] flag to prevent further
 ## immediate calls from causing issues.[br]
-## 2. Awaits the current state's [method StateBase.exit], allowing
+## 2. Awaits the current state's [method StateNode.exit], allowing
 ## it to trigger a transition on exit.[br]
 ## 3. Updates [member StateMachine.current_state].[br]
-## 4. Awaits the new state's [method StateBase.enter], and passing the
+## 4. Awaits the new state's [method StateNode.enter], and passing the
 ## [code]payload[/code] parameter accordingly.[br]
 ## 5. Turns off the [code]_transitioning[/code] flag and drains the event queue.[br]
 ## [br]
@@ -29,7 +31,7 @@ var _event_queue: Array[Dictionary] = []
 ## [code]enter()[/code].[br][br]
 ## [color=yellow]DO NOT SET [member StateMachine.current_state] MANUALLY.[br][br]
 ## CALL THIS METHOD TO CHANGE STATE.[/color]
-func change_state_OLD(nextState: StateBase, payload: Dictionary = {}) -> void:
+func change_state_OLD(nextState: StateNode, payload: Dictionary = {}) -> void:
 	assert(nextState != null, "[StateMachine]: change_state() was provided a null state!")
 	if _transitioning:
 		push_warning("State change requested mid-transition; queueing not implemented for this call")
@@ -58,16 +60,19 @@ func _change_state(nextState: int, payload: Dictionary = {}) -> void:
 	_transitioning = true
 	if current_state:
 		await current_state.exit()
-	current_state = StateIds.create_state(nextState)
+	# TODO
+	current_state = state_to_children_map[nextState]
 	current_state.fsm_owner = self
 	await current_state.enter(payload)
 	_transitioning = false
 	_drain_event_queue()
 
 
-## Calls the [method StateBase.update] method of the current state.
+## First checks if any of the current state's [TransitionNode] children
+## want to transition.
+## Then Calls its [method StateNode.update] method.
 func update(delta: float) -> void:
-	if current_state and not _transitioning:
+	if current_state and not _transitioning and not current_state.done:
 		current_state.update(delta)
 
 

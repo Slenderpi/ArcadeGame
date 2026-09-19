@@ -1,4 +1,4 @@
-extends StateBase
+extends StateNode
 class_name GameplayState
 
 
@@ -6,13 +6,12 @@ class_name GameplayState
 const DEV_SKIP_STAGE_SELECT_STATE = true
 
 
-var fsm : StateMachine
+@onready
+var fsm : StateMachine = $GameplayFsm
 
 
 func enter(_payload: Dictionary = {}) -> void:
 	Debug.print_info("[State][Primary][Gameplay]: >> enter()")
-	fsm = StateMachine.new()
-	fsm_owner.add_child(fsm)
 	if GameStateManager.DEV_SKIP_TO_COMBAT:
 		fsm.change_state(StateIds.COMBAT, {
 			&"mech0": GameStateManager.DEV_SKIP_MECH_0,

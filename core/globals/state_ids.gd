@@ -1,6 +1,21 @@
 extends Node
 
 
+enum Enum {
+	IDLE = 0,
+	
+	BOOTING = 1,
+	ATTRACT_MODE = 2,
+	MATCHMAKING = 3,
+	GAMEPLAY = 4,
+	
+	CHARACTER_SELECT = 5,
+	STAGE_SELECT = 6,
+	COMBAT = 7,
+	RESULTS = 8,
+}
+
+
 const IDLE := 0
 
 const BOOTING := 1

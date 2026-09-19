@@ -1,4 +1,4 @@
-extends StateBase
+extends StateNode
 class_name BootingState
 
 
@@ -13,7 +13,7 @@ func enter(payload: Dictionary = {}) -> void:
 
 func update(_delta: float) -> void:
 	#print("[State][Primary][Booting]: Booting not yet implemented. Firing finished().")
-	fsm_owner.change_state(StateIds.ATTRACT_MODE)
+	_transition_to(StateIds.ATTRACT_MODE)
 
 
 func exit() -> void:

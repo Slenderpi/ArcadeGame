@@ -1,4 +1,4 @@
-extends StateBase
+extends StateNode
 class_name CharacterSelectState
 
 
@@ -48,13 +48,13 @@ func update(_delta: float) -> void:
 		if InputReader.is_any_binary_active():
 			_visuals.on_option_chosen()
 			#finished.emit({&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
-			fsm_owner.change_state(StateIds.STAGE_SELECT, {&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
+			_transition_to(StateIds.STAGE_SELECT, {&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
 		if _timer_enabled:
 			_timer = max(_timer - _delta, 0)
 			_visuals.set_time_remaining(_timer)
 			if _timer == 0:
 				#finished.emit({&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
-				fsm_owner.change_state(StateIds.STAGE_SELECT, {&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
+				_transition_to(StateIds.STAGE_SELECT, {&"mech0": selected_option, &"mech1": MechRefs.EMech.BIG_BLUE})
 	elif _opponent_connected:
 		fsm_owner.current_state.fsm_owner.change_state(StateIds.GAMEPLAY)
 
