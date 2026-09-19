@@ -1,2 +1,2 @@
-extends CanvasBase
-class_name AttractionModeCanvas
+#extends CanvasBase
+#class_name AttractionModeCanvas

@@ -1,3 +1,3 @@
-extends CharacterControllerComponent
-class_name DummyControllerComponent
-## Basically does nothing.
+#extends CharacterControllerComponent
+#class_name DummyControllerComponent
+### Basically does nothing.

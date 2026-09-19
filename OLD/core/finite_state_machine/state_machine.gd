@@ -9,8 +9,8 @@ class_name StateMachine
 ## [color=yellow]DO NOT SET THIS VALUE MANUALLY.[br][br]
 ## CALL THE METHOD [method StateMachine.change_state] TO CHANGE STATE.
 var current_state : StateNode
-@export
-var state_to_children_map : Dictionary[StateIds.Enum, StateNode] = {}
+#@export
+#var state_to_children_map : Dictionary[StateIds.Enum, StateNode] = {}
 
 var _transitioning := false
 var _event_queue: Array[Dictionary] = []
@@ -61,7 +61,7 @@ func _change_state(nextState: int, payload: Dictionary = {}) -> void:
 	if current_state:
 		await current_state.exit()
 	# TODO
-	current_state = state_to_children_map[nextState]
+	#current_state = state_to_children_map[nextState]
 	current_state.fsm_owner = self
 	await current_state.enter(payload)
 	_transitioning = false

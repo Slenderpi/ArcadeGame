@@ -37,7 +37,7 @@ autowrap_mode = 0
 autowrap_trim_flags = 0
 script = ExtResource("2_fl0hp")
 
-[node name="ControlsDisplay" type="Panel" parent="." unique_id=1308339398 node_paths=PackedStringArray("_stick_left", "_stick_right", "_trigger_left", "_trigger_right", "_trigger_both")]
+[node name="ControlsDisplay" type="Panel" parent="." unique_id=1308339398]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -45,11 +45,6 @@ offset_top = -146.0
 offset_right = 232.0
 grow_vertical = 0
 script = ExtResource("7_bfnto")
-_stick_left = NodePath("StickVisualizerLeft/Stick")
-_stick_right = NodePath("StickVisualizerRight/Stick")
-_trigger_left = NodePath("TriggerLeft")
-_trigger_right = NodePath("TriggerRight")
-_trigger_both = NodePath("TriggerBoth")
 
 [node name="StickVisualizerLeft" type="ColorRect" parent="ControlsDisplay" unique_id=1385241803]
 layout_mode = 1

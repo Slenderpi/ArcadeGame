@@ -1,3 +1,3 @@
-extends CharacterControllerComponent
-class_name AIControllerComponent
-# TODO
+#extends CharacterControllerComponent
+#class_name AIControllerComponent
+## TODO
