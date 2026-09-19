@@ -8,7 +8,7 @@ class_name StateMachine
 ## Use a default [method StateNode.new] for idle behaviour.[br][br]
 ## [color=yellow]DO NOT SET THIS VALUE MANUALLY.[br][br]
 ## CALL THE METHOD [method StateMachine.change_state] TO CHANGE STATE.
-var current_state : StateNode
+var current_state : StateBase
 #@export
 #var state_to_children_map : Dictionary[StateIds.Enum, StateNode] = {}
 
@@ -31,7 +31,7 @@ var _event_queue: Array[Dictionary] = []
 ## [code]enter()[/code].[br][br]
 ## [color=yellow]DO NOT SET [member StateMachine.current_state] MANUALLY.[br][br]
 ## CALL THIS METHOD TO CHANGE STATE.[/color]
-func change_state_OLD(nextState: StateNode, payload: Dictionary = {}) -> void:
+func change_state_OLD(nextState: StateBase, payload: Dictionary = {}) -> void:
 	assert(nextState != null, "[StateMachine]: change_state() was provided a null state!")
 	if _transitioning:
 		push_warning("State change requested mid-transition; queueing not implemented for this call")
