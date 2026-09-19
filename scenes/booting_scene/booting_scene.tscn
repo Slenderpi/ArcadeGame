@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://b6f2dn6bvetk4"]
+
+[node name="BootingScene" type="Control" unique_id=2083924563]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

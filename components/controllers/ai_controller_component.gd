@@ -1,3 +1,0 @@
-extends CharacterControllerComponent
-class_name AIControllerComponent
-# TODO

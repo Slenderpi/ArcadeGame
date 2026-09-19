@@ -1,0 +1,121 @@
+[gd_scene format=3 uid="uid://ktk85mqyxoxj"]
+
+[ext_resource type="Script" uid="uid://eb5ffr5f36ok" path="res://OLD/ui/dev_canvas/dev_canvas.gd" id="1_urbsn"]
+[ext_resource type="Script" uid="uid://d1at3y8hqbnih" path="res://OLD/ui/dev_canvas/fps_label.gd" id="2_fl0hp"]
+[ext_resource type="FontFile" uid="uid://y6a3mwetdwcc" path="res://assets/fonts/consolas/consola.ttf" id="2_n8cf4"]
+[ext_resource type="FontFile" uid="uid://c5dxwvvvdiqo7" path="res://assets/fonts/consolas/consolab.ttf" id="3_5cp3g"]
+[ext_resource type="FontFile" uid="uid://da6hgjgsxvvic" path="res://assets/fonts/consolas/consolaz.ttf" id="4_uw75p"]
+[ext_resource type="FontFile" uid="uid://thw8cc7x20vf" path="res://assets/fonts/consolas/consolai.ttf" id="5_uxnd5"]
+[ext_resource type="Script" uid="uid://xuoarewnke7n" path="res://OLD/ui/dev_canvas/dev_controls_display.gd" id="7_bfnto"]
+[ext_resource type="Texture2D" uid="uid://bi24qsjbteoq3" path="res://icon.svg" id="7_uw75p"]
+
+[node name="DevCanvas" type="CanvasLayer" unique_id=159376391]
+script = ExtResource("1_urbsn")
+
+[node name="Panel" type="Panel" parent="." unique_id=529319228]
+offset_right = 172.0
+offset_bottom = 45.0
+
+[node name="FpsLabel" type="RichTextLabel" parent="Panel" unique_id=500743552]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/normal_font = ExtResource("2_n8cf4")
+theme_override_fonts/bold_font = ExtResource("3_5cp3g")
+theme_override_fonts/bold_italics_font = ExtResource("4_uw75p")
+theme_override_fonts/italics_font = ExtResource("5_uxnd5")
+theme_override_font_sizes/normal_font_size = 14
+bbcode_enabled = true
+text = "FPS        : [color=cyan]60[/color]
+FPS (live) : [color=cyan]60[/color]
+Frame time : [color=cyan]0.0000000[/color]
+"
+autowrap_mode = 0
+autowrap_trim_flags = 0
+script = ExtResource("2_fl0hp")
+
+[node name="ControlsDisplay" type="Panel" parent="." unique_id=1308339398]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -146.0
+offset_right = 232.0
+grow_vertical = 0
+script = ExtResource("7_bfnto")
+
+[node name="StickVisualizerLeft" type="ColorRect" parent="ControlsDisplay" unique_id=1385241803]
+layout_mode = 1
+offset_left = 15.0
+offset_top = 15.0
+offset_right = 75.0
+offset_bottom = 75.0
+
+[node name="Stick" type="TextureRect" parent="ControlsDisplay/StickVisualizerLeft" unique_id=1381907893]
+layout_mode = 0
+offset_right = 30.0
+offset_bottom = 30.0
+texture = ExtResource("7_uw75p")
+expand_mode = 1
+
+[node name="StickVisualizerRight" type="ColorRect" parent="ControlsDisplay" unique_id=1760668550]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -75.0
+offset_top = 15.0
+offset_right = -15.0
+offset_bottom = 75.0
+grow_horizontal = 0
+
+[node name="Stick" type="TextureRect" parent="ControlsDisplay/StickVisualizerRight" unique_id=260677266]
+layout_mode = 0
+offset_right = 30.0
+offset_bottom = 30.0
+texture = ExtResource("7_uw75p")
+expand_mode = 1
+
+[node name="TriggerLeft" type="ColorRect" parent="ControlsDisplay" unique_id=2144048268]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 25.0
+offset_top = -55.0
+offset_right = 65.0
+offset_bottom = -15.0
+grow_vertical = 0
+color = Color(1, 0, 0, 1)
+
+[node name="TriggerRight" type="ColorRect" parent="ControlsDisplay" unique_id=1553903713]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -65.0
+offset_top = -55.0
+offset_right = -25.0
+offset_bottom = -15.0
+grow_horizontal = 0
+grow_vertical = 0
+color = Color(0, 1, 1, 1)
+
+[node name="TriggerBoth" type="ColorRect" parent="ControlsDisplay" unique_id=992654937]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -55.0
+offset_right = 20.0
+offset_bottom = -15.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(0, 1, 0, 1)

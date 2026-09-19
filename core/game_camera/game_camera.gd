@@ -11,15 +11,15 @@ class_name GameCamera
 ## Determines the different modes a Camera can be in.
 enum ECameraMode {
 	## The Camera is idle.
-	NONE = 0,
-	## The Camera sets its position and rotation to [member GameCamera.first_person_target]
-	FIRST_PERSON = 1,
+	NONE,
 	## For debugging purposes. Enables the camera to freely fly around
 	## using the WASDEQ keys.
-	FREE_FLIGHT = 2,
+	FREE_FLIGHT,
+	## The Camera sets its position and rotation to [member GameCamera.first_person_target]
+	FIRST_PERSON,
 	## The Camera acts as a third person camera, where
 	## [member GameCamera.third_person_target] is the target being followed.
-	THIRD_PERSON = 3,
+	THIRD_PERSON,
 }
 
 ## Determines the Camera's current [enum GameCamera.ECameraMode].[br]
@@ -37,7 +37,7 @@ enum ECameraMode {
 	set(value):
 		_current_camera_mode = value
 		_handle_camera_mode_change()
-var _current_camera_mode := ECameraMode.FREE_FLIGHT
+var _current_camera_mode : ECameraMode
 ## The FOV of the GameCamera (degrees). You should set this value instead of
 ## [code]Camera3D.fov[/code], since some Camera effects may affect the final fov.[br]
 ## Note that this is vertical FOV.
@@ -142,7 +142,6 @@ var _last_yawshake_intensity_set_time := 0
 
 
 func _ready() -> void:
-	_handle_camera_mode_change()
 	camera.fov = desired_fov
 
 
@@ -250,6 +249,7 @@ func _handle_camera_mode_change() -> void:
 	match _current_camera_mode:
 		ECameraMode.NONE:
 			camera_target = null
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		ECameraMode.FIRST_PERSON:
 			camera_target = first_person_target
 			if first_person_target and first_person_target.has_method("get_camera_fps_target"):
