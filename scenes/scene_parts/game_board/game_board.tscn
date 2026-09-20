@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://dcd5s17v7gfn4"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_n4i5i"]
+size = Vector3(1, 1, 10)
+
+[node name="GameBoard" type="Node3D" unique_id=726624782]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1802383211]
+transform = Transform3D(0.91618186, -0.34012666, 0.21195431, 0, 0.5288773, 0.8486983, -0.40076274, -0.777562, 0.4845478, 0, 1.5726662, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=2100745882]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, -5)
+mesh = SubResource("BoxMesh_n4i5i")

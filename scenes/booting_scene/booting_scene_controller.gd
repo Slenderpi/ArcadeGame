@@ -20,7 +20,7 @@ func _ready() -> void:
 	SceneManager.prefetch(NEXT_SCENE)
 
 
-func _process(_delta: float) -> void:
+func _update(_delta: float) -> void:
 	if _done:
 		return
 	#if not GameInput.select_just_pressed:

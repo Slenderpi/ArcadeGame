@@ -7,6 +7,7 @@ extends Node
 
 const SCENE_BOOTING = "uid://b6f2dn6bvetk4"
 const SCENE_ATTRACT_MODE = "uid://brkm4rs1whqxb"
+const SCENE_GAMEPLAY = "uid://dw5mie345pinb"
 
 #endregion
 

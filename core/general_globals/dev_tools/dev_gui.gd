@@ -13,10 +13,12 @@ const GOOD_FPS_LOWER_LIMIT := 50.0
 var sceneNameList : Array[String] = [ # Make sure to keep sceneUids up to date too
 	"Booting",
 	"Attract Mode",
+	"Gameplay",
 ]
 var sceneUids : Array[String] = [ # Make sure to keep sceneNameList up to date too
 	SceneManager.SCENE_BOOTING,
 	SceneManager.SCENE_ATTRACT_MODE,
+	SceneManager.SCENE_GAMEPLAY,
 ]
 var changeSceneChoice : int = 1
 var longestSceneName : int = 0
