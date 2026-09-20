@@ -25,6 +25,5 @@ func _process(_delta: float) -> void:
 		return
 	#if not GameInput.select_just_pressed:
 		#return
-	print("Booting done!")
 	_done = true
 	SceneManager.change_scene(NEXT_SCENE)
