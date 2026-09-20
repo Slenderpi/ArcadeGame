@@ -50,7 +50,7 @@ var graphics_config : Dictionary[String, Variant] = {
 ## Dictionary of cfg keys and their values, specific to dev gui config.
 var dev_gui_config_config : Dictionary[String, Variant] = {
 	CFGKEY_DEV_GUI_ENABLED: false,
-	CFGKEY_PAUSE_ON_DEV_GUI: true,
+	CFGKEY_PAUSE_ON_DEV_GUI: false,
 }
 
 #endregion
