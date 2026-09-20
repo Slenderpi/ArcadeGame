@@ -3,8 +3,8 @@ extends Node
 
 #region TRANSITION PRELOAD REFERENCES
 
-const transition_uis : Array[PackedScene] = [
-	#preload(),
+const transition_uis : Array[String] = [
+	"uid://ci3q6w03ttwd6"
 ]
 
 #endregion
@@ -38,11 +38,18 @@ var queued_transition_id : int:
 var _queued_transition_id : int = 0
 
 
+var is_transitioning : bool:
+	get:
+		return _is_transitioning
+var _is_transitioning : bool = false
+
+
 ## Determines the next transition to use.
 ## The next transition will be instantiated when the current tranition (if any)
 ## ends its transition.
-func queue_transition(transitionId: int) -> void:
+func set_queued_transition(transitionId: int) -> void:
 	_queued_transition_id = transitionId
+	_try_load_queued_transition()
 
 
 ## Call the loaded transition's [method TransitionUi.begin_transition].[br]
@@ -50,6 +57,7 @@ func queue_transition(transitionId: int) -> void:
 ## [i]Note: async[/i]
 func begin_transition() -> void:
 	if _curr_transition_ui:
+		_is_transitioning = true
 		await _curr_transition_ui.begin_transition()
 
 
@@ -59,10 +67,13 @@ func begin_transition() -> void:
 func end_transition() -> void:
 	if _curr_transition_ui:
 		await _curr_transition_ui.end_transition()
-	_try_load_queud_transition()
+	_is_transitioning = false
+	_try_load_queued_transition()
 
 
-func _try_load_queud_transition() -> void:
+func _try_load_queued_transition() -> void:
+	if _is_transitioning:
+		return
 	if _queued_transition_id == _curr_transition_id:
 		# Same transition, no need to load it again
 		return
@@ -71,5 +82,6 @@ func _try_load_queud_transition() -> void:
 		_curr_transition_ui = null
 	_curr_transition_id = queued_transition_id
 	if _curr_transition_id != TRANSITION_NONE:
-		_curr_transition_ui = transition_uis[_curr_transition_id - 1].instantiate() as TransitionUi
+		_curr_transition_ui = (load(transition_uis[_curr_transition_id - 1]) as PackedScene).instantiate() as TransitionUi
+		add_child(_curr_transition_ui)
 	

@@ -1,3 +1,28 @@
 [gd_scene format=3 uid="uid://brkm4rs1whqxb"]
 
+[ext_resource type="Script" uid="uid://0dpkpntnhv12" path="res://scenes/attract_mode_scene/attract_mode_scene_controller.gd" id="1_ixfnh"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_xse17"]
+font_size = 44
+
 [node name="AttractModeScene" type="Node3D" unique_id=1400901758]
+script = ExtResource("1_ixfnh")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1570928203]
+
+[node name="PressStart" type="Label" parent="CanvasLayer" unique_id=1790268864]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -49.0
+offset_top = -80.0
+offset_right = 50.0
+offset_bottom = -57.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "PRESS START"
+label_settings = SubResource("LabelSettings_xse17")
+horizontal_alignment = 1
+vertical_alignment = 1

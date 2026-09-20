@@ -1,6 +1,11 @@
 [gd_scene format=3 uid="uid://b6f2dn6bvetk4"]
 
 [ext_resource type="Script" uid="uid://j122w2q3lnkw" path="res://scenes/booting_scene/booting_scene_controller.gd" id="1_7snvs"]
+[ext_resource type="FontFile" uid="uid://y6a3mwetdwcc" path="res://assets/fonts/consolas/consola.ttf" id="2_jytax"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_xse17"]
+font = ExtResource("2_jytax")
+font_size = 35
 
 [node name="BootingScene" type="Control" unique_id=2083924563]
 layout_mode = 3
@@ -10,3 +15,30 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_7snvs")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=518883588]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="BootingLabel" type="Label" parent="." unique_id=601001116]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -62.0
+offset_top = -11.5
+offset_right = 62.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "BOOTING GAME"
+label_settings = SubResource("LabelSettings_xse17")
+horizontal_alignment = 1
+vertical_alignment = 1

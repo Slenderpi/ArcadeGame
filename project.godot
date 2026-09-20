@@ -23,6 +23,7 @@ Debug="*uid://cu7bimfn6fy4k"
 GameInput="*uid://cfkhdv867l8hl"
 CreditManager="*uid://bq6iep24jqbwu"
 TransitionManager="*uid://bxv7vuqxnvcfj"
+SceneManager="*uid://g6yj6p2odjvd"
 DevGui="*uid://r27162nph57e"
 
 [display]

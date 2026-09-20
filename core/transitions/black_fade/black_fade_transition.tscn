@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://ci3q6w03ttwd6"]
+
+[ext_resource type="Script" uid="uid://lan77adtr6t" path="res://core/transitions/black_fade/black_fade_transition.gd" id="1_ojf8v"]
+
+[node name="BlackFadeTransitionCanvas" type="CanvasLayer" unique_id=179553619]
+script = ExtResource("1_ojf8v")
+
+[node name="Fader" type="Control" parent="." unique_id=2123752116]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="Fader" unique_id=2010197852]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Logo" type="TextureRect" parent="Fader" unique_id=1023321589]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -100.0
+offset_right = 100.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
