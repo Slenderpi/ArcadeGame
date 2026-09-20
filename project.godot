@@ -12,7 +12,7 @@ config_version=5
 
 config/name="ArcadeGame"
 run/main_scene="uid://b6f2dn6bvetk4"
-config/features=PackedStringArray("4.7", "GL Compatibility")
+config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
