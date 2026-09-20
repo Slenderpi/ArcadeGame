@@ -11,7 +11,11 @@ const SCENE_ATTRACT_MODE = "uid://brkm4rs1whqxb"
 #endregion
 
 
-var _busy := false
+## Use this to check if the SceneManager is currently busy changing scene.
+var is_changing_scene : bool:
+	get:
+		return _is_changing_scene
+var _is_changing_scene := false
 
 
 #region PUBLIC METHODS
@@ -31,21 +35,21 @@ func prefetch(path: String) -> void:
 ## [br]
 ## [i]Note: async[/i]
 func change_scene(path: String) -> void:
-	if _busy:
+	if _is_changing_scene:
 		return
-	_busy = true
+	_is_changing_scene = true
 	
 	prefetch(path)
 	await TransitionManager.begin_transition()
 	
 	if not await _wait_for_scene_to_load(path):
-		_busy = false
+		_is_changing_scene = false
 		return
 	await _free_prev_scene()
 	_instantiate_new_scene(path)
 	
 	await TransitionManager.end_transition()
-	_busy = false
+	_is_changing_scene = false
 
 #endregion
 

@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://lan77adtr6t" path="res://core/transitions/black_fade/black_fade_transition.gd" id="1_ojf8v"]
 
 [node name="BlackFadeTransitionCanvas" type="CanvasLayer" unique_id=179553619]
+layer = 100
 script = ExtResource("1_ojf8v")
 
 [node name="Fader" type="Control" parent="." unique_id=2123752116]

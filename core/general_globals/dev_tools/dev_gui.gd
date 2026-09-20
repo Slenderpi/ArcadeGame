@@ -10,9 +10,23 @@ const MODERATE_FPS_LOWER_LIMIT := 30.0
 # Fps text is green if fps > this value, else yellow.
 const GOOD_FPS_LOWER_LIMIT := 50.0
 
-#var sceneNameList : Array[String]
-#var changeSceneChoice : int = 0
-#var longestSceneName : int = 0
+var sceneNameList : Array[String] = [ # Make sure to keep sceneUids up to date too
+	"Booting",
+	"Attract Mode",
+]
+var sceneUids : Array[String] = [ # Make sure to keep sceneNameList up to date too
+	SceneManager.SCENE_BOOTING,
+	SceneManager.SCENE_ATTRACT_MODE,
+]
+var changeSceneChoice : int = 1
+var longestSceneName : int = 0
+var transitionNameList : Array[String] = [ # Make sure to keep this synced with the TransitionManager
+	"None",
+	"Black fade",
+	"Fancy doors",
+]
+var longestTransitionName : int = 0
+
 
 var _mouse_visibility_before_show := Input.MOUSE_MODE_VISIBLE
 var _was_resumed_before_dev_gui := false
@@ -25,10 +39,12 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	dev_gui_enabled = DevConfig.get_dev_gui_config_value(DevConfig.CFGKEY_DEV_GUI_ENABLED)
 	_pause_on_dev_gui = DevConfig.get_dev_gui_config_value(DevConfig.CFGKEY_PAUSE_ON_DEV_GUI, _pause_on_dev_gui)
-	#sceneNameList = SceneManager.SCENE_PATHS.keys()
-	#for sn in sceneNameList:
-		#if sn.length() > longestSceneName:
-			#longestSceneName = sn.length()
+	for sn in sceneNameList:
+		if sn.length() > longestSceneName:
+			longestSceneName = sn.length()
+	for tn in transitionNameList:
+		if tn.length() > longestTransitionName:
+			longestTransitionName = tn.length()
 
 
 func _process(delta: float) -> void:
@@ -36,7 +52,7 @@ func _process(delta: float) -> void:
 		return
 	ImGui.Begin("ARCADE GAME DevGui") # Can add a version number
 	_imgui_consistent_info(delta)
-	#ImGui.BeginDisabled(SceneManager.is_transitioning)
+	ImGui.BeginDisabled(SceneManager.is_changing_scene)
 	if ImGui.BeginTabBar("Categories"):
 		if ImGui.BeginTabItem("General"):
 			_imgui_tab_general()
@@ -48,7 +64,7 @@ func _process(delta: float) -> void:
 			_imgui_tab_devgui_config()
 			ImGui.EndTabItem()
 		ImGui.EndTabBar()
-	#ImGui.EndDisabled()
+	ImGui.EndDisabled()
 	ImGui.End()
 
 
@@ -97,11 +113,12 @@ func _imgui_tab_general() -> void:
 	ImGui.TextWrapped("This will become a general tab with often-used information and capabilities.")
 	
 	_imgui_general_credits()
-	#_imgui_general_scene_changing()
+	_imgui_general_scene_changing()
 
 
 func _imgui_general_credits() -> void:
 	var tempArr := []
+	ImGui.SeparatorText("Credits and Freeplay")
 	
 	tempArr = [DevConfig.get_general_value(DevConfig.CFGKEY_FREEPLAY_MODE)]
 	if ImGui.Checkbox("Freeplay mode", tempArr):
@@ -110,15 +127,22 @@ func _imgui_general_credits() -> void:
 		DevConfig.set_general_value(DevConfig.CFGKEY_FREEPLAY_MODE, fpMode)
 
 
-#func _imgui_general_scene_changing() -> void:
-	#var tempArr := []
-	#if ImGui.Button("Change scene to:"):
-		#SceneManager.change_scene_to(sceneNameList[changeSceneChoice])
-	#ImGui.SameLine()
-	#tempArr = [changeSceneChoice]
-	#ImGui.SetNextItemWidth(ImGui.GetFontSize() * longestSceneName)
-	#if ImGui.Combo("Scene name", tempArr, sceneNameList):
-		#changeSceneChoice = tempArr[0]
+func _imgui_general_scene_changing() -> void:
+	var tempArr := []
+	ImGui.SeparatorText("Scene Management")
+	
+	if ImGui.Button("Change scene to:"):
+		SceneManager.change_scene(sceneUids[changeSceneChoice])
+	ImGui.SameLine()
+	tempArr = [changeSceneChoice]
+	ImGui.SetNextItemWidth(ImGui.GetFontSize() * longestSceneName)
+	if ImGui.Combo("Scene name", tempArr, sceneNameList):
+		changeSceneChoice = tempArr[0]
+	
+	tempArr = [TransitionManager.curr_transition_id]
+	ImGui.SetNextItemWidth(ImGui.GetFontSize() * longestTransitionName)
+	if ImGui.Combo("Transition type", tempArr, transitionNameList):
+		TransitionManager.set_queued_transition(tempArr[0])
 
 #endregion
 

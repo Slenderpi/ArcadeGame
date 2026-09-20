@@ -4,7 +4,8 @@ extends Node
 #region TRANSITION PRELOAD REFERENCES
 
 const transition_uis : Array[String] = [
-	"uid://ci3q6w03ttwd6"
+	"uid://ci3q6w03ttwd6", # TRANSITION_BLACK_FADE
+	"uid://cal548khphjyg", # TRANSITION_FANCY_DOORS
 ]
 
 #endregion
@@ -14,7 +15,7 @@ const transition_uis : Array[String] = [
 
 const TRANSITION_NONE = 0
 const TRANSITION_BLACK_FADE = 1
-const TRANSITION_DOORS = 2
+const TRANSITION_FANCY_DOORS = 2
 
 #endregion
 

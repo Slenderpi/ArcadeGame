@@ -4,6 +4,7 @@ class_name AttractModeSceneController
 
 func _ready() -> void:
 	print("Attract mode scene entered!")
+	TransitionManager.set_queued_transition(TransitionManager.TRANSITION_FANCY_DOORS)
 
 
 #func _update() -> void:
