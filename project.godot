@@ -22,6 +22,7 @@ DevConfig="*uid://bgehwcrdxd4v"
 Debug="*uid://cu7bimfn6fy4k"
 GameInput="*uid://cfkhdv867l8hl"
 CreditManager="*uid://bq6iep24jqbwu"
+TransitionManager="*uid://bxv7vuqxnvcfj"
 DevGui="*uid://r27162nph57e"
 
 [display]

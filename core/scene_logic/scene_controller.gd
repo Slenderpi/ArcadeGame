@@ -14,5 +14,7 @@ class_name SceneController
 ## [br]
 ## [b]NOTE:[/b] A [SceneController]'s [code]_ready()[/code] function
 ## should tell the [TransitionManager] to load the transition animation it needs.
-func go_to_scene() -> void:
-	await (func(): pass).call()
+# TODO: figure out how to pass in next scene
+func go_to_scene(_scenePath: String, transitionId: int) -> void:
+	await TransitionManager.begin_transition()
+	# TODO: go to next scene
