@@ -16,5 +16,8 @@ export_credentials.cfg
 data_*/
 mono_crash.*.json
 
+# Addon temporary files
+addons/imgui-godot/**/~*.dll
+
 # Virtual Off
 cabinet.cfg
