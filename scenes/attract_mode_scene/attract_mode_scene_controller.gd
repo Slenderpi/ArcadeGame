@@ -16,6 +16,10 @@ func _update(_delta: float) -> void:
 		return
 	if not GameInput.select_just_pressed:
 		return
-	print("Chnge")
-	_done = true
-	SceneManager.change_scene(SceneManager.SCENE_GAMEPLAY) # TODO: SCENE_SONG_SELECT
+	if CreditManager.has_credits():
+		Debug.print_success("[AttractMode] There are credits, and select was pressed!")
+		_done = true
+		CreditManager.spend_credit()
+		SceneManager.change_scene(SceneManager.SCENE_GAMEPLAY) # TODO: SCENE_SONG_SELECT
+	else:
+		print_rich("[AttractMode] Select was pressed, but there are no credits.")

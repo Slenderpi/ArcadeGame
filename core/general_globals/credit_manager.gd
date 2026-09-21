@@ -17,35 +17,48 @@ var credits : int:
 
 var _credits : int = -1 # TODO TEMP: start in freeplay mode
 
+var verbose : bool:
+	get:
+		return _verbose
+	set(val):
+		print_rich(
+			"[CreditManager] Verbosity set [color=%s]%s" %
+			[Debug.bool_to_color_str(val), Debug.bool_to_str_on(val)]
+		)
+		_verbose = val
+var _verbose : bool = false
+
 
 func _ready() -> void:
 	process_priority = PROCESS_MODE_DISABLED
+	if _verbose:
+		print("[CreditManager]: Initializing.")
+	process_priority = PROCESS_MODE_ALWAYS
+	if _verbose:
+		print("[CreditManager]: Setup finished.")
 
 
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed(&"insert_coin"):
-		if not is_in_freeplay_mode():
-			_credits += 1
-		print(
-			"[CreditManager]: Credit insert detected! Credits: %s." \
-			% ("inf" if is_in_freeplay_mode() else str(credits))
-		)
-		credit_inserted.emit()
-	if Input.is_action_just_pressed("toggle_freeplay"):
-		set_freeplay_mode(not is_in_freeplay_mode())
-		print("[CreditManager]: Freeplay toggled to ", ("ON." if is_in_freeplay_mode() else "OFF."))
-
-
-func init() -> void:
-	print("[CredMan]: Initializing.")
-	process_priority = PROCESS_MODE_ALWAYS
-	print("[CredMan]: Setup finished.")
+		insert_credit()
 
 
 ## Returns true if there are credits in the machine
 ## (always true if are in freeplay mode).
 func has_credits() -> bool:
 	return credits != 0
+
+
+## Add a credit. Does nothing if in freeplay mode.
+func insert_credit() -> void:
+	if not is_in_freeplay_mode():
+		_credits += 1
+	if _verbose:
+		print(
+			"[CreditManager]: Credit insert detected! Credits: %s." \
+			% ("inf" if is_in_freeplay_mode() else str(credits))
+		)
+	credit_inserted.emit()
 
 
 ## Spend a credit.[br][br]
@@ -71,7 +84,11 @@ func set_freeplay_mode(freeplay: bool) -> void:
 	if freeplay:
 		if not is_in_freeplay_mode():
 			_credits = -1
+			if _verbose:
+				print_rich("[CreditManager]: Freeplay toggled to [color=green]ON[/color].")
 			freeplay_mode_changed.emit()
 	elif is_in_freeplay_mode():
 		_credits = 0
+		if _verbose:
+			print_rich("[CreditManager]: Freeplay toggled to [color=RED]OFF[/color].")
 		freeplay_mode_changed.emit()

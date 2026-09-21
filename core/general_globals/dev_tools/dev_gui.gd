@@ -41,6 +41,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	dev_gui_enabled = DevConfig.get_dev_gui_config_value(DevConfig.CFGKEY_DEV_GUI_ENABLED)
 	_pause_on_dev_gui = DevConfig.get_dev_gui_config_value(DevConfig.CFGKEY_PAUSE_ON_DEV_GUI, _pause_on_dev_gui)
+	if DevConfig.get_general_value(DevConfig.CFGKEY_FREEPLAY_MODE):
+		CreditManager.set_freeplay_mode(true)
 	for sn in sceneNameList:
 		if sn.length() > longestSceneName:
 			longestSceneName = sn.length()
@@ -168,7 +170,7 @@ func _imgui_screen_settings() -> void:
 	if ImGui.IsItemHovered(ImGui.HoveredFlags_DelayNone):
 		ImGui.SetTooltip(
 			"VSync is %s. Click to change it to %s." %
-			[_bool_text_enabled(tempArr[0]), _bool_text_enabled(!tempArr[0])]
+			[Debug.bool_to_str_enabled(tempArr[0]), Debug.bool_to_str_enabled(!tempArr[0])]
 		)
 
 
@@ -229,19 +231,5 @@ func _imgui_tab_devgui_config() -> void:
 	if ImGui.IsItemHovered(ImGui.HoveredFlags_DelayNone):
 		ImGui.SetTooltip("Deletes your developer config file.\nPath: %s" % DevConfig.CFG_PATH)
 	ImGui.EndDisabled()
-
-#endregion
-
-
-#region HELPER FUNCTIONS
-
-func _bool_color(b: bool) -> Color:
-	return Color.GREEN if b else Color.RED
-
-func _bool_text_enabled(b: bool) -> String:
-	return "ENABLED" if b else "DISABLED"
-
-func _bool_text_on(b: bool) -> String:
-	return "ON" if b else "OFF"
 
 #endregion
