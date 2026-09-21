@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cwdijfbd8pejl"]
 
-[ext_resource type="Script" uid="uid://bfmi3oyjgk54i" path="res://OLD/scenes/attract_mode/accessories/attract_skybox_thing.gd" id="1_ew7be"]
+[ext_resource type="Script" uid="uid://bfmi3oyjgk54i" path="res://scenes/attract_mode_scene/parts/attract_skybox_thing.gd" id="1_ew7be"]
 [ext_resource type="PackedScene" uid="uid://c18chs8n78i2r" path="res://OLD/scenes/attract_mode/attraction_mode_canvas.tscn" id="1_nlw2i"]
 
 [sub_resource type="Shader" id="Shader_v0gnm"]

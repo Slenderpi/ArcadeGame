@@ -41,8 +41,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	dev_gui_enabled = DevConfig.get_dev_gui_config_value(DevConfig.CFGKEY_DEV_GUI_ENABLED)
 	_pause_on_dev_gui = DevConfig.get_dev_gui_config_value(DevConfig.CFGKEY_PAUSE_ON_DEV_GUI, _pause_on_dev_gui)
-	if DevConfig.get_general_value(DevConfig.CFGKEY_FREEPLAY_MODE):
-		CreditManager.set_freeplay_mode(true)
+	CreditManager.set_freeplay_mode(DevConfig.get_general_value(DevConfig.CFGKEY_FREEPLAY_MODE))
 	for sn in sceneNameList:
 		if sn.length() > longestSceneName:
 			longestSceneName = sn.length()

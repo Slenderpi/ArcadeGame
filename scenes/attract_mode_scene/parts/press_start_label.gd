@@ -2,12 +2,12 @@ extends Label
 
 
 func _ready() -> void:
-	CreditManager.credit_inserted.connect(_show_label)
-	CreditManager.freeplay_mode_changed.connect(_on_freeplay_changed)
 	if CreditManager.has_credits():
 		_show_label()
 	else:
 		_hide_label()
+	CreditManager.credit_inserted.connect(_show_label)
+	CreditManager.freeplay_mode_changed.connect(_on_freeplay_changed)
 
 
 func _show_label() -> void:
