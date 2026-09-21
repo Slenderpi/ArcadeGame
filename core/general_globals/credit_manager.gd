@@ -29,13 +29,15 @@ var verbose : bool:
 var _verbose : bool = false
 
 
-func _ready() -> void:
-	process_priority = PROCESS_MODE_DISABLED
+func _init() -> void:
+	if DevConfig.get_dev_gui_config_value(DevConfig.CFGKEY_VERBOSE_CREDIT_MANAGER):
+		verbose = true
 	if _verbose:
-		print("[CreditManager]: Initializing.")
+		print("[CreditManager] Initializing.")
 	process_priority = PROCESS_MODE_ALWAYS
+	set_freeplay_mode(DevConfig.get_general_value(DevConfig.CFGKEY_FREEPLAY_MODE))
 	if _verbose:
-		print("[CreditManager]: Setup finished.")
+		print("[CreditManager] Setup finished.")
 
 
 func _process(_delta: float) -> void:
@@ -55,7 +57,7 @@ func insert_credit() -> void:
 		_credits += 1
 	if _verbose:
 		print(
-			"[CreditManager]: Credit insert detected! Credits: %s." \
+			"[CreditManager] Credit insert detected! Credits: %s." \
 			% ("inf" if is_in_freeplay_mode() else str(credits))
 		)
 	credit_inserted.emit()
@@ -70,7 +72,7 @@ func spend_credit() -> void:
 			credit_spent.emit()
 		else:
 			Debug.print_error(
-				"[CreditManager]: spend_credit() called when there are 0 credits!"
+				"[CreditManager] spend_credit() called when there are 0 credits!"
 			)
 
 
@@ -85,10 +87,10 @@ func set_freeplay_mode(freeplay: bool) -> void:
 		if not is_in_freeplay_mode():
 			_credits = -1
 			if _verbose:
-				print_rich("[CreditManager]: Freeplay toggled to [color=green]ON[/color].")
+				print_rich("[CreditManager] Freeplay toggled to [color=green]ON[/color].")
 			freeplay_mode_changed.emit()
 	elif is_in_freeplay_mode():
 		_credits = 0
 		if _verbose:
-			print_rich("[CreditManager]: Freeplay toggled to [color=RED]OFF[/color].")
+			print_rich("[CreditManager] Freeplay toggled to [color=RED]OFF[/color].")
 		freeplay_mode_changed.emit()

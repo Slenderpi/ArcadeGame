@@ -12,16 +12,17 @@ extends Node
 ## Windows: %APPDATA%[br]
 ## Mac: ~/Library/Application Support/[br]
 ## Linux: ~/.local/share/
-const CFG_PATH := "user://developer_config.cfg"
+const CFG_PATH = "user://developer_config.cfg"
 
-const SECTION_GENERAL := "general"
+const SECTION_GENERAL = "general"
 const CFGKEY_FREEPLAY_MODE = "freeplay_mode"
 
-const SECTION_GRAPHICS := "graphics"
+const SECTION_GRAPHICS = "graphics"
 
-const SECTION_DEV_GUI_CONFIG := "dev_gui_config"
-const CFGKEY_PAUSE_ON_DEV_GUI := "pause_on_dev_gui"
-const CFGKEY_DEV_GUI_ENABLED := "dev_gui_enabled"
+const SECTION_DEV_GUI_CONFIG = "dev_gui_config"
+const CFGKEY_PAUSE_ON_DEV_GUI = "pause_on_dev_gui"
+const CFGKEY_DEV_GUI_ENABLED = "dev_gui_enabled"
+const CFGKEY_VERBOSE_CREDIT_MANAGER = "verbose_credit_manager"
 
 #endregion
 
@@ -51,6 +52,7 @@ var graphics_config : Dictionary[String, Variant] = {
 var dev_gui_config_config : Dictionary[String, Variant] = {
 	CFGKEY_DEV_GUI_ENABLED: false,
 	CFGKEY_PAUSE_ON_DEV_GUI: false,
+	CFGKEY_VERBOSE_CREDIT_MANAGER: false,
 }
 
 #endregion
@@ -58,7 +60,7 @@ var dev_gui_config_config : Dictionary[String, Variant] = {
 
 #region INITIALIZERS
 
-func _ready() -> void:
+func _init() -> void:
 	_init_configs_dict()
 	_init_config_values()
 

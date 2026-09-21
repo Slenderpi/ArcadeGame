@@ -37,11 +37,10 @@ var _pause_on_dev_gui := true
 var _is_deleting_cfg_file := false
 
 
-func _ready() -> void:
+func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	dev_gui_enabled = DevConfig.get_dev_gui_config_value(DevConfig.CFGKEY_DEV_GUI_ENABLED)
 	_pause_on_dev_gui = DevConfig.get_dev_gui_config_value(DevConfig.CFGKEY_PAUSE_ON_DEV_GUI, _pause_on_dev_gui)
-	CreditManager.set_freeplay_mode(DevConfig.get_general_value(DevConfig.CFGKEY_FREEPLAY_MODE))
 	for sn in sceneNameList:
 		if sn.length() > longestSceneName:
 			longestSceneName = sn.length()
@@ -203,6 +202,13 @@ func _imgui_tab_devgui_config() -> void:
 	if ImGui.IsItemHovered(ImGui.HoveredFlags_DelayNone):
 		ImGui.SetTooltip("Determines if the game will get paused when DevGui is opened.")
 	
+	ImGui.SeparatorText("Verbosity")
+	tempArr = [DevConfig.get_dev_gui_config_value(DevConfig.CFGKEY_VERBOSE_CREDIT_MANAGER)]
+	if ImGui.Checkbox("CreditManager", tempArr):
+		CreditManager.verbose = tempArr[0]
+		DevConfig.set_dev_gui_config_value(DevConfig.CFGKEY_VERBOSE_CREDIT_MANAGER, tempArr[0])
+	
+	ImGui.SeparatorText("Dev config file")
 	ImGui.BeginDisabled(not DevConfig.does_config_file_exist())
 	ImGui.PushStyleColor(ImGui.Col_Button, Color(0.6, 0.0, 0.0, 1.0))
 	ImGui.PushStyleColor(ImGui.Col_ButtonHovered, Color(0.85, 0.136, 0.148, 1.0))

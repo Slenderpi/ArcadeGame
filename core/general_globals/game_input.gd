@@ -62,7 +62,7 @@ var _verbose: bool = false
 
 #region NODE OVERRIDES
 
-func _ready() -> void:
+func _init() -> void:
 	process_priority = -10
 
 
