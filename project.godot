@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 ImGuiRoot="*uid://dugmpnsxaagba"
 DevConfig="*uid://bgehwcrdxd4v"
+Game="*uid://bjcr0qyid1pym"
 Debug="*uid://cu7bimfn6fy4k"
 GameInput="*uid://cfkhdv867l8hl"
 CreditManager="*uid://bq6iep24jqbwu"
