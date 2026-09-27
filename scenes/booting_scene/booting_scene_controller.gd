@@ -6,7 +6,7 @@ class_name BootingSceneController
 
 ## The scene to switch to after booting is finished.
 ## You can change this to make it load to a specific scene.
-const NEXT_SCENE = SceneManager.SCENE_ATTRACT_MODE
+const NEXT_SCENE = SceneManager.SCENE_GAMEPLAY
 
 
 var _done : bool

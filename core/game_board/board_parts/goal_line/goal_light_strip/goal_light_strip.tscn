@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://culbyld5kpm48"]
-
-[ext_resource type="Script" uid="uid://b6haoyu87xue7" path="res://core/game_board/board_parts/goal_line/goal_light_strip/goal_light_strip.gd" id="1_urvr4"]
-
-[node name="GoalLightStrip" type="Node3D" unique_id=280699142]
-script = ExtResource("1_urvr4")

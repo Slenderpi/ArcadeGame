@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://b77lswe1osdpf"]
+
+[ext_resource type="Script" uid="uid://csf5krggco68t" path="res://core/game_board/board_parts/judge_line/judge_line.gd" id="1_tomcr"]
+[ext_resource type="Material" uid="uid://btkumge4biux0" path="res://assets/basic_materials/m_green.tres" id="2_tr8rj"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_xse17"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_xse17"]
+
+[node name="JudgeLine" type="Node3D" unique_id=355234101]
+script = ExtResource("1_tomcr")
+
+[node name="MultiMeshInstance3D" type="MultiMeshInstance3D" parent="." unique_id=1111108407]
+
+[node name="Surface" type="MeshInstance3D" parent="." unique_id=575898455]
+mesh = SubResource("PlaneMesh_xse17")
+
+[node name="LightStrip" type="MeshInstance3D" parent="." unique_id=1689397777]
+material_override = ExtResource("2_tr8rj")
+mesh = SubResource("BoxMesh_xse17")
