@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" uid="uid://csf5krggco68t" path="res://core/game_board/board_parts/goal_line/goal_line.gd" id="1_jfv5x"]
 
-[node name="GoalLine" type="MeshInstance3D" unique_id=2032830125]
+[node name="GoalLine" type="Node3D" unique_id=355234101]
 script = ExtResource("1_jfv5x")
