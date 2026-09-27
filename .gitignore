@@ -19,5 +19,6 @@ mono_crash.*.json
 # Addon temporary files
 addons/imgui-godot/**/~*.dll
 
-# Virtual Off
+# Arcade Game
 cabinet.cfg
+*.blend1
