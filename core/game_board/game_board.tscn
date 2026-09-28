@@ -2,9 +2,18 @@
 
 [ext_resource type="Script" uid="uid://d4kqyxjnixvor" path="res://core/game_board/game_board.gd" id="1_6gj2g"]
 [ext_resource type="PackedScene" uid="uid://b77lswe1osdpf" path="res://core/game_board/board_parts/judge_line/judge_line.tscn" id="2_i6xlh"]
+[ext_resource type="ArrayMesh" uid="uid://w1qb5ahml5pu" path="res://core/game_board/board_parts/judge_line/assets/judge_line_light_strip_Cube.res" id="3_6kwuu"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_n4i5i"]
 size = Vector3(20, 1, 200)
+
+[sub_resource type="MultiMesh" id="MultiMesh_6kwuu"]
+transform_format = 1
+use_colors = true
+use_custom_data = true
+instance_count = 20
+mesh = ExtResource("3_6kwuu")
+buffer = PackedFloat32Array(1, 0, 0, -9.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, -8.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.052612305, 0, 0.9472656, 1, 1, 0, 0, -7.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.10522461, 0, 0.89453125, 1, 1, 0, 0, -6.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.15783691, 0, 0.8417969, 1, 1, 0, 0, -5.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.21044922, 0, 0.7890625, 1, 1, 0, 0, -4.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.26293945, 0, 0.7368164, 1, 1, 0, 0, -3.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.31567383, 0, 0.68408203, 1, 1, 0, 0, -2.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.3684082, 0, 0.63134766, 1, 1, 0, 0, -1.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.42089844, 0, 0.5786133, 1, 1, 0, 0, -0.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.4736328, 0, 0.5258789, 1, 1, 0, 0, 0.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.5258789, 0, 0.4736328, 1, 1, 0, 0, 1.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.5786133, 0, 0.42089844, 1, 1, 0, 0, 2.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.63134766, 0, 0.3684082, 1, 1, 0, 0, 3.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.68408203, 0, 0.31567383, 1, 1, 0, 0, 4.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.7368164, 0, 0.26293945, 1, 1, 0, 0, 5.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.7890625, 0, 0.21044922, 1, 1, 0, 0, 6.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.8417969, 0, 0.15783691, 1, 1, 0, 0, 7.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.89453125, 0, 0.10522461, 1, 1, 0, 0, 8.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.9472656, 0, 0.052612305, 1, 1, 0, 0, 9.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1)
 
 [node name="GameBoard" type="Node3D" unique_id=726624782]
 script = ExtResource("1_6gj2g")
@@ -21,3 +30,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -100)
 mesh = SubResource("BoxMesh_n4i5i")
 
 [node name="JudgeLine" parent="." unique_id=355234101 instance=ExtResource("2_i6xlh")]
+multimesh = SubResource("MultiMesh_6kwuu")
