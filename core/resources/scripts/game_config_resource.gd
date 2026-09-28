@@ -1,5 +1,6 @@
 extends Resource
 class_name GameConfigResource
+# NOTE: MIGHT NOT USE
 
 
 ## This should exactly match the sensor row array count.

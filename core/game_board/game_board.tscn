@@ -17,6 +17,8 @@ buffer = PackedFloat32Array(1, 0, 0, -9.5, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0
 
 [node name="GameBoard" type="Node3D" unique_id=726624782]
 script = ExtResource("1_6gj2g")
+strip_count = 20
+strip_width = 1.0
 
 [node name="CameraTransform" type="Marker3D" parent="." unique_id=1873025484]
 transform = Transform3D(1, 0, 0, 0, 0.9659258, 0.25881904, 0, -0.25881904, 0.9659258, 0, 10, 10)
@@ -29,5 +31,8 @@ transform = Transform3D(0.91618186, -0.34012666, 0.21195431, 0, 0.5288773, 0.848
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -100)
 mesh = SubResource("BoxMesh_n4i5i")
 
-[node name="JudgeLine" parent="." unique_id=355234101 instance=ExtResource("2_i6xlh")]
+[node name="JudgeLine" parent="." unique_id=355234101 node_paths=PackedStringArray("game_board_owner") instance=ExtResource("2_i6xlh")]
 multimesh = SubResource("MultiMesh_6kwuu")
+game_board_owner = NodePath("..")
+
+[connection signal="board_config_changed" from="." to="JudgeLine" method="_on_game_board_board_config_changed"]
