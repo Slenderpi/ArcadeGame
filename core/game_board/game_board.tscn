@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d4kqyxjnixvor" path="res://core/game_board/game_board.gd" id="1_6gj2g"]
 [ext_resource type="PackedScene" uid="uid://b77lswe1osdpf" path="res://core/game_board/board_parts/judge_line/judge_line.tscn" id="2_i6xlh"]
-[ext_resource type="ArrayMesh" uid="uid://w1qb5ahml5pu" path="res://core/game_board/board_parts/judge_line/assets/judge_line_light_strip_Cube.res" id="3_6kwuu"]
+[ext_resource type="ArrayMesh" uid="uid://w1qb5ahml5pu" path="res://core/game_board/board_parts/assets/judge_line_light_strip_Cube.res" id="3_6kwuu"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_n4i5i"]
 size = Vector3(20, 1, 200)

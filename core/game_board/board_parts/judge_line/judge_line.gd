@@ -1,12 +1,10 @@
 @tool
 extends MultiMeshInstance3D
+class_name JudgeLine
 
-@export
 @warning_ignore("unused_private_class_variable")
-var _regenerate : bool:
-	set(value):
-		if (value):
-			setup_led_strip()
+@export_tool_button("Regenerate MultiMesh", "SliderJoint3D")
+var _regen_mesh_tool_button = _regenerate_multimesh_callable
 
 @export_range(1, 40, 1, "prefer_slider")
 var count: int:
@@ -14,7 +12,7 @@ var count: int:
 		return _count
 	set(value):
 		_count = value
-		setup_led_strip()
+		generate_multimesh()
 
 @export_range(0.0, 2.0, 0.01)
 var mesh_width: float:
@@ -22,7 +20,7 @@ var mesh_width: float:
 		return _mesh_width
 	set(value):
 		_mesh_width = value
-		setup_led_strip()
+		generate_multimesh()
 
 @export
 var mesh_instance: Mesh:
@@ -30,7 +28,7 @@ var mesh_instance: Mesh:
 		return _mesh_instance
 	set(value):
 		_mesh_instance = value
-		setup_led_strip()
+		generate_multimesh()
 
 
 var _count : int = 20
@@ -38,11 +36,13 @@ var _mesh_width : float = 1.0
 var _mesh_instance : Mesh
 
 
-func _ready() -> void:
-	setup_led_strip()
+func _regenerate_multimesh_callable():
+	# NOTE: is a "print_editor()" possible?
+	print("Regenerating JudgeLine MultiMesh.")
+	generate_multimesh()
 
 
-func setup_led_strip() -> void:
+func generate_multimesh() -> void:
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.use_colors = true         # Enables set_instance_color

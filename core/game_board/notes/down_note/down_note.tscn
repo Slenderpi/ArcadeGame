@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://qjoet0mh4fsi"]
-
-[ext_resource type="Script" uid="uid://bsfm5eac0dbqn" path="res://core/game_board/notes/down_note/down_note.gd" id="1_nwlp8"]
-
-[node name="DownNote" type="MeshInstance3D" unique_id=514061978]
-script = ExtResource("1_nwlp8")
