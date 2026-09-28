@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://csf5krggco68t" path="res://core/game_board/board_parts/judge_line/judge_line.gd" id="1_tomcr"]
 [ext_resource type="Script" uid="uid://l8tklhrfb5uh" path="res://core/game_board/board_parts/judge_line/judge_line_multi_mesh.gd" id="2_k0u11"]
-[ext_resource type="ArrayMesh" uid="uid://dkxogmub61t3e" path="res://core/game_board/board_parts/judge_line/assets/judge_line_light_strip_Cube.res" id="3_r7uio"]
+[ext_resource type="ArrayMesh" uid="uid://w1qb5ahml5pu" path="res://core/game_board/board_parts/judge_line/assets/judge_line_light_strip_Cube.res" id="3_r7uio"]
 
 [node name="JudgeLine" type="Node3D" unique_id=355234101]
 script = ExtResource("1_tomcr")
