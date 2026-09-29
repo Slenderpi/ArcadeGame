@@ -90,8 +90,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _imgui_consistent_info(delta: float) -> void:
 	ImGui.Text("FPS:")
-	ImGui.SameLine()
 	
+	ImGui.SameLine()
 	var liveFps := 1.0 / delta
 	var fpsColor := Color.GREEN if liveFps > GOOD_FPS_LOWER_LIMIT else (Color.YELLOW if liveFps > MODERATE_FPS_LOWER_LIMIT else Color.RED)
 	ImGui.TextColored(fpsColor, "%3d" % roundi(Engine.get_frames_per_second()))
@@ -99,12 +99,20 @@ func _imgui_consistent_info(delta: float) -> void:
 	ImGui.Text('=')
 	ImGui.SameLine()
 	ImGui.TextColored(fpsColor, "%5.1f ms" % (round(delta * 10000.0) / 10.0))
-	ImGui.SameLine()
 	
+	ImGui.SameLine()
 	ImGui.Text("|")
-	ImGui.SameLine()
 	
-	ImGui.Text("<other persistent info>")
+	ImGui.SameLine()
+	ImGui.Text("DPAD:")
+	ImGui.SameLine()
+	ImGui.TextColored(Color.GREEN, "%-4s" % GameInput.get_nav_input_compass_str())
+	
+	ImGui.SameLine()
+	ImGui.Text("|")
+	
+	ImGui.SameLine()
+	ImGui.TextColored(Color.GREEN, GameInput.get_foot_input_str())
 
 #endregion
 

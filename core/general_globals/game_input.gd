@@ -53,12 +53,17 @@ var nav_input : Vector4i:
 		return _nav_input
 var _nav_input : Vector4i
 
+var foot_inputs : Dictionary[int, float] = {}
+
 #endregion
 
 
 ## Debug verbosity.
 var _verbose: bool = false
 
+## Draw 2D lines where foot inputs are detected.
+var _draw_foot_lines : bool = true
+var _debug_lines : Dictionary[int, Line2D] = {}
 
 #region NODE OVERRIDES
 
@@ -73,13 +78,30 @@ func _process(_delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	# The below code is not meant for actual gameplay and is instead meant for
+	# playtesting via a touch screen so that the game can be tested without
+	# the actual IR pad.
 	if event is InputEventScreenTouch:
 		if event.pressed:
-			print_rich("Finger [color=cyan]%d[/color] [color=green]tapped[/color] at position: %s" % [event.index, event.position])
+			foot_inputs[event.index] = event.position.x
+			if _draw_foot_lines:
+				var debugLine := Line2D.new()
+				debugLine.width = 3.0
+				debugLine.default_color = Color.GREEN
+				debugLine.add_point(Vector2(foot_inputs[event.index], 0))
+				debugLine.add_point(Vector2(foot_inputs[event.index], 9999))
+				_debug_lines[event.index] = debugLine
+				add_child(debugLine)
 		elif not event.pressed:
-			print_rich("Finger [color=cyan]%d[/color] [color=red]lifted[/color] from the screen" % [event.index])
+			foot_inputs.erase(event.index)
+			if _draw_foot_lines:
+				_debug_lines[event.index].queue_free()
+				_debug_lines[event.index] = null
 	elif event is InputEventScreenDrag:
-		print_rich("Finger [color=cyan]%d[/color] [color=yellow]dragged[/color] to new position: %s" % [event.index, event.position])
+		foot_inputs[event.index] = event.position.x
+		if _draw_foot_lines:
+			_debug_lines[event.index].set_point_position(0, Vector2(foot_inputs[event.index], 0))
+			_debug_lines[event.index].set_point_position(1, Vector2(foot_inputs[event.index], 9999))
 
 #endregion
 
@@ -100,6 +122,17 @@ func get_nav_input_compass_str() -> String:
 		ret += "E"
 	if nav_input.x:
 		ret += "W"
+	return ret
+
+
+## Returns a string representing the current [member GameInput.foot_inputs].[br]
+## The format is: [code]"[index1: position1] [index2: position2] [etc]"[/code].
+func get_foot_input_str() -> String:
+	if foot_inputs.is_empty():
+		return "-"
+	var ret := ""
+	for index in foot_inputs:
+		ret += "[%d: %.1f] " % [index, foot_inputs[index]]
 	return ret
 
 
