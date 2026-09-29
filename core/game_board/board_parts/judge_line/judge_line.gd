@@ -36,7 +36,7 @@ func _regenerate_multimesh_callable():
 
 func generate_multimesh() -> void:
 	if not _game_board_owner:
-		push_warning("[JudgeLine] Please set the game_board_owner for the JudgeLine.")
+		#push_warning("[JudgeLine] Please set the game_board_owner for the JudgeLine.")
 		return
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
