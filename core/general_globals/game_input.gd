@@ -71,6 +71,16 @@ func _process(_delta: float) -> void:
 	if _verbose:
 		_print_input_on_pressed()
 
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			print_rich("Finger [color=cyan]%d[/color] [color=green]tapped[/color] at position: %s" % [event.index, event.position])
+		elif not event.pressed:
+			print_rich("Finger [color=cyan]%d[/color] [color=red]lifted[/color] from the screen" % [event.index])
+	elif event is InputEventScreenDrag:
+		print_rich("Finger [color=cyan]%d[/color] [color=yellow]dragged[/color] to new position: %s" % [event.index, event.position])
+
 #endregion
 
 
