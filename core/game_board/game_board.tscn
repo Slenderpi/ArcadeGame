@@ -2,7 +2,8 @@
 
 [ext_resource type="Script" uid="uid://d4kqyxjnixvor" path="res://core/game_board/game_board.gd" id="1_6gj2g"]
 [ext_resource type="PackedScene" uid="uid://b77lswe1osdpf" path="res://core/game_board/board_parts/judge_line/judge_line.tscn" id="2_i6xlh"]
-[ext_resource type="ArrayMesh" uid="uid://w1qb5ahml5pu" path="res://core/game_board/board_parts/assets/judge_line_light_strip_Cube.res" id="3_6kwuu"]
+[ext_resource type="ArrayMesh" uid="uid://w1qb5ahml5pu" path="res://core/game_board/assets/judge_line_light_strip/judge_line_light_strip_Cube.res" id="3_6kwuu"]
+[ext_resource type="Script" uid="uid://bgknorcoctk8i" path="res://core/game_board/board_parts/note_pool.gd" id="5_vr3lb"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_n4i5i"]
 size = Vector3(20, 1, 200)
@@ -34,5 +35,8 @@ mesh = SubResource("BoxMesh_n4i5i")
 [node name="JudgeLine" parent="." unique_id=355234101 node_paths=PackedStringArray("game_board_owner") instance=ExtResource("2_i6xlh")]
 multimesh = SubResource("MultiMesh_6kwuu")
 game_board_owner = NodePath("..")
+
+[node name="NotePool" type="Node3D" parent="." unique_id=1752475783]
+script = ExtResource("5_vr3lb")
 
 [connection signal="board_config_changed" from="." to="JudgeLine" method="_on_game_board_board_config_changed"]

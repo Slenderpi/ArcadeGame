@@ -1,2 +1,11 @@
-extends Node3D
+extends PoolableMesh
 class_name StepNote
+
+
+const LEFT_MATERIAL_RSRC = preload("uid://24b55u61opj4")
+const RIGHT_MATERIAL_RSRC = preload("uid://vorepyqm7cm3")
+
+
+## Set the visual appearance based on which foot side this note is for.
+func set_visuals_for_side(asLeft: bool) -> void:
+	set_surface_override_material(0, LEFT_MATERIAL_RSRC if asLeft else RIGHT_MATERIAL_RSRC)

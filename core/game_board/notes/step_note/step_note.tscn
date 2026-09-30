@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://do64nme8d3bk1"]
 
+[ext_resource type="ArrayMesh" uid="uid://dj68p0uyfjmud" path="res://core/game_board/notes/step_note/assets/note_mesh_Cube.res" id="1_c6e4w"]
 [ext_resource type="Script" uid="uid://eqlb8xsvwvgc" path="res://core/game_board/notes/step_note/step_note.gd" id="1_qjg0x"]
 
 [node name="StepNote" type="MeshInstance3D" unique_id=505928933]
+mesh = ExtResource("1_c6e4w")
 script = ExtResource("1_qjg0x")

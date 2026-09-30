@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://b77lswe1osdpf"]
 
 [ext_resource type="Script" uid="uid://l8tklhrfb5uh" path="res://core/game_board/board_parts/judge_line/judge_line.gd" id="2_k0u11"]
-[ext_resource type="ArrayMesh" uid="uid://w1qb5ahml5pu" path="res://core/game_board/board_parts/assets/judge_line_light_strip_Cube.res" id="3_r7uio"]
+[ext_resource type="ArrayMesh" uid="uid://w1qb5ahml5pu" path="res://core/game_board/assets/judge_line_light_strip/judge_line_light_strip_Cube.res" id="3_r7uio"]
 
 [sub_resource type="MultiMesh" id="MultiMesh_tr8rj"]
 transform_format = 1
