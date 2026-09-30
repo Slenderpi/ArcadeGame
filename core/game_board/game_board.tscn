@@ -8,7 +8,7 @@
 [sub_resource type="BoxMesh" id="BoxMesh_n4i5i"]
 size = Vector3(20, 1, 200)
 
-[sub_resource type="MultiMesh" id="MultiMesh_6kwuu"]
+[sub_resource type="MultiMesh" id="MultiMesh_g7hmd"]
 transform_format = 1
 use_colors = true
 use_custom_data = true
@@ -33,7 +33,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -100)
 mesh = SubResource("BoxMesh_n4i5i")
 
 [node name="JudgeLine" parent="." unique_id=355234101 node_paths=PackedStringArray("game_board_owner") instance=ExtResource("2_i6xlh")]
-multimesh = SubResource("MultiMesh_6kwuu")
+multimesh = SubResource("MultiMesh_g7hmd")
 game_board_owner = NodePath("..")
 
 [node name="NotePool" type="Node3D" parent="." unique_id=1752475783]
