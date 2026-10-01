@@ -1,4 +1,4 @@
-#@tool
+@tool
 extends MultiMeshInstance3D
 class_name JudgeLine
 
@@ -11,9 +11,9 @@ var game_board_owner : GameBoard:
 		_game_board_owner = value
 		generate_multimesh()
 
-@warning_ignore("unused_private_class_variable")
+#@warning_ignore("unused_private_class_variable")
 #@export_tool_button("Regenerate MultiMesh", "SliderJoint3D")
-var _regen_mesh_tool_button = _regenerate_multimesh_callable
+#var _regen_mesh_tool_button = _regenerate_multimesh_callable
 
 @export
 var mesh_instance: Mesh:
@@ -24,24 +24,33 @@ var mesh_instance: Mesh:
 		generate_multimesh()
 
 
+var _is_mmgen_queued: bool = false
+
 var _game_board_owner : GameBoard = null
 var _mesh_instance : Mesh
 
 
-func _regenerate_multimesh_callable():
-	# NOTE: is a "print_editor()" possible?
-	print("Regenerating JudgeLine MultiMesh.")
-	generate_multimesh()
+#func _regenerate_multimesh_callable():
+	## NOTE: is a "print_editor()" possible?
+	#print("Regenerating JudgeLine MultiMesh.")
+	#generate_multimesh()
 
 
 func generate_multimesh() -> void:
-	if not _game_board_owner:
-		#push_warning("[JudgeLine] Please set the game_board_owner for the JudgeLine.")
+	if _is_mmgen_queued:
+		return
+	_is_mmgen_queued = true
+	_generate_multimesh_implementation.call_deferred()
+
+
+func _generate_multimesh_implementation() -> void:
+	_is_mmgen_queued = false
+	if not _game_board_owner or _game_board_owner._strip_count <= 0 or not _mesh_instance:
 		return
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.use_colors = true         # Enables set_instance_color
-	mm.use_custom_data = true    # Enables set_instance_custom_data (4 extra floats per instance!)
+	#mm.use_custom_data = true    # Enables set_instance_custom_data (4 extra floats per instance!)
 	mm.mesh = _mesh_instance
 	mm.instance_count = _game_board_owner.strip_count
 	
