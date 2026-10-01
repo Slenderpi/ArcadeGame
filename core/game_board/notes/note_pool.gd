@@ -36,8 +36,9 @@ func despawn_step_note(note: StepNote) -> void:
 	if not note.is_spawned:
 		push_warning("[NotePool] despawn_step_note() called on a note that's already despawned.")
 		return
-	note.set_process(false)
 	note.hide()
+	note.set_process(false)
+	note.position = Vector3(0, 0, -99999)
 	note.is_spawned = false
 
 

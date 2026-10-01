@@ -7,7 +7,7 @@ class_name NoteObject
 var hit_time: int
 
 ## Convenient accessor for position.z.
-var location: float:
+var zpos: float:
 	get:
 		return position.z
 	set(value):

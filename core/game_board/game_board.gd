@@ -34,19 +34,26 @@ var camtrans : Node3D = $CameraTransform
 @onready
 var note_pool: NotePool = $NotePool
 
-var startX : float:
+## X positions in the world that the left/right edges of the board are reach to.
+var board_edge_positions: Vector2:
 	get:
-		return _startX
+		return _board_edge_positions
+var _board_edge_positions: Vector2
+
+# NOTE: Perhaps this factor should be adjustable in editor and dictate everything else?
+## Physical width of the board.
+var board_width: float:
+	get:
+		return _board_width
+var _board_width: float
 
 var start_time: int = 0
 
 # TEST
 var _last_note_create_time: int
-var _side_flip: = true
 var _spawned: Array[NoteObject] = []
 
 
-var _startX: float
 var _strip_count: int = 20
 var _strip_width: float = 1.0
 
@@ -62,24 +69,39 @@ func _process(_delta: float) -> void:
 	var time: = Time.get_ticks_msec() - start_time
 	
 	# TEST
-	if time - _last_note_create_time >= 100:
+	if time - _last_note_create_time >= 500:
 		var note: = note_pool.spawn_step_note()
-		note.hit_time = time + int(randf() * 1000) + 3000
-		note.position = Vector3(-1 if _side_flip else 1, 0, 0)
-		note.set_visuals_for_side(_side_flip)
+		#note.hit_time = time + int(randf() * 1000) + 3000
+		note.hit_time = time + 3500
+		
+		var randScaleOfBoard: float = randf() * 0.8 + 0.2
+		var randPosOfBoard: = randf() * (1 - randScaleOfBoard) + randScaleOfBoard * 0.5
+		var noteHalfWidth: = randScaleOfBoard * board_width * 0.5
+		var leftEdge: int = roundi((randPosOfBoard * board_width - noteHalfWidth) / board_width * 65535.0)
+		var rightEdge: int = roundi((randPosOfBoard * board_width + noteHalfWidth) / board_width * 65535.0)
+		set_transform_from_edge_positions(note, leftEdge, rightEdge)
+		
+		note.set_visuals_for_side(randf() > 0.5)
 		note.show()
 		_spawned.append(note)
 		_last_note_create_time = time
-		_side_flip = not _side_flip
 	var newSpawned: Array[NoteObject] = []
 	for n in _spawned:
 		var tdiff = time - n.hit_time
 		if tdiff > 1000:
 			note_pool.despawn_step_note(n)
 			continue
-		n.location = tdiff * 0.075
+		n.zpos = tdiff * 0.075
 		newSpawned.append(n)
 	_spawned = newSpawned
+
+
+func set_transform_from_edge_positions(note: NoteObject, leftEdge: int, rightEdge: int) -> void:
+	var widthScale: float = (rightEdge - leftEdge) / 65535.0
+	var posX: float = (leftEdge / 65535.0 + widthScale * 0.5) * board_width + board_edge_positions.x
+	# NOTE: For scale, the *board_width/2 part is necessary because the note's width size is 1 (while board is bigger)
+	note.scale.x = widthScale * board_width * 0.5
+	note.position.x = posX
 
 
 func _on_force_emit_property_changed_button():
@@ -88,5 +110,6 @@ func _on_force_emit_property_changed_button():
 
 
 func _on_board_config_property_changed():
-	_startX = (strip_count - 1) * strip_width * -0.5
+	_board_width = strip_count * strip_width
+	_board_edge_positions = Vector2(board_width * -0.5, board_width * 0.5)
 	board_config_changed.emit()

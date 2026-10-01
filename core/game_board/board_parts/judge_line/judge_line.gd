@@ -1,4 +1,4 @@
-@tool
+#@tool
 extends MultiMeshInstance3D
 class_name JudgeLine
 
@@ -12,7 +12,7 @@ var game_board_owner : GameBoard:
 		generate_multimesh()
 
 @warning_ignore("unused_private_class_variable")
-@export_tool_button("Regenerate MultiMesh", "SliderJoint3D")
+#@export_tool_button("Regenerate MultiMesh", "SliderJoint3D")
 var _regen_mesh_tool_button = _regenerate_multimesh_callable
 
 @export
@@ -45,14 +45,15 @@ func generate_multimesh() -> void:
 	mm.mesh = _mesh_instance
 	mm.instance_count = _game_board_owner.strip_count
 	
+	var leftX: = _game_board_owner.board_edge_positions.x + _game_board_owner.strip_width * 0.5
 	for i in range(_game_board_owner.strip_count):
 		# Set fixed position in a straight row along the X axis
-		var pos := Vector3(_game_board_owner.startX + i * _game_board_owner.strip_width, 0.0, 0.0)
+		var pos := Vector3(leftX + i * _game_board_owner.strip_width, 0.0, 0.0)
 		var trans := Transform3D(Basis(), pos)
 		mm.set_instance_transform(i, trans)
 		
 		# Set default color and initial custom parameters (e.g. brightness = 1.0)
-		var colorV : Vector3 = lerp(Vector3(0, 0, 1), Vector3(1, 0, 0), float(i) / (_game_board_owner.strip_count - 1))
+		var colorV : Vector3 = lerp(Vector3(1, 0, 0), Vector3(0, 1, 1), float(i) / (_game_board_owner.strip_count - 1))
 		var color : Color = Color(colorV.x, colorV.y, colorV.z)
 		mm.set_instance_color(i, color)
 		#mm.set_instance_custom_data(i, Color(color, 1))
