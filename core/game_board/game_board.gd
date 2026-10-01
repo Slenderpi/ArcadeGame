@@ -43,6 +43,7 @@ var start_time: int = 0
 # TEST
 var _last_note_create_time: int
 var _side_flip: = true
+var _spawned: Array[NoteObject] = []
 
 
 var _startX: float
@@ -61,13 +62,24 @@ func _process(_delta: float) -> void:
 	var time: = Time.get_ticks_msec() - start_time
 	
 	# TEST
-	if time - _last_note_create_time >= 1000:
-		_last_note_create_time = time
+	if time - _last_note_create_time >= 100:
 		var note: = note_pool.spawn_step_note()
+		note.hit_time = time + int(randf() * 1000) + 3000
 		note.position = Vector3(-1 if _side_flip else 1, 0, 0)
 		note.set_visuals_for_side(_side_flip)
 		note.show()
+		_spawned.append(note)
+		_last_note_create_time = time
 		_side_flip = not _side_flip
+	var newSpawned: Array[NoteObject] = []
+	for n in _spawned:
+		var tdiff = time - n.hit_time
+		if tdiff > 1000:
+			note_pool.despawn_step_note(n)
+			continue
+		n.location = tdiff * 0.075
+		newSpawned.append(n)
+	_spawned = newSpawned
 
 
 func _on_force_emit_property_changed_button():

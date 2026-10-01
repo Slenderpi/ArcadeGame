@@ -1,4 +1,4 @@
-extends PoolableMesh
+extends NoteObject
 class_name StepNote
 
 
