@@ -20,9 +20,9 @@ script = ExtResource("1_6gj2g")
 strip_count = 20
 strip_width = 1.0
 
-[node name="CameraTransform" type="Marker3D" parent="." unique_id=1873025484]
-transform = Transform3D(1, 0, 0, 0, 0.9063077, 0.42261824, 0, -0.42261824, 0.9063077, 0, 18, 21)
-gizmo_extents = 1.0
+[node name="Camera3D" type="Camera3D" parent="." unique_id=781227219]
+transform = Transform3D(1, 0, 0, 0, 0.9063077, 0.42261827, 0, -0.42261827, 0.9063077, 0, 18, 21)
+fov = 40.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1802383211]
 transform = Transform3D(0.91618186, -0.34012666, 0.21195431, 0, 0.5288773, 0.8486983, -0.40076274, -0.777562, 0.4845478, 0, 1.5726662, 0)

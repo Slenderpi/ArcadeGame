@@ -30,7 +30,7 @@ var strip_width: float:
 
 
 @onready
-var camtrans : Node3D = $CameraTransform
+var camera : Camera3D = $Camera3D
 @onready
 var note_pool: NotePool = $NotePool
 
