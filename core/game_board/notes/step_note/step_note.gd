@@ -3,7 +3,7 @@ class_name StepNote
 
 
 const LEFT_MATERIAL_RSRC = preload("uid://24b55u61opj4")
-const RIGHT_MATERIAL_RSRC = preload("uid://vorepyqm7cm3")
+const RIGHT_MATERIAL_RSRC = preload("uid://dl140m1352mpw")
 
 
 ## Set the visual appearance based on which foot side this note is for.
