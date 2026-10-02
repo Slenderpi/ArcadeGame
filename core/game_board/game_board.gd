@@ -6,6 +6,9 @@ class_name GameBoard
 signal board_config_changed()
 
 
+const MAX_NOTE_SPEED = 20
+
+
 @export_group("Board Config")
 
 @warning_ignore("unused_private_class_variable")
@@ -50,7 +53,7 @@ var _board_width: float
 
 var start_time: int = 0
 ## Note movement speed in units/ms
-var base_note_speed: float = 0.01
+var base_note_speed: float = 0.05
 ## Multiplies with [member GameBoard.note_speed].and
 ## [member GameBoard.base_note_speed] to get the final note speed.
 var note_speed_per_level: float = 0.005
@@ -98,7 +101,7 @@ func _process(_delta: float) -> void:
 		if tdiff > 1000:
 			note_pool.despawn_step_note(n)
 			continue
-		n.zpos = tdiff * (base_note_speed + note_speed_per_level * note_speed)
+		n.zpos = tdiff * (base_note_speed * (10.0 / (3.0 + MAX_NOTE_SPEED - note_speed)))
 		newSpawned.append(n)
 	_spawned = newSpawned
 
