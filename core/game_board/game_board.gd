@@ -47,7 +47,14 @@ var board_width: float:
 		return _board_width
 var _board_width: float
 
+
 var start_time: int = 0
+## Note movement speed in units/ms
+var base_note_speed: float = 0.01
+## Multiplies with [member GameBoard.note_speed].and
+## [member GameBoard.base_note_speed] to get the final note speed.
+var note_speed_per_level: float = 0.005
+var note_speed: int = 1
 
 # TEST
 var _last_note_create_time: int
@@ -72,7 +79,7 @@ func _process(_delta: float) -> void:
 	if time - _last_note_create_time >= 500:
 		var note: = note_pool.spawn_step_note()
 		#note.hit_time = time + int(randf() * 1000) + 3000
-		note.hit_time = time + 3500
+		note.hit_time = time + 3000
 		
 		var randScaleOfBoard: float = randf() * 0.8 + 0.2
 		var randPosOfBoard: = randf() * (1 - randScaleOfBoard) + randScaleOfBoard * 0.5
@@ -91,7 +98,7 @@ func _process(_delta: float) -> void:
 		if tdiff > 1000:
 			note_pool.despawn_step_note(n)
 			continue
-		n.zpos = tdiff * 0.075
+		n.zpos = tdiff * (base_note_speed + note_speed_per_level * note_speed)
 		newSpawned.append(n)
 	_spawned = newSpawned
 

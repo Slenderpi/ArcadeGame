@@ -12,4 +12,10 @@ func _ready() -> void:
 
 
 func _update(_delta: float) -> void:
-	pass
+	if GameInput.nav_just_pressed && GameInput.nav_type != GameInput.NAV_TYPE_COMBO:
+		if GameInput.nav_input.z:
+			game_board.note_speed += 1
+			print("Note speed now %d" % game_board.note_speed)
+		elif GameInput.nav_input.w:
+			game_board.note_speed -= 1
+			print("Note speed now %d" % game_board.note_speed)
