@@ -95,15 +95,8 @@ func _process(_delta: float) -> void:
 		note.show()
 		_spawned.append(note)
 		_last_note_create_time = time
-	var newSpawned: Array[NoteObject] = []
-	for n in _spawned:
-		var tdiff = time - n.hit_time
-		if tdiff > 1000:
-			note_pool.despawn_step_note(n)
-			continue
-		n.zpos = tdiff * (base_note_speed * (10.0 / (3.0 + MAX_NOTE_SPEED - note_speed)))
-		newSpawned.append(n)
-	_spawned = newSpawned
+	
+	_update_note_positions(time)
 
 
 func set_transform_from_edge_positions(note: NoteObject, leftEdge: int, rightEdge: int) -> void:
@@ -112,6 +105,19 @@ func set_transform_from_edge_positions(note: NoteObject, leftEdge: int, rightEdg
 	# NOTE: For scale, the *board_width/2 part is necessary because the note's width size is 1 (while board is bigger)
 	note.scale.x = widthScale * board_width * 0.5
 	note.position.x = posX
+
+
+func _update_note_positions(time: int) -> void:
+	var newSpawned: Array[NoteObject] = []
+	for n in _spawned:
+		var tdiff = time - n.hit_time
+		if tdiff > 1000:
+			note_pool.despawn_step_note(n)
+			continue
+		# NOTE: magic numbers
+		n.zpos = tdiff * (base_note_speed * (10.0 / (3.0 + MAX_NOTE_SPEED - note_speed)))
+		newSpawned.append(n)
+	_spawned = newSpawned
 
 
 func _on_force_emit_property_changed_button():

@@ -17,9 +17,9 @@ func _update(_delta: float) -> void:
 			if game_board.note_speed == game_board.MAX_NOTE_SPEED:
 				return
 			game_board.note_speed += 1
-			print("Note speed now %d" % game_board.note_speed)
+			print("[GameplayScene] Note speed now %d" % game_board.note_speed)
 		elif GameInput.nav_input.w:
 			if game_board.note_speed == 0:
 				return
 			game_board.note_speed -= 1
-			print("Note speed now %d" % game_board.note_speed)
+			print("[GameplayScene] Note speed now %d" % game_board.note_speed)
